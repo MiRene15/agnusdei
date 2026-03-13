@@ -11,67 +11,24 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Show Login Page
-    |--------------------------------------------------------------------------
-    */
-
-    public function login()
+    public function showLogin()
     {
         return view('auth.login');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Process Login
-    |--------------------------------------------------------------------------
-    */
-
-    public function loginPost(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        if (Auth::attempt($request->only('email','password'), $request->remember)) {
-
-            $request->session()->regenerate();
-
-            return $this->redirectByRole(Auth::user()->role);
-        }
-
-        return back()->withErrors([
-            'email' => 'Invalid login credentials.'
-        ])->withInput();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Show Register Page
-    |--------------------------------------------------------------------------
-    */
-
-    public function register()
+    public function showRegister()
     {
         return view('auth.register');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Process Registration
-    |--------------------------------------------------------------------------
-    */
-
-    public function registerPost(Request $request)
+    public function registerUser(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'contact_number' => 'nullable|string|max:20',
-            'role' => 'required|in:student,parent,teacher,registrar,admin,cashier',
-            'password' => 'required|confirmed|min:6'
+            'role' => 'required|in:student,parent,registrar,teacher,admin,cashier',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
@@ -82,21 +39,25 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Auto-create Student Profile
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->role === 'student') {
+        if ($user->role === 'student') {
+            $nameParts = explode(' ', trim($request->name), 2);
 
             Student::create([
                 'user_id' => $user->id,
-                'student_number' => 'STU-' . strtoupper(Str::random(6)),
-                'first_name' => $request->name,
-                'last_name' => '',
-                'grade_level' => 'Pending',
-                'status' => 'pending'
+                'parent_id' => null,
+                'admission_id' => null,
+                'student_number' => 'STU-' . strtoupper(Str::random(8)),
+                'first_name' => $nameParts[0] ?? $request->name,
+                'last_name' => $nameParts[1] ?? '-',
+                'birth_date' => null,
+                'gender' => null,
+                'email' => $request->email,
+                'phone' => $request->contact_number,
+                'address' => null,
+                'grade_level' => 'Not Yet Assigned',
+                'section' => null,
+                'school_year' => null,
+                'status' => 'pending',
             ]);
         }
 
@@ -105,11 +66,34 @@ class AuthController extends Controller
         return $this->redirectByRole($user->role);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Logout
-    |--------------------------------------------------------------------------
-    */
+    public function loginUser(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+            $detectedRole = $this->detectRoleFromEmail($user->email);
+
+            if ($detectedRole && $detectedRole !== $user->role) {
+                Auth::logout();
+
+                return back()->withErrors([
+                    'email' => 'Email role does not match account role.',
+                ])->onlyInput('email');
+            }
+
+            return $this->redirectByRole($user->role);
+        }
+
+        return back()->withErrors([
+            'email' => 'Invalid email or password.',
+        ])->onlyInput('email');
+    }
 
     public function logout(Request $request)
     {
@@ -121,36 +105,33 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Role Redirect
-    |--------------------------------------------------------------------------
-    */
+    private function detectRoleFromEmail($email)
+    {
+        $email = strtolower($email);
+
+        return match (true) {
+            str_contains($email, 'admin') => 'admin',
+            str_contains($email, 'registrar') => 'registrar',
+            str_contains($email, 'teacher') => 'teacher',
+            str_contains($email, 'parent') => 'parent',
+            str_contains($email, 'cashier') => 'cashier',
+            str_contains($email, 'student') => 'student',
+            default => null,
+        };
+    }
 
     private function redirectByRole($role)
     {
-        switch ($role) {
-
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-
-            case 'registrar':
-                return redirect()->route('registrar.dashboard');
-
-            case 'teacher':
-                return redirect()->route('teacher.dashboard');
-
-            case 'parent':
-                return redirect()->route('parent.dashboard');
-
-            case 'cashier':
-                return redirect()->route('cashier.dashboard');
-
-            case 'student':
-                return redirect()->route('student.portal.check');
-
-            default:
-                return redirect('/');
-        }
+        return match ($role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'registrar' => redirect()->route('registrar.dashboard'),
+            'teacher' => redirect()->route('teacher.dashboard'),
+            'parent' => redirect()->route('parent.dashboard'),
+            'cashier' => redirect()->route('cashier.dashboard'),
+            'student' => redirect()->route('student.portal.check'),
+            default => redirect()->route('login')->withErrors([
+                'email' => 'Role not recognized.',
+            ]),
+        };
     }
 }

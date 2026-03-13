@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Admin Panel')</title>
+    <title>@yield('title', 'Cashier Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -162,39 +162,6 @@
             font-size: 18px;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 11px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: #001e82;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background: #1636a3;
-        }
-
-        .btn-outline {
-            border: 2px solid #001e82;
-            color: #001e82;
-            background: #ffffff;
-        }
-
-        .btn-outline:hover {
-            background: #001e82;
-            color: #ffffff;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -260,6 +227,29 @@
             background: #f8fbff;
         }
 
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         @media (max-width: 991px) {
             .sidebar {
                 width: 220px;
@@ -289,29 +279,29 @@
 
 <div class="sidebar">
     <div class="brand-box">
-        <h2>Admin Portal</h2>
+        <h2>Cashier Portal</h2>
         <p>Agnus Dei School Systems ERP</p>
     </div>
 
     <div class="menu-label">Main Menu</div>
 
-    <a href="{{ route('admin.dashboard') }}"
-       class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('cashier.dashboard') }}"
+       class="{{ request()->routeIs('cashier.dashboard') ? 'active' : '' }}">
         Dashboard
     </a>
 
-    <a href="{{ route('admin.users') }}"
-       class="{{ request()->routeIs('admin.users') ? 'active' : '' }}">
-        User Management
+    <a href="{{ route('cashier.payments') }}"
+       class="{{ request()->routeIs('cashier.payments') ? 'active' : '' }}">
+        Payments
     </a>
 
-    <a href="{{ route('admin.settings') }}"
-       class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-        System Settings
+    <a href="{{ route('cashier.billing') }}"
+       class="{{ request()->routeIs('cashier.billing') ? 'active' : '' }}">
+        Billing
     </a>
 
-    <a href="{{ route('admin.reports') }}"
-       class="{{ request()->routeIs('admin.reports') ? 'active' : '' }}">
+    <a href="{{ route('cashier.reports') }}"
+       class="{{ request()->routeIs('cashier.reports') ? 'active' : '' }}">
         Reports
     </a>
 
@@ -325,8 +315,8 @@
 
 <div class="main">
     <div class="topbar">
-        <h3>@yield('title', 'Admin Dashboard')</h3>
-        <div class="welcome">Welcome, Admin</div>
+        <h3>@yield('title', 'Cashier Dashboard')</h3>
+        <div class="welcome">Welcome, Cashier</div>
     </div>
 
     <div class="content">
