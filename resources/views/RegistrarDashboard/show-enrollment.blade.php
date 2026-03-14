@@ -1,11 +1,12 @@
 @extends('layouts.registrar')
 
-@section('title', 'View Enrollment')
+@section('title', 'Application Details')
 
 @section('content')
+
 <div class="page-intro">
-    <h4>Enrollment Details</h4>
-    <p>Review applicant information, submitted requirements, and current admission status.</p>
+    <h4>Application Details</h4>
+    <p>Review applicant information, requirements, and update the admission decision.</p>
 </div>
 
 @if(session('success'))
@@ -20,112 +21,125 @@
     </div>
 @endif
 
-<div class="card">
-    <h4>Admission Information</h4>
+<div class="grid-2">
+    <div class="card">
+        <h4>Applicant Information</h4>
 
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Application Number</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->application_number }}</div>
-        </div>
+        <div class="grid-3">
+            <div class="section-box">
+                <h5>Application No.</h5>
+                <p>{{ $admission->application_number }}</p>
+            </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">LRN</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->lrn ?? '-' }}</div>
-        </div>
+            <div class="section-box">
+                <h5>LRN</h5>
+                <p>{{ $admission->lrn ?? '-' }}</p>
+            </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Status</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a; text-transform:capitalize;">
-                {{ str_replace('_', ' ', $admission->status) }}
+            <div class="section-box">
+                <h5>Status</h5>
+                <p style="text-transform:capitalize;">{{ str_replace('_', ' ', $admission->status) }}</p>
             </div>
         </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Application Date</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">
-                {{ $admission->application_date ? \Carbon\Carbon::parse($admission->application_date)->format('M d, Y') : '-' }}
+        <div class="grid-3" style="margin-top:16px;">
+            <div class="section-box">
+                <h5>First Name</h5>
+                <p>{{ $admission->first_name }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Last Name</h5>
+                <p>{{ $admission->last_name }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Grade Applying For</h5>
+                <p>{{ $admission->applying_for_grade }}</p>
             </div>
         </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">First Name</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->first_name }}</div>
-        </div>
+        <div class="grid-3" style="margin-top:16px;">
+            <div class="section-box">
+                <h5>Birth Date</h5>
+                <p>{{ $admission->birth_date ?? '-' }}</p>
+            </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Last Name</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->last_name }}</div>
-        </div>
+            <div class="section-box">
+                <h5>Sex</h5>
+                <p>{{ $admission->sex ?? '-' }}</p>
+            </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Birth Date</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">
-                {{ $admission->birth_date ? \Carbon\Carbon::parse($admission->birth_date)->format('M d, Y') : '-' }}
+            <div class="section-box">
+                <h5>Application Date</h5>
+                <p>{{ $admission->application_date ?? '-' }}</p>
             </div>
         </div>
 
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Sex</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->sex ?? '-' }}</div>
-        </div>
-
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Email</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->email ?? '-' }}</div>
-        </div>
-
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Phone</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->phone ?? '-' }}</div>
-        </div>
-
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Applying for Grade</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->applying_for_grade }}</div>
-        </div>
-
-        <div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Previous School</div>
-            <div style="font-size:16px; font-weight:600; color:#0f172a;">{{ $admission->previous_school ?? '-' }}</div>
+        <div style="margin-top:16px;" class="section-box">
+            <h5>Contact Details</h5>
+            <p><strong>Email:</strong> {{ $admission->email ?? '-' }}</p>
+            <p><strong>Phone:</strong> {{ $admission->phone ?? '-' }}</p>
+            <p><strong>Address:</strong> {{ $admission->address ?? '-' }}</p>
+            <p><strong>Previous School:</strong> {{ $admission->previous_school ?? '-' }}</p>
         </div>
     </div>
 
-    <div style="margin-top:20px;">
-        <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Address</div>
-        <div style="font-size:15px; font-weight:500; color:#0f172a;">{{ $admission->address ?? '-' }}</div>
-    </div>
+    <div class="card">
+        <h4>Registrar Actions</h4>
 
-    <div style="margin-top:20px;">
-        <div style="font-size:13px; color:#64748b; margin-bottom:6px;">Remarks</div>
-        <div style="font-size:15px; font-weight:500; color:#0f172a;">{{ $admission->remarks ?? '-' }}</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <form method="POST" action="{{ route('registrar.enrollments.approve', $admission->id) }}">
+                @csrf
+                <button type="submit" class="btn btn-success" style="width:100%;">Approve Admission</button>
+            </form>
+
+            <form method="POST" action="{{ route('registrar.enrollments.incomplete', $admission->id) }}">
+                @csrf
+                <button type="submit" class="btn btn-danger" style="width:100%;">Mark as Incomplete</button>
+            </form>
+
+            <a href="{{ route('registrar.enrollments') }}" class="btn btn-outline" style="text-align:center;">
+                Back to Enrollment Requests
+            </a>
+        </div>
     </div>
 </div>
 
 <div class="card">
-    <h4>Submitted Requirements</h4>
+    <h4>Requirement Checklist</h4>
 
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>Requirement</th>
-                    <th>Submitted</th>
                     <th>Status</th>
+                    <th>Submitted</th>
                     <th>Submitted Date</th>
                     <th>File</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($admission->requirements as $requirement)
+                @forelse($admission->requirements as $req)
                     <tr>
-                        <td>{{ $requirement->requirement_name }}</td>
-                        <td>{{ $requirement->submitted ? 'Yes' : 'No' }}</td>
-                        <td style="text-transform:capitalize;">{{ $requirement->status ?? '-' }}</td>
-                        <td>{{ $requirement->submitted_at ? \Carbon\Carbon::parse($requirement->submitted_at)->format('M d, Y h:i A') : '-' }}</td>
+                        <td>{{ $req->requirement_name }}</td>
                         <td>
-                            @if($requirement->file_path)
-                                <a href="{{ asset('storage/' . $requirement->file_path) }}" target="_blank" class="btn btn-outline">
+                            @if($req->status === 'approved')
+                                <span class="badge badge-approved">Approved</span>
+                            @elseif($req->status === 'submitted')
+                                <span class="badge badge-review">Submitted</span>
+                            @elseif($req->status === 'pending')
+                                <span class="badge badge-pending">Pending</span>
+                            @else
+                                <span class="badge badge-incomplete">{{ ucfirst($req->status ?? 'unknown') }}</span>
+                            @endif
+                        </td>
+                        <td>{{ $req->submitted ? 'Yes' : 'No' }}</td>
+                        <td>{{ $req->submitted_at ?? '-' }}</td>
+                        <td>
+                            @if($req->file_path)
+                                <a href="{{ asset('storage/' . $req->file_path) }}" target="_blank" class="btn btn-outline">
                                     View File
                                 </a>
                             @else
@@ -135,7 +149,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">No requirements found.</td>
+                        <td colspan="5" style="text-align:center; color:#64748b;">No requirements found.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -143,27 +157,4 @@
     </div>
 </div>
 
-<div class="card">
-    <h4>Actions</h4>
-
-    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <a href="{{ route('registrar.enrollments') }}" class="btn btn-outline">
-            Back to Enrollments
-        </a>
-
-        <form method="POST" action="{{ route('registrar.enrollments.approve', $admission->id) }}">
-            @csrf
-            <button type="submit" class="btn btn-success">
-                Approve Admission
-            </button>
-        </form>
-
-        <form method="POST" action="{{ route('registrar.enrollments.incomplete', $admission->id) }}">
-            @csrf
-            <button type="submit" class="btn btn-danger">
-                Mark as Incomplete
-            </button>
-        </form>
-    </div>
-</div>
 @endsection

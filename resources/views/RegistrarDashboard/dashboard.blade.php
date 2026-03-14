@@ -3,113 +3,95 @@
 @section('title', 'Registrar Dashboard')
 
 @section('content')
+
 <div class="page-intro">
-    <h4>Dashboard Overview</h4>
-    <p>Monitor admissions, student records, pending requirements, and sectioning activities.</p>
+    <h4>Registrar Dashboard</h4>
+    <p>Monitor applications, review recent submissions, and manage student admissions efficiently.</p>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-label">Total Applicants</div>
-        <div class="stat-value">245</div>
-        <div class="stat-sub">This admission cycle</div>
+        <div class="stat-value">{{ $totalApplicants }}</div>
+        <div class="stat-sub">All admission applications received</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">Pending Review</div>
-        <div class="stat-value">42</div>
-        <div class="stat-sub">Applications awaiting review</div>
+        <div class="stat-label">Pending Applicants</div>
+        <div class="stat-value">{{ $pendingApplicants }}</div>
+        <div class="stat-sub">Awaiting registrar review</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">Approved Students</div>
-        <div class="stat-value">180</div>
-        <div class="stat-sub">Ready for enrollment</div>
+        <div class="stat-label">Approved Applicants</div>
+        <div class="stat-value">{{ $approvedApplicants }}</div>
+        <div class="stat-sub">Already accepted and processed</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Incomplete Requirements</div>
-        <div class="stat-value">23</div>
-        <div class="stat-sub">Documents still missing</div>
-    </div>
-</div>
-
-<div class="card">
-    <h4>Quick Actions</h4>
-    <div class="quick-actions">
-        <a href="{{ route('registrar.enrollments') }}" class="action-box">
-            <h5>Review Applications</h5>
-            <p>Check newly submitted enrollment and admission requests.</p>
-        </a>
-
-        <a href="{{ route('registrar.students') }}" class="action-box">
-            <h5>Manage Records</h5>
-            <p>Open the student records table and review profiles quickly.</p>
-        </a>
-
-        <a href="{{ route('registrar.sectioning') }}" class="action-box">
-            <h5>Assign Sections</h5>
-            <p>Place students into sections and organize class distribution.</p>
-        </a>
+        <div class="stat-value">{{ $incompleteApplicants }}</div>
+        <div class="stat-sub">Need missing or corrected documents</div>
     </div>
 </div>
 
 <div class="grid-2">
     <div class="card">
-        <h4>Recent Admission Applications</h4>
+        <h4>Recent Applications</h4>
+
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
                         <th>Application No.</th>
-                        <th>Name</th>
+                        <th>Applicant</th>
                         <th>Grade Level</th>
                         <th>Status</th>
-                        <th>Date Submitted</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>APP-2026-001</td>
-                        <td>Maria Santos</td>
-                        <td>Grade 11</td>
-                        <td><span class="badge badge-pending">Pending</span></td>
-                        <td>Mar 10, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>APP-2026-002</td>
-                        <td>John Dela Cruz</td>
-                        <td>Grade 9</td>
-                        <td><span class="badge badge-review">Under Review</span></td>
-                        <td>Mar 10, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>APP-2026-003</td>
-                        <td>Angela Reyes</td>
-                        <td>Grade 12</td>
-                        <td><span class="badge badge-approved">Approved</span></td>
-                        <td>Mar 09, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>APP-2026-004</td>
-                        <td>Kevin Flores</td>
-                        <td>Grade 8</td>
-                        <td><span class="badge badge-incomplete">Incomplete</span></td>
-                        <td>Mar 09, 2026</td>
-                    </tr>
+                    @forelse($recentAdmissions as $admission)
+                        <tr>
+                            <td>{{ $admission->application_number }}</td>
+                            <td>{{ $admission->first_name }} {{ $admission->last_name }}</td>
+                            <td>{{ $admission->applying_for_grade }}</td>
+                            <td>
+                                @if($admission->status === 'approved')
+                                    <span class="badge badge-approved">Approved</span>
+                                @elseif($admission->status === 'under_review')
+                                    <span class="badge badge-review">Under Review</span>
+                                @elseif($admission->status === 'incomplete')
+                                    <span class="badge badge-incomplete">Incomplete</span>
+                                @else
+                                    <span class="badge badge-pending">{{ ucfirst($admission->status) }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('registrar.enrollments.show', $admission->id) }}" class="btn btn-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:#64748b;">No recent applications found.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
     <div class="card">
-        <h4>Today's Tasks</h4>
+        <h4>Quick Guide</h4>
         <ul class="mini-list">
-            <li>Verify newly uploaded documents for Grade 11 applicants.</li>
-            <li>Approve pending student profiles for section assignment.</li>
-            <li>Coordinate with cashier for cleared enrollment records.</li>
-            <li>Print summary report for today’s processed applications.</li>
+            <li>Review all student-submitted admission forms.</li>
+            <li>Approve applications only after all requirements are complete.</li>
+            <li>Use sectioning to assign approved students to their sections.</li>
+            <li>Student records update automatically after approval.</li>
         </ul>
     </div>
 </div>
+
 @endsection

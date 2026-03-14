@@ -476,9 +476,9 @@
         Student Records
     </a>
 
-    <a href="{{ route('registrar.sectioning') }}"
-       class="{{ request()->routeIs('registrar.sectioning') ? 'active' : '' }}">
-        Sectioning
+    <a href="{{ route('registrar.section') }}"
+       class="{{ request()->routeIs('registrar.section') ? 'active' : '' }}">
+        Section
     </a>
 
     <div class="logout-wrap">

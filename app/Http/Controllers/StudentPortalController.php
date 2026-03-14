@@ -67,14 +67,20 @@ class StudentPortalController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birth_date' => 'nullable|date',
-            'sex' => 'nullable|string|max:20',
+            'birth_date' => 'required|date|before:today',
+            'sex' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'applying_for_grade' => 'required|string|max:50',
             'lrn' => 'required|digits:12|unique:admissions,lrn|unique:students,lrn',
             'previous_school' => 'nullable|string|max:255',
+        ], [
+            'birth_date.required' => 'Birth date is required.',
+            'birth_date.before' => 'Birth date must be earlier than today.',
+            'sex.required' => 'Gender is required.',
+            'lrn.required' => 'LRN is required.',
+            'lrn.digits' => 'LRN must be exactly 12 digits.',
         ]);
 
         $user = Auth::user();

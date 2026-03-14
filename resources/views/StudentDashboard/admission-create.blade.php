@@ -35,6 +35,23 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div style="
+                    background: #fee2e2;
+                    color: #991b1b;
+                    border: 1px solid #fecaca;
+                    border-radius: 12px;
+                    padding: 14px 16px;
+                    margin-bottom: 20px;
+                ">
+                    <ul style="margin:0; padding-left:18px;">
+                        @foreach ($errors->all() as $error)
+                            <li style="margin-bottom:4px;">{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('student.admission.store') }}">
                 @csrf
 
@@ -44,47 +61,47 @@
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">First Name</label>
-                            <input type="text" name="first_name" class="form-control" placeholder="Enter first name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="text" name="first_name" value="{{ old('first_name') }}" class="form-control" placeholder="Enter first name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Last Name</label>
-                            <input type="text" name="last_name" class="form-control" placeholder="Enter last name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="text" name="last_name" value="{{ old('last_name') }}" class="form-control" placeholder="Enter last name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Birth Date</label>
-                            <input type="date" name="birth_date" id="birth_date" class="form-control" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date') }}" class="form-control" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Age</label>
-                            <input type="text" name="age" id="age" class="form-control" placeholder="Enter Age" readonly style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;">
+                            <input type="text" name="age" id="age" class="form-control" placeholder="Auto computed age" readonly style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;">
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Gender</label>
-                            <select name="sex" class="form-control" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;">
+                            <select name="sex" class="form-control" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;">
                                 <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
+                                <option value="Male" {{ old('sex') == 'Male' ? 'selected' : '' }}>Male</option>
+                                <option value="Female" {{ old('sex') == 'Female' ? 'selected' : '' }}>Female</option>
                             </select>
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Email</label>
-                            <input type="email" name="email" class="form-control" placeholder="Enter email address" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="Enter email address" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Phone</label>
-                            <input type="text" name="phone" class="form-control" placeholder="Enter phone number" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="text" name="phone" value="{{ old('phone') }}" class="form-control" placeholder="Enter phone number" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                         </div>
                     </div>
 
                     <div style="margin-top:18px;">
                         <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Address</label>
-                        <textarea name="address" class="form-control" rows="3" placeholder="Enter complete address" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; resize:vertical;"></textarea>
+                        <textarea name="address" class="form-control" rows="3" placeholder="Enter complete address" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; resize:vertical;">{{ old('address') }}</textarea>
                     </div>
                 </div>
 
@@ -96,20 +113,20 @@
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Applying for Grade</label>
                             <select name="applying_for_grade" id="applying_for_grade" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;">
                                 <option value="">Select Grade Level</option>
-                                <option value="Nursery">Nursery</option>
-                                <option value="Kinder">Kinder</option>
-                                <option value="Grade 1">Grade 1</option>
-                                <option value="Grade 2">Grade 2</option>
-                                <option value="Grade 3">Grade 3</option>
-                                <option value="Grade 4">Grade 4</option>
-                                <option value="Grade 5">Grade 5</option>
-                                <option value="Grade 6">Grade 6</option>
-                                <option value="Grade 7">Grade 7</option>
-                                <option value="Grade 8">Grade 8</option>
-                                <option value="Grade 9">Grade 9</option>
-                                <option value="Grade 10">Grade 10</option>
-                                <option value="Grade 11">Grade 11</option>
-                                <option value="Grade 12">Grade 12</option>
+                                <option value="Nursery" {{ old('applying_for_grade') == 'Nursery' ? 'selected' : '' }}>Nursery</option>
+                                <option value="Kinder" {{ old('applying_for_grade') == 'Kinder' ? 'selected' : '' }}>Kinder</option>
+                                <option value="Grade 1" {{ old('applying_for_grade') == 'Grade 1' ? 'selected' : '' }}>Grade 1</option>
+                                <option value="Grade 2" {{ old('applying_for_grade') == 'Grade 2' ? 'selected' : '' }}>Grade 2</option>
+                                <option value="Grade 3" {{ old('applying_for_grade') == 'Grade 3' ? 'selected' : '' }}>Grade 3</option>
+                                <option value="Grade 4" {{ old('applying_for_grade') == 'Grade 4' ? 'selected' : '' }}>Grade 4</option>
+                                <option value="Grade 5" {{ old('applying_for_grade') == 'Grade 5' ? 'selected' : '' }}>Grade 5</option>
+                                <option value="Grade 6" {{ old('applying_for_grade') == 'Grade 6' ? 'selected' : '' }}>Grade 6</option>
+                                <option value="Grade 7" {{ old('applying_for_grade') == 'Grade 7' ? 'selected' : '' }}>Grade 7</option>
+                                <option value="Grade 8" {{ old('applying_for_grade') == 'Grade 8' ? 'selected' : '' }}>Grade 8</option>
+                                <option value="Grade 9" {{ old('applying_for_grade') == 'Grade 9' ? 'selected' : '' }}>Grade 9</option>
+                                <option value="Grade 10" {{ old('applying_for_grade') == 'Grade 10' ? 'selected' : '' }}>Grade 10</option>
+                                <option value="Grade 11" {{ old('applying_for_grade') == 'Grade 11' ? 'selected' : '' }}>Grade 11</option>
+                                <option value="Grade 12" {{ old('applying_for_grade') == 'Grade 12' ? 'selected' : '' }}>Grade 12</option>
                             </select>
                         </div>
 
@@ -119,18 +136,20 @@
                                 type="text"
                                 name="lrn"
                                 id="lrn"
+                                value="{{ old('lrn') }}"
                                 class="form-control"
                                 placeholder="Select grade first"
                                 maxlength="12"
+                                required
                                 disabled
                                 style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;"
                             >
-                            <small id="lrn_note" style="color:#64748b;">Choose a grade level to enable the LRN field.</small>
+                            <small id="lrn_note" style="color:#64748b;">Choose a grade level to enable the LRN field. LRN is required.</small>
                         </div>
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Previous School</label>
-                            <input type="text" name="previous_school" list="school-list" class="form-control" placeholder="Type or select previous school" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
+                            <input type="text" name="previous_school" value="{{ old('previous_school') }}" list="school-list" class="form-control" placeholder="Type or select previous school" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;">
                             <datalist id="school-list">
                                 <option value="Agnus Dei School Systems INC."></option>
                                 <option value="San Jose National High School"></option>
@@ -186,6 +205,7 @@
 
     function computeAge() {
         const birthDateValue = birthDateInput.value;
+
         if (!birthDateValue) {
             ageInput.value = '';
             return;
@@ -209,30 +229,27 @@
 
         if (selected !== '') {
             lrnInput.disabled = false;
+            lrnInput.required = true;
             lrnInput.style.background = '#ffffff';
             lrnInput.placeholder = 'Enter 12-digit Learner Reference Number';
-
-            if (selected === 'Grade 11' || selected === 'Grade 12') {
-                lrnInput.required = true;
-                lrnNote.textContent = 'LRN is required for Grade 11 and Grade 12.';
-            } else {
-                lrnInput.required = false;
-                lrnNote.textContent = 'LRN is optional for this grade level.';
-            }
+            lrnNote.textContent = 'LRN is required for all applicants.';
         } else {
             lrnInput.disabled = true;
             lrnInput.required = false;
             lrnInput.value = '';
             lrnInput.style.background = '#f8fafc';
             lrnInput.placeholder = 'Select grade first';
-            lrnNote.textContent = 'Choose a grade level to enable the LRN field.';
+            lrnNote.textContent = 'Choose a grade level to enable the LRN field. LRN is required.';
         }
     }
 
     birthDateInput.addEventListener('change', computeAge);
+    birthDateInput.addEventListener('input', computeAge);
     gradeInput.addEventListener('change', updateLrnField);
 
-    computeAge();
-    updateLrnField();
+    window.addEventListener('load', function () {
+        computeAge();
+        updateLrnField();
+    });
 </script>
 @endsection

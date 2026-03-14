@@ -3,12 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentPortalController;
+use App\Http\Controllers\RegistrarController;
 
 /*
 |--------------------------------------------------------------------------
 | Public Pages (FrontWebsite)
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', fn() => view('FrontWebsite.home'))->name('home');
 Route::get('/philosophy', fn() => view('FrontWebsite.philosophy'))->name('philosophy');
 Route::get('/background', fn() => view('FrontWebsite.background'))->name('background');
@@ -58,12 +60,22 @@ Route::prefix('student')->name('student.')->middleware('auth')->group(function (
 | Registrar Portal Flow
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('RegistrarDashboard.dashboard'))->name('dashboard');
-    Route::get('/enrollments', fn() => view('RegistrarDashboard.enrollments'))->name('enrollments');
-    Route::get('/students', fn() => view('RegistrarDashboard.students'))->name('students');
-    Route::get('/sectioning', fn() => view('RegistrarDashboard.section'))->name('section');
+
+    Route::get('/dashboard', [RegistrarController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/enrollments', [RegistrarController::class, 'enrollments'])->name('enrollments');
+    Route::get('/enrollments/{id}', [RegistrarController::class, 'showEnrollment'])->name('enrollments.show');
+    Route::post('/enrollments/{id}/approve', [RegistrarController::class, 'approveEnrollment'])->name('enrollments.approve');
+    Route::post('/enrollments/{id}/incomplete', [RegistrarController::class, 'markIncomplete'])->name('enrollments.incomplete');
+
+    Route::get('/students', [RegistrarController::class, 'students'])->name('students');
+
+    Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
+    Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
 });
+
 
 /*
 |--------------------------------------------------------------------------

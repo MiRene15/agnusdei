@@ -35,8 +35,8 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'contact_number' => $request->contact_number,
-            'role' => $request->role,
-            'password' => Hash::make($request->password),
+            'role' => strtolower($request->role),
+            'password' => $request->password,
         ]);
 
         if ($user->role === 'student') {
