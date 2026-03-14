@@ -37,22 +37,28 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | Student Portal Flow
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('student')->name('student.')->middleware('auth')->group(function () {
-    Route::get('/portal-check', [StudentPortalController::class, 'check'])->name('portal.check');
 
-    Route::get('/admission/create', [StudentPortalController::class, 'createAdmission'])->name('admission.create');
-    Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission'])->name('admission.store');
+    Route::get('/portal-check', [StudentPortalController::class, 'check']) ->name('portal.check');
 
-    Route::get('/requirements', [StudentPortalController::class, 'requirements'])->name('requirements');
-    Route::post('/requirements/upload', [StudentPortalController::class, 'uploadRequirement'])->name('requirements.upload');
+    Route::get('/admission/create', [StudentPortalController::class, 'createAdmission']) ->name('admission.create');
 
-    Route::get('/enrollment', [StudentPortalController::class, 'enrollment'])->name('enrollment');
-    Route::get('/dashboard', [StudentPortalController::class, 'dashboard'])->name('dashboard');
+    Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission']) ->name('admission.store');
 
-    Route::get('/enroll', fn() => view('StudentDashboard.enroll'))->name('enroll');
-    Route::get('/enrollments', fn() => view('StudentDashboard.enrollments'))->name('enrollments');
-    Route::get('/assessment', fn() => view('StudentDashboard.assessment'))->name('assessment');
-    Route::get('/schedule', fn() => view('StudentDashboard.schedule'))->name('schedule');
+    Route::get('/requirements', [StudentPortalController::class, 'requirements']) ->name('requirements');
+
+    Route::post('/requirements/upload', [StudentPortalController::class, 'uploadRequirement']) ->name('requirements.upload');
+
+    Route::get('/dashboard', [StudentPortalController::class, 'dashboard']) ->name('dashboard');
+
+    Route::get('/subjects', [StudentPortalController::class, 'subjects']) ->name('subjects');
+
+    Route::get('/grades', [StudentPortalController::class, 'grades']) ->name('grades');
+
+    Route::get('/schedule', [StudentPortalController::class, 'scheduleView']) ->name('schedule');
+
+    Route::get('/assessment', [StudentPortalController::class, 'assessment']) ->name('assessment');
 });
 
 /*

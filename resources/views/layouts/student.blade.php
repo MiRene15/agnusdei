@@ -466,24 +466,24 @@
         Dashboard
     </a>
 
-    <a href="{{ route('student.enroll') }}"
-       class="{{ request()->routeIs('student.enroll') ? 'active' : '' }}">
-        Enroll
-    </a>
-
-    <a href="{{ route('student.enrollments') }}"
-       class="{{ request()->routeIs('student.enrollments') ? 'active' : '' }}">
-        Enrollments
-    </a>
-
-    <a href="{{ route('student.assessment') }}"
-       class="{{ request()->routeIs('student.assessment') ? 'active' : '' }}">
-        Assessment
+    <a href="{{ route('student.subjects') }}"
+       class="{{ request()->routeIs('student.subjects') ? 'active' : '' }}">
+        Subjects
     </a>
 
     <a href="{{ route('student.schedule') }}"
        class="{{ request()->routeIs('student.schedule') ? 'active' : '' }}">
         Schedule
+    </a>
+
+    <a href="{{ route('student.grades') }}"
+       class="{{ request()->routeIs('student.grades') ? 'active' : '' }}">
+        Grades
+    </a>
+
+    <a href="{{ route('student.assessment') }}"
+       class="{{ request()->routeIs('student.assessment') ? 'active' : '' }}">
+        Assessment
     </a>
 
     <div class="logout-wrap">
