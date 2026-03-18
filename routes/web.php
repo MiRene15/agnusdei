@@ -84,11 +84,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 | Teacher Portal Flow
 |--------------------------------------------------------------------------
 */
+
+use App\Http\Controllers\TeacherController;
+
 Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('TeacherDashboard.dashboard'))->name('dashboard');
-    Route::get('/classes', fn() => view('TeacherDashboard.classes'))->name('classes');
-    Route::get('/grades', fn() => view('TeacherDashboard.grades'))->name('grades');
-    Route::get('/reports', fn() => view('TeacherDashboard.reports'))->name('reports');
+    Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
+    Route::get('/classes', [TeacherController::class, 'classes'])->name('classes');
+    Route::get('/grades', [TeacherController::class, 'grades'])->name('grades');
+    Route::get('/reports', [TeacherController::class, 'reports'])->name('reports');
 });
 
 /*
