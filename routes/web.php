@@ -6,6 +6,7 @@ use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ParentController;
+use App\Http\Controllers\TeacherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,12 +86,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\TeacherController;
-
 Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
     Route::get('/classes', [TeacherController::class, 'classes'])->name('classes');
+    Route::get('/schedule', [TeacherController::class, 'schedule'])->name('schedule');
     Route::get('/grades', [TeacherController::class, 'grades'])->name('grades');
+    Route::post('/grades/save', [TeacherController::class, 'saveGrades'])->name('grades.save');
     Route::get('/reports', [TeacherController::class, 'reports'])->name('reports');
 });
 
@@ -99,6 +100,7 @@ Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function (
 | Parent Portal Flow
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
     Route::get('/children', [ParentController::class, 'children'])->name('children');

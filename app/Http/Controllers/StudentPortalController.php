@@ -50,7 +50,7 @@ class StudentPortalController extends Controller
             return redirect()->route('student.requirements');
         }
 
-        if ($admission->status === 'approved') {
+        if ($admission->status === 'Approved') {
             return redirect()->route('student.dashboard');
         }
 

@@ -15,7 +15,7 @@ class Enrollment extends Model
 
     public function student()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
     public function class()
@@ -25,6 +25,6 @@ class Enrollment extends Model
 
     public function grades()
     {
-        return $this->hasMany(Grade::class);
+        return $this->hasMany(Grade::class, 'enrollment_id');
     }
 }

@@ -10,18 +10,14 @@ class Teacher extends Model
 
     protected $fillable = [
         'user_id',
-        'employee_id',
+        'teacher_number',
         'first_name',
         'last_name',
         'email',
-        'contact_number',
+        'phone',
+        'department',
+        'status',
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
 
     public function user()
     {
@@ -35,6 +31,25 @@ class Teacher extends Model
 
     public function schedules()
     {
-        return $this->hasMany(Schedule::class, 'teacher_id');
+        return $this->hasManyThrough(
+            Schedule::class,
+            Classes::class,
+            'teacher_id',
+            'class_id',
+            'id',
+            'id'
+        );
+    }
+
+    public function subjects()
+    {
+        return $this->hasManyThrough(
+            Subject::class,
+            Classes::class,
+            'teacher_id',
+            'id',
+            'id',
+            'subject_id'
+        );
     }
 }

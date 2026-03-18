@@ -34,9 +34,9 @@ class Classes extends Model
     {
         return $this->belongsTo(Teacher::class);
     }
-    
+
     public function enrollments()
-{
-    return $this->hasMany(Enrollment::class, 'class_id');
-}
+    {
+        return $this->hasMany(Enrollment::class, 'class_id');
+    }
 }

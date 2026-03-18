@@ -37,11 +37,11 @@ class Student extends Model
 
     public function enrollments()
     {
-        return $this->hasMany(Enrollment::class);
+        return $this->hasMany(Enrollment::class, 'student_id');
     }
 
     public function tuitionFees()
     {
-        return $this->hasMany(TuitionFee::class);
+        return $this->hasMany(TuitionFee::class, 'student_id');
     }
 }
