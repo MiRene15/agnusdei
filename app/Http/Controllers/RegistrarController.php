@@ -199,4 +199,11 @@ class RegistrarController extends Controller
 
         return back()->with('success', 'Student section updated successfully and subjects were assigned automatically.');
     }
+
+    public function showStudent($id)
+    {
+        $student = Student::with('admission')->findOrFail($id);
+
+        return view('RegistrarDashboard.show-student', compact('student'));
+    }
 }

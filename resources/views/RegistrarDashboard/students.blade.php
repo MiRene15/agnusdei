@@ -62,6 +62,7 @@
                     <th>Section</th>
                     <th>School Year</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,10 +83,15 @@
                                 <span class="badge badge-review">{{ ucfirst($student->status) }}</span>
                             @endif
                         </td>
+                        <td>
+                            <a href="{{ route('registrar.students.show', $student->id) }}" class="btn btn-primary">
+                                View
+                            </a>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#64748b;">No students found.</td>
+                        <td colspan="8" style="text-align:center; color:#64748b;">No students found.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -26,10 +26,8 @@ Route::get('/discounts', fn() => view('FrontWebsite.discounts'))->name('discount
 */
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'registerUser'])->name('register.post');
-
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'loginUser'])->name('login.post');
-
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
@@ -39,25 +37,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 */
 
 Route::prefix('student')->name('student.')->middleware('auth')->group(function () {
-
     Route::get('/portal-check', [StudentPortalController::class, 'check']) ->name('portal.check');
-
     Route::get('/admission/create', [StudentPortalController::class, 'createAdmission']) ->name('admission.create');
-
     Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission']) ->name('admission.store');
-
     Route::get('/requirements', [StudentPortalController::class, 'requirements']) ->name('requirements');
-
     Route::post('/requirements/upload', [StudentPortalController::class, 'uploadRequirement']) ->name('requirements.upload');
-
     Route::get('/dashboard', [StudentPortalController::class, 'dashboard']) ->name('dashboard');
-
     Route::get('/subjects', [StudentPortalController::class, 'subjects']) ->name('subjects');
-
     Route::get('/grades', [StudentPortalController::class, 'grades']) ->name('grades');
-
     Route::get('/schedule', [StudentPortalController::class, 'scheduleView']) ->name('schedule');
-
     Route::get('/assessment', [StudentPortalController::class, 'assessment']) ->name('assessment');
 });
 
@@ -68,16 +56,13 @@ Route::prefix('student')->name('student.')->middleware('auth')->group(function (
 */
 
 Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(function () {
-
     Route::get('/dashboard', [RegistrarController::class, 'dashboard'])->name('dashboard');
-
     Route::get('/enrollments', [RegistrarController::class, 'enrollments'])->name('enrollments');
     Route::get('/enrollments/{id}', [RegistrarController::class, 'showEnrollment'])->name('enrollments.show');
     Route::post('/enrollments/{id}/approve', [RegistrarController::class, 'approveEnrollment'])->name('enrollments.approve');
     Route::post('/enrollments/{id}/incomplete', [RegistrarController::class, 'markIncomplete'])->name('enrollments.incomplete');
-
     Route::get('/students', [RegistrarController::class, 'students'])->name('students');
-
+    Route::get('/students/{id}', [RegistrarController::class, 'showStudent'])->name('students.show');
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
     Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
 });
