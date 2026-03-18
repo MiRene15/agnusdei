@@ -3,40 +3,67 @@
 @section('title', 'Payments')
 
 @section('content')
+
 <div class="page-intro">
-    <h4>Payments</h4>
-    <p>View and record student payment transactions.</p>
+    <h4>Payment Records</h4>
+    <p>Track all recorded payment transactions.</p>
 </div>
 
 <div class="card">
+    <form method="GET" action="{{ route('cashier.payments') }}" class="search-row">
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Search by student, LRN, or reference no."
+        >
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{{ route('cashier.payments') }}" class="btn btn-outline">Reset</a>
+    </form>
+</div>
+
+<div class="card">
+    <h4>Payment List</h4>
+
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>Receipt No.</th>
-                    <th>Student Name</th>
+                    <th>Student</th>
+                    <th>LRN</th>
+                    <th>Payment Date</th>
                     <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Reference No.</th>
+                    <th>Received By</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>OR-2026-001</td>
-                    <td>Maria Santos</td>
-                    <td>₱12,500</td>
-                    <td>Mar 13, 2026</td>
-                    <td><span class="badge badge-paid">Paid</span></td>
-                </tr>
-                <tr>
-                    <td>OR-2026-002</td>
-                    <td>John Dela Cruz</td>
-                    <td>₱8,000</td>
-                    <td>Mar 13, 2026</td>
-                    <td><span class="badge badge-paid">Paid</span></td>
-                </tr>
+                @forelse($payments as $payment)
+                    <tr>
+                        <td>
+                            {{ $payment->tuitionFee->student->first_name ?? '-' }}
+                            {{ $payment->tuitionFee->student->last_name ?? '' }}
+                        </td>
+                        <td>{{ $payment->tuitionFee->student->lrn ?? '-' }}</td>
+                        <td>{{ $payment->payment_date ?? '-' }}</td>
+                        <td>₱{{ number_format($payment->amount, 2) }}</td>
+                        <td>{{ $payment->payment_method ?? '-' }}</td>
+                        <td>{{ $payment->reference_no ?? '-' }}</td>
+                        <td>{{ $payment->received_by ?? '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#64748b;">No payment records found.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+
+    <div style="margin-top:18px;">
+        {{ $payments->links() }}
+    </div>
 </div>
+
 @endsection

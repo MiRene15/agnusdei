@@ -11,10 +11,13 @@ class Classes extends Model
     protected $fillable = [
         'subject_id',
         'teacher_id',
-        'grade_level',
         'section',
+        'grade_level',
         'school_year',
+        'semester',
         'room',
+        'capacity',
+        'status',
     ];
 
     public function subject()
@@ -25,5 +28,10 @@ class Classes extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'class_id');
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
     }
 }

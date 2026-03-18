@@ -25,6 +25,11 @@ class Student extends Model
         'status',
     ];
 
+    public function parent()
+    {
+        return $this->belongsTo(ParentModel::class, 'parent_id');
+    }
+
     public function admission()
     {
         return $this->belongsTo(Admission::class);

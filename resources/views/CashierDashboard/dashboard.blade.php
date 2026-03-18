@@ -3,33 +3,66 @@
 @section('title', 'Cashier Dashboard')
 
 @section('content')
+
 <div class="page-intro">
     <h4>Cashier Dashboard</h4>
-    <p>Track collections, pending balances, and student payment records.</p>
+    <p>View billing summaries, recent collections, and outstanding balances.</p>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-label">Payments Today</div>
-        <div class="stat-value">18</div>
-        <div class="stat-sub">Processed transactions</div>
+        <div class="stat-label">Students with Billing</div>
+        <div class="stat-value">{{ $totalStudentsWithBilling }}</div>
+        <div class="stat-sub">Students with tuition records</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">Amount Collected</div>
-        <div class="stat-value">₱54,000</div>
-        <div class="stat-sub">Today's total collections</div>
+        <div class="stat-label">Total Collected</div>
+        <div class="stat-value">₱{{ number_format($totalCollected, 2) }}</div>
+        <div class="stat-sub">All recorded payments</div>
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">Pending Balances</div>
-        <div class="stat-value">42</div>
-        <div class="stat-sub">Students with dues</div>
+        <div class="stat-label">Outstanding Balance</div>
+        <div class="stat-value">₱{{ number_format($totalOutstanding, 2) }}</div>
+        <div class="stat-sub">Combined remaining balances</div>
     </div>
 </div>
 
 <div class="card">
-    <h4>Quick Overview</h4>
-    <p style="color:#64748b;">Use the cashier portal to review billing, post payments, and generate collection reports.</p>
+    <h4>Recent Payments</h4>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Payment Date</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Reference</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recentPayments as $payment)
+                    <tr>
+                        <td>
+                            {{ $payment->tuitionFee->student->first_name ?? '-' }}
+                            {{ $payment->tuitionFee->student->last_name ?? '' }}
+                        </td>
+                        <td>{{ $payment->payment_date ?? '-' }}</td>
+                        <td>₱{{ number_format($payment->amount, 2) }}</td>
+                        <td>{{ $payment->payment_method ?? '-' }}</td>
+                        <td>{{ $payment->reference_no ?? '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#64748b;">No recent payments found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
+
 @endsection

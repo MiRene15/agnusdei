@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\RegistrarController;
+use App\Http\Controllers\CashierController;
+use App\Http\Controllers\ParentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,18 +37,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | Student Portal Flow
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('student')->name('student.')->middleware('auth')->group(function () {
-    Route::get('/portal-check', [StudentPortalController::class, 'check']) ->name('portal.check');
-    Route::get('/admission/create', [StudentPortalController::class, 'createAdmission']) ->name('admission.create');
-    Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission']) ->name('admission.store');
-    Route::get('/requirements', [StudentPortalController::class, 'requirements']) ->name('requirements');
-    Route::post('/requirements/upload', [StudentPortalController::class, 'uploadRequirement']) ->name('requirements.upload');
-    Route::get('/dashboard', [StudentPortalController::class, 'dashboard']) ->name('dashboard');
-    Route::get('/subjects', [StudentPortalController::class, 'subjects']) ->name('subjects');
-    Route::get('/grades', [StudentPortalController::class, 'grades']) ->name('grades');
-    Route::get('/schedule', [StudentPortalController::class, 'scheduleView']) ->name('schedule');
-    Route::get('/assessment', [StudentPortalController::class, 'assessment']) ->name('assessment');
+    Route::get('/portal-check', [StudentPortalController::class, 'check'])->name('portal.check');
+    Route::get('/admission/create', [StudentPortalController::class, 'createAdmission'])->name('admission.create');
+    Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission'])->name('admission.store');
+    Route::get('/requirements', [StudentPortalController::class, 'requirements'])->name('requirements');
+    Route::post('/requirements/upload', [StudentPortalController::class, 'uploadRequirement'])->name('requirements.upload');
+    Route::get('/dashboard', [StudentPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/subjects', [StudentPortalController::class, 'subjects'])->name('subjects');
+    Route::get('/grades', [StudentPortalController::class, 'grades'])->name('grades');
+    Route::get('/schedule', [StudentPortalController::class, 'scheduleView'])->name('schedule');
+    Route::get('/assessment', [StudentPortalController::class, 'assessment'])->name('assessment');
 });
 
 /*
@@ -54,7 +55,6 @@ Route::prefix('student')->name('student.')->middleware('auth')->group(function (
 | Registrar Portal Flow
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [RegistrarController::class, 'dashboard'])->name('dashboard');
     Route::get('/enrollments', [RegistrarController::class, 'enrollments'])->name('enrollments');
@@ -66,7 +66,6 @@ Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(functi
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
     Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -98,10 +97,10 @@ Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function (
 |--------------------------------------------------------------------------
 */
 Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('ParentDashboard.dashboard'))->name('dashboard');
-    Route::get('/children', fn() => view('ParentDashboard.children'))->name('children');
-    Route::get('/grades', fn() => view('ParentDashboard.grades'))->name('grades');
-    Route::get('/billing', fn() => view('ParentDashboard.billing'))->name('billing');
+    Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
+    Route::get('/children', [ParentController::class, 'children'])->name('children');
+    Route::get('/grades', [ParentController::class, 'grades'])->name('grades');
+    Route::get('/billing', [ParentController::class, 'billing'])->name('billing');
 });
 
 /*
@@ -110,8 +109,8 @@ Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::prefix('cashier')->name('cashier.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('CashierDashboard.dashboard'))->name('dashboard');
-    Route::get('/payments', fn() => view('CashierDashboard.payments'))->name('payments');
-    Route::get('/billing', fn() => view('CashierDashboard.billing'))->name('billing');
-    Route::get('/reports', fn() => view('CashierDashboard.reports'))->name('reports');
+    Route::get('/dashboard', [CashierController::class, 'dashboard'])->name('dashboard');
+    Route::get('/billing', [CashierController::class, 'billing'])->name('billing');
+    Route::get('/payments', [CashierController::class, 'payments'])->name('payments');
+    Route::get('/reports', [CashierController::class, 'reports'])->name('reports');
 });
