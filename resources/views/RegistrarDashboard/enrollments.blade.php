@@ -40,7 +40,7 @@
             <option value="">All Status</option>
             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
             <option value="under_review" {{ request('status') == 'under_review' ? 'selected' : '' }}>Under Review</option>
-            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+            <option value="Approved" {{ request('status') == 'Approved' ? 'selected' : '' }}>Approved</option>
             <option value="incomplete" {{ request('status') == 'incomplete' ? 'selected' : '' }}>Incomplete</option>
         </select>
 
@@ -73,7 +73,7 @@
                         <td>{{ $admission->first_name }} {{ $admission->last_name }}</td>
                         <td>{{ $admission->applying_for_grade }}</td>
                         <td>
-                            @if($admission->status === 'approved')
+                            @if($admission->status === 'Approved')
                                 <span class="badge badge-approved">Approved</span>
                             @elseif($admission->status === 'under_review')
                                 <span class="badge badge-review">Under Review</span>

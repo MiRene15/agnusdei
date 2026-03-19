@@ -125,7 +125,7 @@
                     <tr>
                         <td>{{ $req->requirement_name }}</td>
                         <td>
-                            @if($req->status === 'approved')
+                            @if($req->status === 'Approved')
                                 <span class="badge badge-approved">Approved</span>
                             @elseif($req->status === 'submitted')
                                 <span class="badge badge-review">Submitted</span>

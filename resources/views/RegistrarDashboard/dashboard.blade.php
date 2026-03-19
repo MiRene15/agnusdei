@@ -57,7 +57,7 @@
                             <td>{{ $admission->first_name }} {{ $admission->last_name }}</td>
                             <td>{{ $admission->applying_for_grade }}</td>
                             <td>
-                                @if($admission->status === 'approved')
+                                @if($admission->status === 'Approved')
                                     <span class="badge badge-approved">Approved</span>
                                 @elseif($admission->status === 'under_review')
                                     <span class="badge badge-review">Under Review</span>

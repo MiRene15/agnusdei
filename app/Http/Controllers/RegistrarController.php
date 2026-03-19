@@ -15,7 +15,7 @@ class RegistrarController extends Controller
     {
         $totalApplicants = Admission::count();
         $pendingApplicants = Admission::where('status', 'pending')->count();
-        $approvedApplicants = Admission::where('status', 'approved')->count();
+        $approvedApplicants = Admission::where('status', 'Approved')->count();
         $incompleteApplicants = Admission::whereHas('requirements', function ($query) {
             $query->where('submitted', 0);
         })->count();
@@ -88,7 +88,7 @@ class RegistrarController extends Controller
                 'address' => $admission->address,
                 'grade_level' => $admission->applying_for_grade,
                 'school_year' => date('Y') . '-' . (date('Y') + 1),
-                'status' => 'approved',
+                'status' => 'Approved',
             ]);
         } else {
             Student::create([
@@ -107,12 +107,12 @@ class RegistrarController extends Controller
                 'grade_level' => $admission->applying_for_grade,
                 'section' => null,
                 'school_year' => date('Y') . '-' . (date('Y') + 1),
-                'status' => 'approved',
+                'status' => 'Approved',
             ]);
         }
 
         $admission->update([
-            'status' => 'approved',
+            'status' => 'Approved',
             'remarks' => 'Approved by registrar',
         ]);
 
@@ -160,7 +160,7 @@ class RegistrarController extends Controller
 
     public function sectioning()
     {
-        $students = Student::where('status', 'approved')->get();
+        $students = Student::where('status', 'Approved')->get();
 
         return view('RegistrarDashboard.section', compact('students'));
     }

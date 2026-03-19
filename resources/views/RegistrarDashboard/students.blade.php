@@ -75,7 +75,7 @@
                         <td>{{ $student->section ?? '-' }}</td>
                         <td>{{ $student->school_year ?? '-' }}</td>
                         <td>
-                            @if($student->status === 'approved')
+                            @if($student->status === 'Approved')
                                 <span class="badge badge-approved">Approved</span>
                             @elseif($student->status === 'pending')
                                 <span class="badge badge-pending">Pending</span>
