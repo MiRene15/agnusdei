@@ -3,18 +3,50 @@
 @section('title', 'Reports')
 
 @section('content')
+
 <div class="page-intro">
     <h4>Reports</h4>
-    <p>Review system reports, user statistics, and operational summaries.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Students</div>
+        <div class="stat-value">{{ $studentCount }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Teachers</div>
+        <div class="stat-value">{{ $teacherCount }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Classes</div>
+        <div class="stat-value">{{ $classCount }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value">{{ $approvedAdmissions }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value">{{ $pendingAdmissions }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Collected</div>
+        <div class="stat-value">₱{{ number_format($totalCollected, 2) }}</div>
+    </div>
 </div>
 
 <div class="card">
-    <h4>Available Reports</h4>
+    <h4>Users by Role</h4>
     <ul class="mini-list">
-        <li>Enrollment Summary Report</li>
-        <li>Student Population Report</li>
-        <li>User Account Activity Report</li>
-        <li>School Year Status Report</li>
+        @foreach($usersByRole as $role => $count)
+            <li>{{ ucfirst($role) }} — {{ $count }}</li>
+        @endforeach
     </ul>
 </div>
+
 @endsection

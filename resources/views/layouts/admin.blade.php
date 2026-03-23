@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -18,6 +18,7 @@
             color: #1e293b;
         }
 
+        /* ✅ FIXED SIDEBAR */
         .sidebar {
             width: 260px;
             background: linear-gradient(180deg, #001e82 0%, #0c2fa0 100%);
@@ -69,6 +70,7 @@
             width: 100%;
             font-family: inherit;
             cursor: pointer;
+            display: block;
         }
 
         .sidebar a:hover,
@@ -83,13 +85,13 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.10);
         }
 
+        /* ✅ LOGOUT NOW JUST BELOW MENU */
         .logout-wrap {
-            margin-top: auto;
-            padding-top: 12px;
+            margin-top: 8px;
         }
 
         .logout-btn {
-            background: rgba(255,255,255,0.12) !important;
+            background: rgba(255, 8, 49, 0.808) !important;
         }
 
         .logout-btn:hover {
@@ -130,134 +132,21 @@
             padding: 30px;
         }
 
-        .page-intro {
-            margin-bottom: 24px;
-        }
-
-        .page-intro h4 {
-            color: #0f172a;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .page-intro p {
-            color: #64748b;
+        .alert {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 18px;
             font-size: 14px;
         }
 
-        .card {
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-            margin-bottom: 24px;
-            border: 1px solid #eef2f7;
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .card h4 {
-            color: #001e82;
-            margin-bottom: 15px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 11px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: #001e82;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background: #1636a3;
-        }
-
-        .btn-outline {
-            border: 2px solid #001e82;
-            color: #001e82;
-            background: #ffffff;
-        }
-
-        .btn-outline:hover {
-            background: #001e82;
-            color: #ffffff;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-            border: 1px solid #eef2f7;
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: 700;
-            color: #001e82;
-        }
-
-        .stat-sub {
-            margin-top: 8px;
-            color: #94a3b8;
-            font-size: 12px;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            min-width: 760px;
-        }
-
-        th {
-            text-align: left;
-            padding: 14px;
-            background: #001e82;
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-            color: #334155;
-            vertical-align: middle;
-        }
-
-        tr:hover td {
-            background: #f8fbff;
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         @media (max-width: 991px) {
@@ -282,7 +171,52 @@
             .sidebar {
                 width: 100%;
             }
+
+            .topbar {
+                padding: 18px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
         }
+
+        /* GRID SYSTEM */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        /* MINI LIST */
+        .mini-list {
+            list-style: none;
+        }
+
+        .mini-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eef2f7;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .mini-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 991px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -302,12 +236,12 @@
 
     <a href="{{ route('admin.users') }}"
        class="{{ request()->routeIs('admin.users') ? 'active' : '' }}">
-        User Management
+        Users
     </a>
 
-    <a href="{{ route('admin.settings') }}"
-       class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-        System Settings
+    <a href="{{ route('admin.announcements') }}"
+       class="{{ request()->routeIs('admin.announcements*') ? 'active' : '' }}">
+        Announcements
     </a>
 
     <a href="{{ route('admin.reports') }}"
@@ -315,6 +249,12 @@
         Reports
     </a>
 
+    <a href="{{ route('admin.settings') }}"
+       class="{{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
+    <!-- ✅ NOW DIRECTLY BELOW SETTINGS -->
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -326,10 +266,26 @@
 <div class="main">
     <div class="topbar">
         <h3>@yield('title', 'Admin Dashboard')</h3>
-        <div class="welcome">Welcome, Admin</div>
+        <div class="welcome">Welcome, {{ Auth::user()->name ?? 'Admin' }}</div>
     </div>
 
     <div class="content">
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-error">
+                <ul style="margin-left: 18px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @yield('content')
     </div>
 </div>

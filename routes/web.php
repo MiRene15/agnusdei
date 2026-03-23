@@ -7,6 +7,7 @@ use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ParentController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,10 +75,16 @@ Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(functi
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn() => view('AdminDashboard.dashboard'))->name('dashboard');
-    Route::get('/users', fn() => view('AdminDashboard.users'))->name('users');
-    Route::get('/settings', fn() => view('AdminDashboard.settings'))->name('settings');
-    Route::get('/reports', fn() => view('AdminDashboard.reports'))->name('reports');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+
+    Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
+    Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
+    Route::delete('/announcements/{id}', [AdminController::class, 'deleteAnnouncement'])->name('announcements.delete');
+    Route::put('/settings', [AdminController::class, 'updateProfile'])->name('settings.update');
+    
 });
 
 /*

@@ -84,12 +84,11 @@
         }
 
         .logout-wrap {
-            margin-top: auto;
             padding-top: 12px;
         }
 
         .logout-btn {
-            background: rgba(255,255,255,0.12) !important;
+            background: rgba(255, 8, 49, 0.808) !important;
         }
 
         .logout-btn:hover {
