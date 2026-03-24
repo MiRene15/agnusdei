@@ -18,7 +18,6 @@
             color: #1e293b;
         }
 
-        /* ✅ FIXED SIDEBAR */
         .sidebar {
             width: 260px;
             background: linear-gradient(180deg, #001e82 0%, #0c2fa0 100%);
@@ -85,7 +84,6 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.10);
         }
 
-        /* ✅ LOGOUT NOW JUST BELOW MENU */
         .logout-wrap {
             margin-top: 8px;
         }
@@ -149,6 +147,188 @@
             color: #991b1b;
         }
 
+        .page-intro {
+            margin-bottom: 24px;
+        }
+
+        .page-intro h4 {
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-intro p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+            margin-bottom: 24px;
+            border: 1px solid #eef2f7;
+        }
+
+        .card h4 {
+            color: #001e82;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+            border: 1px solid #eef2f7;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: 700;
+            color: #001e82;
+        }
+
+        .stat-sub {
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            min-width: 760px;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px;
+            background: #001e82;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #f8fbff;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #dbe3ee;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0c2fa0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: inherit;
+            transition: 0.25s ease;
+        }
+
+        .btn-primary {
+            background: #001e82;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0c2fa0;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .mini-list {
+            list-style: none;
+        }
+
+        .mini-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eef2f7;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .mini-list li:last-child {
+            border-bottom: none;
+        }
+
         @media (max-width: 991px) {
             .sidebar {
                 width: 220px;
@@ -160,6 +340,11 @@
 
             .content {
                 padding: 20px;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -179,44 +364,6 @@
                 gap: 6px;
             }
         }
-
-        /* GRID SYSTEM */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-        }
-
-        /* MINI LIST */
-        .mini-list {
-            list-style: none;
-        }
-
-        .mini-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid #eef2f7;
-            font-size: 14px;
-            color: #334155;
-        }
-
-        .mini-list li:last-child {
-            border-bottom: none;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 991px) {
-            .grid-2,
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
-        }
-
     </style>
 </head>
 <body>
@@ -254,7 +401,6 @@
         Settings
     </a>
 
-    <!-- ✅ NOW DIRECTLY BELOW SETTINGS -->
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
