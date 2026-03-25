@@ -10,24 +10,12 @@ return new class extends Migration
     {
         Schema::create('role_reference_codes', function (Blueprint $table) {
             $table->id();
-            $table->enum('role', ['teacher', 'registrar', 'cashier', 'admin']);
+            $table->string('role');
             $table->string('code')->unique();
-
-            // Plain nullable IDs to avoid FK/circular migration errors
-            $table->unsignedBigInteger('subject_id')->nullable();
-            $table->string('section')->nullable();
-            $table->string('grade_level')->nullable();
-            $table->string('school_year')->nullable();
-            $table->string('semester')->nullable();
-
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('used_by')->nullable();
-
-            $table->boolean('is_used')->default(false);
+            $table->string('description')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->timestamp('expires_at')->nullable();
-            $table->timestamp('used_at')->nullable();
-
+            $table->unsignedInteger('max_uses')->nullable();
+            $table->unsignedInteger('used_count')->default(0);
             $table->timestamps();
         });
     }

@@ -9,38 +9,33 @@ class RoleReferenceCode extends Model
     protected $fillable = [
         'role',
         'code',
-        'subject_id',
-        'section',
-        'grade_level',
-        'school_year',
-        'semester',
-        'created_by',
-        'used_by',
-        'is_used',
+        'description',
         'is_active',
-        'expires_at',
-        'used_at',
+        'max_uses',
+        'used_count',
     ];
 
     protected $casts = [
-        'is_used' => 'boolean',
         'is_active' => 'boolean',
-        'expires_at' => 'datetime',
-        'used_at' => 'datetime',
+        'max_uses' => 'integer',
+        'used_count' => 'integer',
     ];
 
-    public function subject()
+    public function users()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->hasMany(User::class, 'reference_code_id');
     }
 
-    public function creator()
+    public function canStillBeUsed(): bool
     {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+        if (!$this->is_active) {
+            return false;
+        }
 
-    public function usedBy()
-    {
-        return $this->belongsTo(User::class, 'used_by');
+        if (is_null($this->max_uses)) {
+            return true;
+        }
+
+        return $this->used_count < $this->max_uses;
     }
 }

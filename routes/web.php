@@ -3,10 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\StudentPortalController;
-use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ParentController;
+use App\Http\Controllers\RegistrarController;
+use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\TeacherController;
 
 /*
@@ -29,7 +29,6 @@ Route::get('/discounts', fn() => view('FrontWebsite.discounts'))->name('discount
 |--------------------------------------------------------------------------
 */
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::get('/register/staff', [AuthController::class, 'showStaffRegister'])->name('register.staff');
 Route::post('/register', [AuthController::class, 'registerUser'])->name('register.post');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'loginUser'])->name('login.post');
@@ -62,8 +61,11 @@ Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(functi
     Route::get('/dashboard', [RegistrarController::class, 'dashboard'])->name('dashboard');
     Route::get('/enrollments', [RegistrarController::class, 'enrollments'])->name('enrollments');
     Route::get('/enrollments/{id}', [RegistrarController::class, 'showEnrollment'])->name('enrollments.show');
+    Route::post('/enrollments/{id}/verify', [RegistrarController::class, 'verifyEnrollment'])->name('enrollments.verify');
     Route::post('/enrollments/{id}/approve', [RegistrarController::class, 'approveEnrollment'])->name('enrollments.approve');
     Route::post('/enrollments/{id}/incomplete', [RegistrarController::class, 'markIncomplete'])->name('enrollments.incomplete');
+    Route::post('/enrollments/batch-approve', [RegistrarController::class, 'batchApprove'])->name('enrollments.batchApprove');
+    Route::post('/enrollments/batch-incomplete', [RegistrarController::class, 'batchIncomplete'])->name('enrollments.batchIncomplete');
     Route::get('/students', [RegistrarController::class, 'students'])->name('students');
     Route::get('/students/{id}', [RegistrarController::class, 'showStudent'])->name('students.show');
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
@@ -79,16 +81,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
-
-    Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
-    Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
-    Route::delete('/announcements/{id}', [AdminController::class, 'deleteAnnouncement'])->name('announcements.delete');
-
     Route::post('/settings/update', [AdminController::class, 'updateProfile'])->name('settings.update');
-
-    Route::get('/reference-codes', [AdminController::class, 'referenceCodes'])->name('reference-codes.index');
-    Route::post('/reference-codes', [AdminController::class, 'storeReferenceCode'])->name('reference-codes.store');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+    Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
+    Route::post('/announcements/store', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
+    Route::delete('/announcements/{id}', [AdminController::class, 'deleteAnnouncement'])->name('announcements.delete');
+    Route::get('/reference-codes', [AdminController::class, 'referenceCodes'])->name('reference-codes');
+    Route::post('/reference-codes/store', [AdminController::class, 'storeReferenceCode'])->name('reference-codes.store');
     Route::post('/reference-codes/{id}/deactivate', [AdminController::class, 'deactivateReferenceCode'])->name('reference-codes.deactivate');
 });
 
@@ -127,5 +126,7 @@ Route::prefix('cashier')->name('cashier.')->middleware('auth')->group(function (
     Route::get('/dashboard', [CashierController::class, 'dashboard'])->name('dashboard');
     Route::get('/billing', [CashierController::class, 'billing'])->name('billing');
     Route::get('/payments', [CashierController::class, 'payments'])->name('payments');
+    Route::get('/payments/create/{tuitionFeeId}', [CashierController::class, 'createPayment'])->name('payments.create');
+    Route::post('/payments/store/{tuitionFeeId}', [CashierController::class, 'storePayment'])->name('payments.store');
     Route::get('/reports', [CashierController::class, 'reports'])->name('reports');
 });

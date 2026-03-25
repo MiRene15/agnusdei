@@ -3,82 +3,118 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
-use App\Models\Student;
 use App\Models\TuitionFee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CashierController extends Controller
 {
     public function dashboard()
     {
-        $totalStudentsWithBilling = TuitionFee::distinct('student_id')->count('student_id');
         $totalCollected = Payment::sum('amount');
-        $totalOutstanding = TuitionFee::sum('balance');
-        $recentPayments = Payment::with('tuitionFee.student')
-            ->latest('payment_date')
-            ->take(10)
-            ->get();
+        $paymentCount = Payment::count();
+        $pendingAccounts = TuitionFee::where('balance', '>', 0)->count();
 
         return view('CashierDashboard.dashboard', compact(
-            'totalStudentsWithBilling',
             'totalCollected',
-            'totalOutstanding',
-            'recentPayments'
+            'paymentCount',
+            'pendingAccounts'
         ));
     }
 
-    public function billing(Request $request)
+    public function billing()
     {
-        $query = TuitionFee::with('student');
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->whereHas('student', function ($q) use ($search) {
-                $q->where('student_number', 'like', "%{$search}%")
-                    ->orWhere('lrn', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            });
-        }
-
-        $billings = $query->latest()->paginate(10);
+        $billings = TuitionFee::with('student')->latest()->paginate(10);
 
         return view('CashierDashboard.billing', compact('billings'));
     }
 
-    public function payments(Request $request)
+    public function payments()
     {
-        $query = Payment::with('tuitionFee.student');
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->whereHas('tuitionFee.student', function ($q) use ($search) {
-                $q->where('student_number', 'like', "%{$search}%")
-                    ->orWhere('lrn', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            })->orWhere('reference_no', 'like', "%{$search}%");
-        }
-
-        $payments = $query->latest('payment_date')->paginate(10);
+        $payments = Payment::with(['tuitionFee.student', 'cashier'])
+            ->latest('payment_date')
+            ->paginate(10);
 
         return view('CashierDashboard.payments', compact('payments'));
+    }
+
+    public function createPayment($tuitionFeeId)
+    {
+        $tuition = TuitionFee::with('student')->findOrFail($tuitionFeeId);
+
+        return view('CashierDashboard.create-payment', compact('tuition'));
+    }
+
+    public function storePayment(Request $request, $tuitionFeeId)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string|max:100',
+        ]);
+
+        $tuition = TuitionFee::with('student')->findOrFail($tuitionFeeId);
+
+        if ((float) $tuition->balance <= 0) {
+            return back()->withErrors([
+                'amount' => 'This account is already fully paid.',
+            ])->withInput();
+        }
+
+        if ((float) $request->amount > (float) $tuition->balance) {
+            return back()->withErrors([
+                'amount' => 'Payment amount cannot be greater than the current balance.',
+            ])->withInput();
+        }
+
+        $payment = Payment::create([
+            'tuition_fee_id' => $tuition->id,
+            'payment_date' => now()->toDateString(),
+            'amount' => $request->amount,
+            'payment_method' => $request->payment_method,
+            'reference_no' => 'PAY-' . strtoupper(uniqid()),
+            'received_by' => Auth::user()->name,
+            'received_by_user_id' => Auth::id(),
+            'receipt_number' => $this->generateReceiptNumber(),
+        ]);
+
+        $tuition->paid_amount = (float) $tuition->paid_amount + (float) $request->amount;
+        $tuition->balance = max(0, (float) $tuition->total_due - (float) $tuition->paid_amount);
+        $tuition->is_downpayment_cleared = (float) $tuition->paid_amount >= (float) $tuition->down_payment_required;
+        $tuition->status = $tuition->balance <= 0 ? 'paid' : 'partial';
+        $tuition->save();
+
+        $student = $tuition->student;
+        if ($student && $tuition->is_downpayment_cleared) {
+            $student->update([
+                'portal_access_status' => 'unlocked',
+                'portal_unlocked_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('cashier.payments')->with('success', 'Payment recorded successfully. Receipt #: ' . $payment->receipt_number);
     }
 
     public function reports()
     {
         $totalCollected = Payment::sum('amount');
-        $totalOutstanding = TuitionFee::sum('balance');
         $paymentCount = Payment::count();
-        $billingCount = TuitionFee::count();
+        $fullyPaid = TuitionFee::where('balance', '<=', 0)->count();
+        $withBalance = TuitionFee::where('balance', '>', 0)->count();
 
         return view('CashierDashboard.reports', compact(
             'totalCollected',
-            'totalOutstanding',
             'paymentCount',
-            'billingCount'
+            'fullyPaid',
+            'withBalance'
         ));
+    }
+
+    private function generateReceiptNumber(): string
+    {
+        do {
+            $receipt = 'RCPT-' . now()->format('Y') . '-' . random_int(100000, 999999);
+        } while (Payment::where('receipt_number', $receipt)->exists());
+
+        return $receipt;
     }
 }

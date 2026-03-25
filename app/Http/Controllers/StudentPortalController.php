@@ -46,11 +46,20 @@ class StudentPortalController extends Controller
             return redirect()->route('student.requirements');
         }
 
-        if (in_array(strtolower((string) $admission->status), ['pending', 'under_review', 'incomplete'])) {
+        if (in_array($admission->status, ['pending', 'under_review', 'incomplete'])) {
             return redirect()->route('student.requirements');
         }
 
-        if (strtolower((string) $admission->status) === 'approved') {
+        if ($admission->status === 'approved') {
+            $tuition = TuitionFee::where('student_id', $student->id)
+                ->where('school_year', $student->school_year)
+                ->first();
+
+            if (!$tuition || !$tuition->is_downpayment_cleared) {
+                return redirect()->route('student.assessment')
+                    ->with('error', 'Please settle the required down payment first before accessing the full dashboard.');
+            }
+
             return redirect()->route('student.dashboard');
         }
 
@@ -59,6 +68,17 @@ class StudentPortalController extends Controller
 
     public function createAdmission()
     {
+        $user = Auth::user();
+        $student = Student::where('user_id', $user->id)->first();
+
+        if ($student && $student->admission_id) {
+            $admission = Admission::find($student->admission_id);
+
+            if ($admission && $admission->status === 'approved') {
+                return redirect()->route('student.dashboard')->with('error', 'Your admission is already approved.');
+            }
+        }
+
         return view('StudentDashboard.admission-create');
     }
 
@@ -93,6 +113,12 @@ class StudentPortalController extends Controller
         }
 
         if ($student->admission_id) {
+            $existingAdmission = Admission::find($student->admission_id);
+
+            if ($existingAdmission && $existingAdmission->status === 'approved') {
+                return redirect()->route('student.dashboard')->with('error', 'Your admission is already approved and locked.');
+            }
+
             return redirect()->route('student.requirements')->with('error', 'You already have an admission application.');
         }
 
@@ -154,16 +180,16 @@ class StudentPortalController extends Controller
         $student = Student::where('user_id', $user->id)->first();
 
         if (!$student || !$student->admission_id) {
-            return redirect()->route('student.admission.create');
+            return redirect()->route('student.admission.create')->with('error', 'Please submit your admission application first.');
         }
 
         $admission = Admission::with('requirements')->find($student->admission_id);
 
         if (!$admission) {
-            return redirect()->route('student.admission.create');
+            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
         }
 
-        return view('StudentDashboard.requirements', compact('student', 'admission'));
+        return view('StudentDashboard.requirements', compact('admission'));
     }
 
     public function uploadRequirement(Request $request)
@@ -177,13 +203,17 @@ class StudentPortalController extends Controller
         $student = Student::where('user_id', $user->id)->first();
 
         if (!$student || !$student->admission_id) {
-            return redirect()->route('student.admission.create');
+            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
         }
 
         $admission = Admission::find($student->admission_id);
 
         if (!$admission) {
-            return redirect()->route('student.admission.create');
+            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
+        }
+
+        if ($admission->status === 'approved') {
+            return back()->with('error', 'Admission is already approved and locked.');
         }
 
         $requirement = $admission->requirements()->where('id', $request->requirement_id)->first();
@@ -217,52 +247,54 @@ class StudentPortalController extends Controller
         $user = Auth::user();
         $student = Student::where('user_id', $user->id)->first();
 
-        $enrollments = collect();
-        $grades = collect();
-        $tuition = null;
-        $payments = collect();
-        $schedule = collect();
-        $studentStatusLabel = '-';
-
-        if ($student) {
-            $studentStatusLabel = strtolower((string) $student->status) === 'approved'
-                ? 'APPROVED'
-                : ucfirst((string) $student->status);
-
-            $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
-                ->where('student_id', $student->id)
-                ->get();
-
-            $grades = Grade::with('enrollment.class.subject')
-                ->whereIn('enrollment_id', $enrollments->pluck('id'))
-                ->get();
-
-            $tuition = TuitionFee::where('student_id', $student->id)
-                ->where('school_year', $student->school_year)
-                ->first();
-
-            if ($tuition) {
-                $payments = Payment::where('tuition_fee_id', $tuition->id)
-                    ->latest('payment_date')
-                    ->get();
-            }
-
-            $schedule = $enrollments->flatMap(function ($enrollment) {
-                return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
-                    return [
-                        'subject_name' => $enrollment->class->subject->subject_name ?? '-',
-                        'day_of_week' => $schedule->day_of_week,
-                        'start_time' => $schedule->start_time,
-                        'end_time' => $schedule->end_time,
-                        'room' => $schedule->room,
-                    ];
-                });
-            });
+        if (!$student) {
+            return redirect()->route('login');
         }
+
+        $admission = $student->admission_id ? Admission::find($student->admission_id) : null;
+
+        if (!$admission || $admission->status !== 'approved') {
+            return redirect()->route('student.portal.check')->with('error', 'Your account is not yet approved.');
+        }
+
+        $tuition = TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $student->school_year)
+            ->first();
+
+        if (!$tuition || !$tuition->is_downpayment_cleared) {
+            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing the dashboard.');
+        }
+
+        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
+            ->where('student_id', $student->id)
+            ->get();
+
+        $grades = Grade::with('enrollment.class.subject')
+            ->whereIn('enrollment_id', $enrollments->pluck('id'))
+            ->get();
+
+        $payments = collect();
+
+        if ($tuition) {
+            $payments = Payment::where('tuition_fee_id', $tuition->id)
+                ->latest('payment_date')
+                ->get();
+        }
+
+        $schedule = $enrollments->flatMap(function ($enrollment) {
+            return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
+                return [
+                    'subject_name' => $enrollment->class->subject->subject_name ?? '-',
+                    'day_of_week' => $schedule->day_of_week,
+                    'start_time' => $schedule->start_time,
+                    'end_time' => $schedule->end_time,
+                    'room' => $schedule->room,
+                ];
+            });
+        });
 
         return view('StudentDashboard.dashboard', compact(
             'student',
-            'studentStatusLabel',
             'enrollments',
             'grades',
             'tuition',
@@ -273,84 +305,105 @@ class StudentPortalController extends Controller
 
     public function subjects()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('user_id', Auth::id())->first();
 
-        $enrollments = collect();
-
-        if ($student) {
-            $enrollments = Enrollment::with('class.subject')
-                ->where('student_id', $student->id)
-                ->get();
+        if (!$student) {
+            return redirect()->route('login');
         }
+
+        $tuition = TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $student->school_year)
+            ->first();
+
+        if (!$tuition || !$tuition->is_downpayment_cleared) {
+            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing subjects.');
+        }
+
+        $enrollments = Enrollment::with('class.subject')
+            ->where('student_id', $student->id)
+            ->get();
 
         return view('StudentDashboard.subjects', compact('student', 'enrollments'));
     }
 
     public function grades()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('user_id', Auth::id())->first();
 
-        $grades = collect();
-
-        if ($student) {
-            $enrollmentIds = Enrollment::where('student_id', $student->id)->pluck('id');
-
-            $grades = Grade::with('enrollment.class.subject')
-                ->whereIn('enrollment_id', $enrollmentIds)
-                ->get();
+        if (!$student) {
+            return redirect()->route('login');
         }
+
+        $tuition = TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $student->school_year)
+            ->first();
+
+        if (!$tuition || !$tuition->is_downpayment_cleared) {
+            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing grades.');
+        }
+
+        $enrollmentIds = Enrollment::where('student_id', $student->id)->pluck('id');
+
+        $grades = Grade::with('enrollment.class.subject')
+            ->whereIn('enrollment_id', $enrollmentIds)
+            ->get();
 
         return view('StudentDashboard.grades', compact('student', 'grades'));
     }
 
     public function scheduleView()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('user_id', Auth::id())->first();
 
-        $schedule = collect();
-
-        if ($student) {
-            $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
-                ->where('student_id', $student->id)
-                ->get();
-
-            $schedule = $enrollments->flatMap(function ($enrollment) {
-                return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
-                    return [
-                        'subject_name' => $enrollment->class->subject->subject_name ?? '-',
-                        'day_of_week' => $schedule->day_of_week,
-                        'start_time' => $schedule->start_time,
-                        'end_time' => $schedule->end_time,
-                        'room' => $schedule->room,
-                    ];
-                });
-            });
+        if (!$student) {
+            return redirect()->route('login');
         }
+
+        $tuition = TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $student->school_year)
+            ->first();
+
+        if (!$tuition || !$tuition->is_downpayment_cleared) {
+            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing schedule.');
+        }
+
+        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
+            ->where('student_id', $student->id)
+            ->get();
+
+        $schedule = $enrollments->flatMap(function ($enrollment) {
+            return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
+                return [
+                    'subject_name' => $enrollment->class->subject->subject_name ?? '-',
+                    'day_of_week' => $schedule->day_of_week,
+                    'start_time' => $schedule->start_time,
+                    'end_time' => $schedule->end_time,
+                    'room' => $schedule->room,
+                ];
+            });
+        });
 
         return view('StudentDashboard.schedule', compact('student', 'schedule'));
     }
 
     public function assessment()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('user_id', Auth::id())->first();
 
-        $tuition = null;
+        if (!$student) {
+            return redirect()->route('login');
+        }
+
+        $tuition = TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $student->school_year)
+            ->first();
+
         $payments = collect();
 
-        if ($student) {
-            $tuition = TuitionFee::where('student_id', $student->id)
-                ->latest()
-                ->first();
-
-            if ($tuition) {
-                $payments = Payment::where('tuition_fee_id', $tuition->id)
-                    ->latest('payment_date')
-                    ->get();
-            }
+        if ($tuition) {
+            $payments = Payment::where('tuition_fee_id', $tuition->id)
+                ->latest('payment_date')
+                ->get();
         }
 
         return view('StudentDashboard.assessment', compact('student', 'tuition', 'payments'));

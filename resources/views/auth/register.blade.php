@@ -54,7 +54,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Full Name
                 </label>
-                <input 
+                <input
                     type="text"
                     name="name"
                     value="{{ old('name') }}"
@@ -75,7 +75,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Email
                 </label>
-                <input 
+                <input
                     type="email"
                     name="email"
                     value="{{ old('email') }}"
@@ -96,7 +96,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Contact Number
                 </label>
-                <input 
+                <input
                     type="text"
                     name="contact_number"
                     value="{{ old('contact_number') }}"
@@ -116,7 +116,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Role
                 </label>
-                <select 
+                <select
                     name="role"
                     id="role"
                     required
@@ -132,10 +132,8 @@
                 >
                     <option value="">Select Role</option>
                     <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                    <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                    <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                     <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                     <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
                 </select>
             </div>
@@ -144,7 +142,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Reference Code
                 </label>
-                <input 
+                <input
                     type="text"
                     name="reference_code"
                     id="reference_code"
@@ -160,7 +158,7 @@
                     "
                 >
                 <small style="display:block; margin-top:6px; color:#64748b; font-size:13px;">
-                    Required for Teacher, Registrar, Cashier, and Admin registration.
+                    Required for Teacher, Registrar, and Cashier registration.
                 </small>
             </div>
 
@@ -168,7 +166,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Password
                 </label>
-                <input 
+                <input
                     type="password"
                     name="password"
                     placeholder="Enter your password"
@@ -188,7 +186,7 @@
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Confirm Password
                 </label>
-                <input 
+                <input
                     type="password"
                     name="password_confirmation"
                     placeholder="Confirm your password"
@@ -241,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const referenceCodeInput = document.getElementById('reference_code');
 
     function toggleReferenceCodeField() {
-        const protectedRoles = ['teacher', 'registrar', 'cashier', 'admin'];
+        const protectedRoles = ['teacher', 'registrar', 'cashier'];
         const selectedRole = roleSelect.value;
 
         if (protectedRoles.includes(selectedRole)) {
