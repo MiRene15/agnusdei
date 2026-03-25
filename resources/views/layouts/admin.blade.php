@@ -391,6 +391,11 @@
         Announcements
     </a>
 
+    <a href="{{ route('admin.reference-codes.index') }}"
+       class="{{ request()->routeIs('admin.reference-codes*') ? 'active' : '' }}">
+        Reference Codes
+    </a>
+
     <a href="{{ route('admin.reports') }}"
        class="{{ request()->routeIs('admin.reports') ? 'active' : '' }}">
         Reports

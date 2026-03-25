@@ -12,7 +12,7 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-label">Enrollment Status</div>
-        <div class="stat-value">{{ $student->status ?? 'N/A' }}</div>
+        <div class="stat-value">{{ $studentStatusLabel ?? ($student ? strtoupper($student->status) : '-') }}</div>
         <div class="stat-sub">Current student status</div>
     </div>
 

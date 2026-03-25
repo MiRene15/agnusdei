@@ -52,19 +52,22 @@
                 </thead>
                 <tbody>
                     @forelse($recentAdmissions as $admission)
+                        @php
+                            $status = strtolower((string) $admission->status);
+                        @endphp
                         <tr>
                             <td>{{ $admission->application_number }}</td>
                             <td>{{ $admission->first_name }} {{ $admission->last_name }}</td>
                             <td>{{ $admission->applying_for_grade }}</td>
                             <td>
-                                @if($admission->status === 'Approved')
+                                @if($status === 'approved')
                                     <span class="badge badge-approved">Approved</span>
-                                @elseif($admission->status === 'under_review')
+                                @elseif($status === 'under_review')
                                     <span class="badge badge-review">Under Review</span>
-                                @elseif($admission->status === 'incomplete')
+                                @elseif($status === 'incomplete')
                                     <span class="badge badge-incomplete">Incomplete</span>
                                 @else
-                                    <span class="badge badge-pending">{{ ucfirst($admission->status) }}</span>
+                                    <span class="badge badge-pending">{{ ucfirst(str_replace('_', ' ', $status)) }}</span>
                                 @endif
                             </td>
                             <td>

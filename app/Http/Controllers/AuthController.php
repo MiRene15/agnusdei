@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Classes;
+use App\Models\RoleReferenceCode;
 use App\Models\Student;
+use App\Models\Teacher;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -21,7 +25,12 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function registerUser(Request $request)
+    public function showStaffRegister()
+    {
+        return view('auth.staff-register');
+    }
+
+    public function registerUser(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -29,44 +38,113 @@ class AuthController extends Controller
             'contact_number' => 'nullable|string|max:20',
             'role' => 'required|in:student,parent,registrar,teacher,admin,cashier',
             'password' => 'required|string|min:8|confirmed',
+            'reference_code' => 'nullable|string|max:100',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'contact_number' => $request->contact_number,
-            'role' => strtolower($request->role),
-            'password' => $request->password,
-        ]);
+        $role = strtolower((string) $request->role);
+        $staffRoles = ['teacher', 'registrar', 'cashier', 'admin'];
+        $referenceCode = null;
 
-        if ($user->role === 'student') {
-            $nameParts = explode(' ', trim($request->name), 2);
-
-            Student::create([
-                'user_id' => $user->id,
-                'parent_id' => null,
-                'admission_id' => null,
-                'student_number' => 'STU-' . strtoupper(Str::random(8)),
-                'first_name' => $nameParts[0] ?? $request->name,
-                'last_name' => $nameParts[1] ?? '-',
-                'birth_date' => null,
-                'gender' => null,
-                'email' => $request->email,
-                'phone' => $request->contact_number,
-                'address' => null,
-                'grade_level' => 'Not Yet Assigned',
-                'section' => null,
-                'school_year' => null,
-                'status' => 'pending',
+        if (in_array($role, $staffRoles, true)) {
+            $request->validate([
+                'reference_code' => 'required|string|max:100',
             ]);
+
+            $referenceCode = RoleReferenceCode::where('code', strtoupper(trim((string) $request->reference_code)))
+                ->where('role', $role)
+                ->where('is_active', true)
+                ->where('is_used', false)
+                ->first();
+
+            if (!$referenceCode) {
+                return back()->withErrors([
+                    'reference_code' => 'Invalid, inactive, or already used reference code.',
+                ])->withInput();
+            }
+
+            if ($referenceCode->expires_at && now()->greaterThan($referenceCode->expires_at)) {
+                return back()->withErrors([
+                    'reference_code' => 'This reference code has already expired.',
+                ])->withInput();
+            }
         }
+
+        $user = DB::transaction(function () use ($request, $role, $referenceCode) {
+            $createdUser = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'contact_number' => $request->contact_number,
+                'role' => $role,
+                'reference_code_id' => $referenceCode?->id,
+                'password' => $request->password,
+            ]);
+
+            $nameParts = preg_split('/\s+/', trim((string) $request->name), 2);
+            $firstName = $nameParts[0] ?? (string) $request->name;
+            $lastName = $nameParts[1] ?? '-';
+
+            if ($createdUser->role === 'student') {
+                Student::create([
+                    'user_id' => $createdUser->id,
+                    'parent_id' => null,
+                    'admission_id' => null,
+                    'student_number' => 'STU-' . strtoupper(Str::random(8)),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'birth_date' => null,
+                    'gender' => null,
+                    'email' => $request->email,
+                    'phone' => $request->contact_number,
+                    'address' => null,
+                    'grade_level' => 'Not Yet Assigned',
+                    'section' => null,
+                    'school_year' => null,
+                    'status' => 'pending',
+                ]);
+            }
+
+            if ($createdUser->role === 'teacher') {
+                $teacher = Teacher::create([
+                    'user_id' => $createdUser->id,
+                    'teacher_number' => 'TCH-' . strtoupper(Str::random(8)),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $request->email,
+                    'phone' => $request->contact_number,
+                    'department' => $referenceCode?->grade_level,
+                    'status' => 'active',
+                ]);
+
+                if ($referenceCode) {
+                    Classes::query()
+                        ->when($referenceCode->subject_id, fn ($q) => $q->where('subject_id', $referenceCode->subject_id))
+                        ->when($referenceCode->section, fn ($q) => $q->where('section', $referenceCode->section))
+                        ->when($referenceCode->grade_level, fn ($q) => $q->where('grade_level', $referenceCode->grade_level))
+                        ->when($referenceCode->school_year, fn ($q) => $q->where('school_year', $referenceCode->school_year))
+                        ->when($referenceCode->semester, fn ($q) => $q->where('semester', $referenceCode->semester))
+                        ->update([
+                            'teacher_id' => $teacher->id,
+                        ]);
+                }
+            }
+
+            if ($referenceCode) {
+                $referenceCode->update([
+                    'used_by' => $createdUser->id,
+                    'is_used' => true,
+                    'used_at' => now(),
+                ]);
+            }
+
+            return $createdUser;
+        });
 
         Auth::login($user);
 
         return $this->redirectByRole($user->role);
     }
 
-    public function loginUser(Request $request)
+    public function loginUser(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -76,15 +154,13 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            $detectedRole = $this->detectRoleFromEmail($user->email);
 
-            if ($detectedRole && $detectedRole !== $user->role) {
-                Auth::logout();
-
-                return back()->withErrors([
-                    'email' => 'Email role does not match account role.',
-                ])->onlyInput('email');
+            if (!$user) {
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Unable to log in right now. Please try again.',
+                ]);
             }
 
             return $this->redirectByRole($user->role);
@@ -95,7 +171,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
 
@@ -105,22 +181,7 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    private function detectRoleFromEmail($email)
-    {
-        $email = strtolower($email);
-
-        return match (true) {
-            str_contains($email, 'admin') => 'admin',
-            str_contains($email, 'registrar') => 'registrar',
-            str_contains($email, 'teacher') => 'teacher',
-            str_contains($email, 'parent') => 'parent',
-            str_contains($email, 'cashier') => 'cashier',
-            str_contains($email, 'student') => 'student',
-            default => null,
-        };
-    }
-
-    private function redirectByRole($role)
+    private function redirectByRole(string $role): RedirectResponse
     {
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),

@@ -21,6 +21,10 @@
     </div>
 @endif
 
+@php
+    $status = strtolower((string) $admission->status);
+@endphp
+
 <div class="grid-2">
     <div class="card">
         <h4>Applicant Information</h4>
@@ -38,7 +42,7 @@
 
             <div class="section-box">
                 <h5>Status</h5>
-                <p style="text-transform:capitalize;">{{ str_replace('_', ' ', $admission->status) }}</p>
+                <p style="text-transform:capitalize;">{{ str_replace('_', ' ', $status) }}</p>
             </div>
         </div>
 
@@ -122,17 +126,20 @@
             </thead>
             <tbody>
                 @forelse($admission->requirements as $req)
+                    @php
+                        $reqStatus = strtolower((string) $req->status);
+                    @endphp
                     <tr>
                         <td>{{ $req->requirement_name }}</td>
                         <td>
-                            @if($req->status === 'Approved')
+                            @if($reqStatus === 'approved')
                                 <span class="badge badge-approved">Approved</span>
-                            @elseif($req->status === 'submitted')
+                            @elseif($reqStatus === 'submitted')
                                 <span class="badge badge-review">Submitted</span>
-                            @elseif($req->status === 'pending')
+                            @elseif($reqStatus === 'pending')
                                 <span class="badge badge-pending">Pending</span>
                             @else
-                                <span class="badge badge-incomplete">{{ ucfirst($req->status ?? 'unknown') }}</span>
+                                <span class="badge badge-incomplete">{{ ucfirst($reqStatus ?: 'unknown') }}</span>
                             @endif
                         </td>
                         <td>{{ $req->submitted ? 'Yes' : 'No' }}</td>

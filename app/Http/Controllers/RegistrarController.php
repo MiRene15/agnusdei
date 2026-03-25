@@ -6,6 +6,7 @@ use App\Models\Admission;
 use App\Models\Classes;
 use App\Models\Enrollment;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class RegistrarController extends Controller
     {
         $totalApplicants = Admission::count();
         $pendingApplicants = Admission::where('status', 'pending')->count();
-        $approvedApplicants = Admission::where('status', 'Approved')->count();
+        $approvedApplicants = Admission::whereRaw('LOWER(status) = ?', ['approved'])->count();
         $incompleteApplicants = Admission::whereHas('requirements', function ($query) {
             $query->where('submitted', 0);
         })->count();
@@ -49,7 +50,7 @@ class RegistrarController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->whereRaw('LOWER(status) = ?', [strtolower($request->status)]);
         }
 
         $admissions = $query->latest()->paginate(10);
@@ -74,49 +75,64 @@ class RegistrarController extends Controller
             return back()->with('error', 'Cannot approve. Some requirements are still incomplete.');
         }
 
-        $student = Student::where('admission_id', $admission->id)->first();
+        $user = null;
+
+        if (!empty($admission->email)) {
+            $user = User::where('email', $admission->email)->first();
+        }
+
+        if (!$user && !empty($admission->lrn)) {
+            $studentByLrn = Student::where('lrn', $admission->lrn)->first();
+            if ($studentByLrn && $studentByLrn->user_id) {
+                $user = User::find($studentByLrn->user_id);
+            }
+        }
+
+        $student = null;
+
+        if ($user) {
+            $student = Student::where('user_id', $user->id)->first();
+        }
+
+        if (!$student) {
+            $student = Student::where('admission_id', $admission->id)->first();
+        }
+
+        if (!$student && !empty($admission->lrn)) {
+            $student = Student::where('lrn', $admission->lrn)->first();
+        }
+
+        $studentData = [
+            'user_id' => $user?->id,
+            'parent_id' => $student->parent_id ?? null,
+            'admission_id' => $admission->id,
+            'student_number' => $student->student_number ?? ('STU-' . strtoupper(Str::random(8))),
+            'lrn' => $admission->lrn,
+            'first_name' => $admission->first_name,
+            'last_name' => $admission->last_name,
+            'birth_date' => $admission->birth_date,
+            'gender' => $admission->sex,
+            'email' => $admission->email,
+            'phone' => $admission->phone,
+            'address' => $admission->address,
+            'grade_level' => $admission->applying_for_grade,
+            'section' => $student->section ?? null,
+            'school_year' => date('Y') . '-' . (date('Y') + 1),
+            'status' => 'approved',
+        ];
 
         if ($student) {
-            $student->update([
-                'lrn' => $admission->lrn,
-                'first_name' => $admission->first_name,
-                'last_name' => $admission->last_name,
-                'birth_date' => $admission->birth_date,
-                'gender' => $admission->sex,
-                'email' => $admission->email,
-                'phone' => $admission->phone,
-                'address' => $admission->address,
-                'grade_level' => $admission->applying_for_grade,
-                'school_year' => date('Y') . '-' . (date('Y') + 1),
-                'status' => 'Approved',
-            ]);
+            $student->update($studentData);
         } else {
-            Student::create([
-                'user_id' => null,
-                'parent_id' => null,
-                'admission_id' => $admission->id,
-                'student_number' => 'STU-' . strtoupper(Str::random(8)),
-                'lrn' => $admission->lrn,
-                'first_name' => $admission->first_name,
-                'last_name' => $admission->last_name,
-                'birth_date' => $admission->birth_date,
-                'gender' => $admission->sex,
-                'email' => $admission->email,
-                'phone' => $admission->phone,
-                'address' => $admission->address,
-                'grade_level' => $admission->applying_for_grade,
-                'section' => null,
-                'school_year' => date('Y') . '-' . (date('Y') + 1),
-                'status' => 'Approved',
-            ]);
+            Student::create($studentData);
         }
 
         $admission->update([
-            'status' => 'Approved',
+            'status' => 'approved',
             'remarks' => 'Approved by registrar',
         ]);
 
-        return back()->with('success', 'Admission approved successfully. Student record created and status updated to approved.');
+        return back()->with('success', 'Admission approved successfully. Student record linked and status updated to approved.');
     }
 
     public function markIncomplete($id)
@@ -127,6 +143,14 @@ class RegistrarController extends Controller
             'status' => 'incomplete',
             'remarks' => 'Marked incomplete by registrar',
         ]);
+
+        $student = Student::where('admission_id', $admission->id)->first();
+
+        if ($student) {
+            $student->update([
+                'status' => 'incomplete',
+            ]);
+        }
 
         return back()->with('success', 'Admission marked as incomplete.');
     }
@@ -160,7 +184,7 @@ class RegistrarController extends Controller
 
     public function sectioning()
     {
-        $students = Student::where('status', 'Approved')->get();
+        $students = Student::whereRaw('LOWER(status) = ?', ['approved'])->get();
 
         return view('RegistrarDashboard.section', compact('students'));
     }

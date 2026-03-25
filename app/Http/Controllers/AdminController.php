@@ -6,13 +6,16 @@ use App\Models\Admission;
 use App\Models\Announcement;
 use App\Models\Classes;
 use App\Models\Payment;
+use App\Models\RoleReferenceCode;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TuitionFee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -28,6 +31,7 @@ class AdminController extends Controller
 
         $recentUsers = User::latest()->take(5)->get();
         $recentAnnouncements = Announcement::latest('posted_at')->take(5)->get();
+        $recentCodes = RoleReferenceCode::latest()->take(5)->get();
 
         return view('AdminDashboard.dashboard', compact(
             'totalUsers',
@@ -38,7 +42,8 @@ class AdminController extends Controller
             'totalCollected',
             'totalOutstanding',
             'recentUsers',
-            'recentAnnouncements'
+            'recentAnnouncements',
+            'recentCodes'
         ));
     }
 
@@ -96,6 +101,12 @@ class AdminController extends Controller
         $totalOutstanding = TuitionFee::sum('balance');
         $billingCount = TuitionFee::count();
 
+        $referenceCodeCount = RoleReferenceCode::count();
+        $usedReferenceCodeCount = RoleReferenceCode::where('is_used', true)->count();
+        $unusedReferenceCodeCount = RoleReferenceCode::where('is_used', false)
+            ->where('is_active', true)
+            ->count();
+
         return view('AdminDashboard.reports', compact(
             'usersByRole',
             'studentCount',
@@ -107,7 +118,10 @@ class AdminController extends Controller
             'totalCollected',
             'paymentCount',
             'totalOutstanding',
-            'billingCount'
+            'billingCount',
+            'referenceCodeCount',
+            'usedReferenceCodeCount',
+            'unusedReferenceCodeCount'
         ));
     }
 
@@ -164,5 +178,96 @@ class AdminController extends Controller
         $admin->save();
 
         return back()->with('success', 'Settings updated successfully.');
+    }
+
+    public function referenceCodes(Request $request)
+    {
+        $query = RoleReferenceCode::with(['subject', 'creator', 'usedBy']);
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'used') {
+                $query->where('is_used', true);
+            } elseif ($request->status === 'unused') {
+                $query->where('is_used', false);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            } elseif ($request->status === 'active') {
+                $query->where('is_active', true);
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhere('role', 'like', "%{$search}%")
+                    ->orWhere('section', 'like', "%{$search}%")
+                    ->orWhere('grade_level', 'like', "%{$search}%")
+                    ->orWhere('school_year', 'like', "%{$search}%")
+                    ->orWhere('semester', 'like', "%{$search}%");
+            });
+        }
+
+        $codes = $query->latest()->paginate(10);
+        $subjects = Subject::orderBy('subject_name')->get();
+
+        return view('AdminDashboard.reference-codes', compact('codes', 'subjects'));
+    }
+
+    public function storeReferenceCode(Request $request)
+    {
+        $request->validate([
+            'role' => 'required|in:teacher,registrar,cashier,admin',
+            'subject_id' => 'nullable|exists:subjects,id',
+            'section' => 'nullable|string|max:50',
+            'grade_level' => 'nullable|string|max:50',
+            'school_year' => 'nullable|string|max:30',
+            'semester' => 'nullable|string|max:30',
+            'expires_at' => 'nullable|date|after:now',
+        ]);
+
+        if ($request->role !== 'teacher' && $request->filled('subject_id')) {
+            return back()->withErrors([
+                'subject_id' => 'Only teacher reference codes can be linked to a subject.',
+            ])->withInput();
+        }
+
+        do {
+            $generatedCode = strtoupper(Str::random(10));
+        } while (RoleReferenceCode::where('code', $generatedCode)->exists());
+
+        RoleReferenceCode::create([
+            'role' => $request->role,
+            'code' => $generatedCode,
+            'subject_id' => $request->role === 'teacher' ? $request->subject_id : null,
+            'section' => $request->role === 'teacher' ? $request->section : null,
+            'grade_level' => $request->role === 'teacher' ? $request->grade_level : null,
+            'school_year' => $request->role === 'teacher' ? $request->school_year : null,
+            'semester' => $request->role === 'teacher' ? $request->semester : null,
+            'created_by' => Auth::id(),
+            'used_by' => null,
+            'is_used' => false,
+            'is_active' => true,
+            'expires_at' => $request->expires_at,
+            'used_at' => null,
+        ]);
+
+        return back()->with('success', 'Reference code created successfully.');
+    }
+
+    public function deactivateReferenceCode($id)
+    {
+        $code = RoleReferenceCode::findOrFail($id);
+
+        $code->update([
+            'is_active' => false,
+        ]);
+
+        return back()->with('success', 'Reference code deactivated successfully.');
     }
 }

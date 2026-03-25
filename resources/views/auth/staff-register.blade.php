@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Register')
+@section('title', 'Staff Registration')
 
 @section('content')
 
@@ -18,7 +18,7 @@
             font-size: 30px;
             font-weight: 600;
         ">
-            Register
+            Staff Registration
         </h2>
 
         <p style="
@@ -27,7 +27,7 @@
             margin-bottom: 30px;
             font-size: 15px;
         ">
-            Create your Agnus Dei School Systems account
+            Register as Teacher, Registrar, Cashier, or Admin using an admin-issued reference code
         </p>
 
         @if ($errors->any())
@@ -114,11 +114,10 @@
 
             <div style="margin-bottom: 18px;">
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Role
+                    Staff Role
                 </label>
                 <select 
                     name="role"
-                    id="role"
                     required
                     style="
                         width:100%;
@@ -130,26 +129,24 @@
                         background:#fff;
                     "
                 >
-                    <option value="">Select Role</option>
-                    <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                    <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                    <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
+                    <option value="">Select Staff Role</option>
                     <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                     <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
+                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>
             </div>
 
-            <div id="reference-code-wrapper" style="margin-bottom: 18px; display: none;">
+            <div style="margin-bottom: 18px;">
                 <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
                     Reference Code
                 </label>
                 <input 
                     type="text"
                     name="reference_code"
-                    id="reference_code"
                     value="{{ old('reference_code') }}"
                     placeholder="Enter the admin-issued reference code"
+                    required
                     style="
                         width:100%;
                         padding:12px 14px;
@@ -157,10 +154,11 @@
                         border-radius:10px;
                         font-size:15px;
                         outline:none;
+                        text-transform: uppercase;
                     "
                 >
                 <small style="display:block; margin-top:6px; color:#64748b; font-size:13px;">
-                    Required for Teacher, Registrar, Cashier, and Admin registration.
+                    This is required for all staff registrations.
                 </small>
             </div>
 
@@ -216,12 +214,24 @@
                 cursor:pointer;
                 transition:0.3s ease;
             ">
-                Register
+                Register Staff Account
             </button>
         </form>
 
         <p style="
             margin-top: 22px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        ">
+            Need a normal account?
+            <a href="{{ route('register') }}" style="color:#001e82; font-weight:600; text-decoration:none;">
+                Go to public registration
+            </a>
+        </p>
+
+        <p style="
+            margin-top: 10px;
             text-align: center;
             font-size: 14px;
             color: #64748b;
@@ -233,32 +243,5 @@
         </p>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const roleSelect = document.getElementById('role');
-    const referenceCodeWrapper = document.getElementById('reference-code-wrapper');
-    const referenceCodeInput = document.getElementById('reference_code');
-
-    function toggleReferenceCodeField() {
-        const protectedRoles = ['teacher', 'registrar', 'cashier', 'admin'];
-        const selectedRole = roleSelect.value;
-
-        if (protectedRoles.includes(selectedRole)) {
-            referenceCodeWrapper.style.display = 'block';
-            referenceCodeInput.setAttribute('required', 'required');
-        } else {
-            referenceCodeWrapper.style.display = 'none';
-            referenceCodeInput.removeAttribute('required');
-            referenceCodeInput.value = '';
-        }
-    }
-
-    if (roleSelect) {
-        toggleReferenceCodeField();
-        roleSelect.addEventListener('change', toggleReferenceCodeField);
-    }
-});
-</script>
 
 @endsection

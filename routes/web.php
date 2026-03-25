@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ParentController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +29,7 @@ Route::get('/discounts', fn() => view('FrontWebsite.discounts'))->name('discount
 |--------------------------------------------------------------------------
 */
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/register/staff', [AuthController::class, 'showStaffRegister'])->name('register.staff');
 Route::post('/register', [AuthController::class, 'registerUser'])->name('register.post');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'loginUser'])->name('login.post');
@@ -83,8 +84,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
     Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
     Route::delete('/announcements/{id}', [AdminController::class, 'deleteAnnouncement'])->name('announcements.delete');
-    Route::put('/settings', [AdminController::class, 'updateProfile'])->name('settings.update');
-    
+
+    Route::post('/settings/update', [AdminController::class, 'updateProfile'])->name('settings.update');
+
+    Route::get('/reference-codes', [AdminController::class, 'referenceCodes'])->name('reference-codes.index');
+    Route::post('/reference-codes', [AdminController::class, 'storeReferenceCode'])->name('reference-codes.store');
+    Route::post('/reference-codes/{id}/deactivate', [AdminController::class, 'deactivateReferenceCode'])->name('reference-codes.deactivate');
 });
 
 /*
@@ -92,7 +97,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 | Teacher Portal Flow
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
     Route::get('/classes', [TeacherController::class, 'classes'])->name('classes');
@@ -107,7 +111,6 @@ Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function (
 | Parent Portal Flow
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
     Route::get('/children', [ParentController::class, 'children'])->name('children');

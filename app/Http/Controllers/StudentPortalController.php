@@ -46,11 +46,11 @@ class StudentPortalController extends Controller
             return redirect()->route('student.requirements');
         }
 
-        if (in_array($admission->status, ['pending', 'under_review', 'incomplete'])) {
+        if (in_array(strtolower((string) $admission->status), ['pending', 'under_review', 'incomplete'])) {
             return redirect()->route('student.requirements');
         }
 
-        if ($admission->status === 'Approved') {
+        if (strtolower((string) $admission->status) === 'approved') {
             return redirect()->route('student.dashboard');
         }
 
@@ -154,16 +154,16 @@ class StudentPortalController extends Controller
         $student = Student::where('user_id', $user->id)->first();
 
         if (!$student || !$student->admission_id) {
-            return redirect()->route('student.admission.create')->with('error', 'Please submit your admission application first.');
+            return redirect()->route('student.admission.create');
         }
 
         $admission = Admission::with('requirements')->find($student->admission_id);
 
         if (!$admission) {
-            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
+            return redirect()->route('student.admission.create');
         }
 
-        return view('StudentDashboard.requirements', compact('admission'));
+        return view('StudentDashboard.requirements', compact('student', 'admission'));
     }
 
     public function uploadRequirement(Request $request)
@@ -177,13 +177,13 @@ class StudentPortalController extends Controller
         $student = Student::where('user_id', $user->id)->first();
 
         if (!$student || !$student->admission_id) {
-            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
+            return redirect()->route('student.admission.create');
         }
 
         $admission = Admission::find($student->admission_id);
 
         if (!$admission) {
-            return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
+            return redirect()->route('student.admission.create');
         }
 
         $requirement = $admission->requirements()->where('id', $request->requirement_id)->first();
@@ -222,8 +222,13 @@ class StudentPortalController extends Controller
         $tuition = null;
         $payments = collect();
         $schedule = collect();
+        $studentStatusLabel = '-';
 
         if ($student) {
+            $studentStatusLabel = strtolower((string) $student->status) === 'approved'
+                ? 'APPROVED'
+                : ucfirst((string) $student->status);
+
             $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
                 ->where('student_id', $student->id)
                 ->get();
@@ -257,6 +262,7 @@ class StudentPortalController extends Controller
 
         return view('StudentDashboard.dashboard', compact(
             'student',
+            'studentStatusLabel',
             'enrollments',
             'grades',
             'tuition',
@@ -289,10 +295,10 @@ class StudentPortalController extends Controller
         $grades = collect();
 
         if ($student) {
-            $enrollments = Enrollment::where('student_id', $student->id)->pluck('id');
+            $enrollmentIds = Enrollment::where('student_id', $student->id)->pluck('id');
 
             $grades = Grade::with('enrollment.class.subject')
-                ->whereIn('enrollment_id', $enrollments)
+                ->whereIn('enrollment_id', $enrollmentIds)
                 ->get();
         }
 
@@ -334,27 +340,19 @@ class StudentPortalController extends Controller
 
         $tuition = null;
         $payments = collect();
-        $quarterAmount = 0;
 
         if ($student) {
             $tuition = TuitionFee::where('student_id', $student->id)
-                ->where('school_year', $student->school_year)
+                ->latest()
                 ->first();
 
             if ($tuition) {
                 $payments = Payment::where('tuition_fee_id', $tuition->id)
                     ->latest('payment_date')
                     ->get();
-
-                $quarterAmount = $tuition->total_amount / 4;
             }
         }
 
-        return view('StudentDashboard.assessment', compact(
-            'student',
-            'tuition',
-            'payments',
-            'quarterAmount'
-        ));
+        return view('StudentDashboard.assessment', compact('student', 'tuition', 'payments'));
     }
 }
