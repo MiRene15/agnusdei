@@ -174,7 +174,7 @@
     </div>
 
     <div style="margin-top:16px;">
-        <a href="{{ route('admin.reference-codes.index') }}" class="btn btn-primary">Manage Reference Codes</a>
+        <a href="{{ route('admin.reference-codes') }}" class="btn btn-primary">Manage Reference Codes</a>
     </div>
 </div>
 

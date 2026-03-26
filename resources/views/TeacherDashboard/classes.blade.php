@@ -9,19 +9,41 @@
     <p>View your assigned subjects, sections, and enrolled students.</p>
 </div>
 
+@if(session('success'))
+    <div class="card" style="border-left:4px solid #16a34a; color:#166534;">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="card" style="border-left:4px solid #dc2626; color:#991b1b;">
+        {{ session('error') }}
+    </div>
+@endif
+
 @forelse($classes as $class)
     <div class="card">
-        <h4>
-            {{ $class->subject->subject_name ?? '-' }}
-            ({{ $class->subject->subject_code ?? '-' }})
-        </h4>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
+            <div>
+                <h4 style="margin-bottom:6px;">
+                    {{ $class->subject->subject_name ?? '-' }}
+                    ({{ $class->subject->subject_code ?? '-' }})
+                </h4>
+                <p style="color:#64748b; margin:0;">
+                    Grade Level: {{ $class->grade_level }} |
+                    Section: {{ $class->section }} |
+                    School Year: {{ $class->school_year }} |
+                    Room: {{ $class->room ?? '-' }}
+                </p>
+            </div>
 
-        <p style="color:#64748b; margin-bottom:14px;">
-            Grade Level: {{ $class->grade_level }} |
-            Section: {{ $class->section }} |
-            School Year: {{ $class->school_year }} |
-            Room: {{ $class->room ?? '-' }}
-        </p>
+            <div style="padding:10px 14px; background:#f8fafc; border-radius:10px; min-width:150px;">
+                <div style="font-size:12px; color:#64748b;">Enrolled Students</div>
+                <div style="font-size:24px; font-weight:700; color:#0f172a;">
+                    {{ $class->enrollments->count() }}
+                </div>
+            </div>
+        </div>
 
         <div class="table-wrap">
             <table>

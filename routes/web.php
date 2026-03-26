@@ -11,10 +11,9 @@ use App\Http\Controllers\TeacherController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Pages (FrontWebsite)
+| Public Pages
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', fn() => view('FrontWebsite.home'))->name('home');
 Route::get('/philosophy', fn() => view('FrontWebsite.philosophy'))->name('philosophy');
 Route::get('/background', fn() => view('FrontWebsite.background'))->name('background');
@@ -32,14 +31,14 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'registerUser'])->name('register.post');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'loginUser'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 /*
+
 |--------------------------------------------------------------------------
-| Student Portal Flow
+| Student Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('student')->name('student.')->middleware('auth')->group(function () {
+Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])->group(function () {
     Route::get('/portal-check', [StudentPortalController::class, 'check'])->name('portal.check');
     Route::get('/admission/create', [StudentPortalController::class, 'createAdmission'])->name('admission.create');
     Route::post('/admission/store', [StudentPortalController::class, 'storeAdmission'])->name('admission.store');
@@ -54,10 +53,10 @@ Route::prefix('student')->name('student.')->middleware('auth')->group(function (
 
 /*
 |--------------------------------------------------------------------------
-| Registrar Portal Flow
+| Registrar Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(function () {
+Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:registrar'])->group(function () {
     Route::get('/dashboard', [RegistrarController::class, 'dashboard'])->name('dashboard');
     Route::get('/enrollments', [RegistrarController::class, 'enrollments'])->name('enrollments');
     Route::get('/enrollments/{id}', [RegistrarController::class, 'showEnrollment'])->name('enrollments.show');
@@ -74,10 +73,10 @@ Route::prefix('registrar')->name('registrar.')->middleware('auth')->group(functi
 
 /*
 |--------------------------------------------------------------------------
-| Admin Portal Flow
+| Admin Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -93,10 +92,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Teacher Portal Flow
+| Teacher Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function () {
+Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])->group(function () {
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
     Route::get('/classes', [TeacherController::class, 'classes'])->name('classes');
     Route::get('/schedule', [TeacherController::class, 'schedule'])->name('schedule');
@@ -107,10 +106,10 @@ Route::prefix('teacher')->name('teacher.')->middleware('auth')->group(function (
 
 /*
 |--------------------------------------------------------------------------
-| Parent Portal Flow
+| Parent Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () {
+Route::prefix('parent')->name('parent.')->middleware(['auth', 'role:parent'])->group(function () {
     Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
     Route::get('/children', [ParentController::class, 'children'])->name('children');
     Route::get('/grades', [ParentController::class, 'grades'])->name('grades');
@@ -119,10 +118,10 @@ Route::prefix('parent')->name('parent.')->middleware('auth')->group(function () 
 
 /*
 |--------------------------------------------------------------------------
-| Cashier Portal Flow
+| Cashier Portal
 |--------------------------------------------------------------------------
 */
-Route::prefix('cashier')->name('cashier.')->middleware('auth')->group(function () {
+Route::prefix('cashier')->name('cashier.')->middleware(['auth', 'role:cashier'])->group(function () {
     Route::get('/dashboard', [CashierController::class, 'dashboard'])->name('dashboard');
     Route::get('/billing', [CashierController::class, 'billing'])->name('billing');
     Route::get('/payments', [CashierController::class, 'payments'])->name('payments');

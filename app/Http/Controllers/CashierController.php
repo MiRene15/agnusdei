@@ -22,18 +22,62 @@ class CashierController extends Controller
         ));
     }
 
-    public function billing()
+    public function billing(Request $request)
     {
-        $billings = TuitionFee::with('student')->latest()->paginate(10);
+        $query = TuitionFee::with('student');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('student', function ($studentQuery) use ($search) {
+                    $studentQuery->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('student_number', 'like', "%{$search}%")
+                        ->orWhere('lrn', 'like', "%{$search}%");
+                })->orWhere('school_year', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = strtolower(trim($request->status));
+
+            if (in_array($status, ['paid', 'partial', 'unpaid', 'voucher'])) {
+                $query->whereRaw('LOWER(status) = ?', [$status]);
+            } elseif ($status === 'cleared') {
+                $query->where('is_downpayment_cleared', true);
+            } elseif ($status === 'not_cleared') {
+                $query->where('is_downpayment_cleared', false);
+            }
+        }
+
+        $billings = $query->latest()->paginate(10)->withQueryString();
 
         return view('CashierDashboard.billing', compact('billings'));
     }
 
-    public function payments()
+    public function payments(Request $request)
     {
-        $payments = Payment::with(['tuitionFee.student', 'cashier'])
-            ->latest('payment_date')
-            ->paginate(10);
+        $query = Payment::with(['tuitionFee.student', 'cashier']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_no', 'like', "%{$search}%")
+                    ->orWhere('receipt_number', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%")
+                    ->orWhere('received_by', 'like', "%{$search}%")
+                    ->orWhereHas('tuitionFee.student', function ($studentQuery) use ($search) {
+                        $studentQuery->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('student_number', 'like', "%{$search}%")
+                            ->orWhere('lrn', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $payments = $query->latest('payment_date')->paginate(10)->withQueryString();
 
         return view('CashierDashboard.payments', compact('payments'));
     }
@@ -80,7 +124,7 @@ class CashierController extends Controller
         $tuition->paid_amount = (float) $tuition->paid_amount + (float) $request->amount;
         $tuition->balance = max(0, (float) $tuition->total_due - (float) $tuition->paid_amount);
         $tuition->is_downpayment_cleared = (float) $tuition->paid_amount >= (float) $tuition->down_payment_required;
-        $tuition->status = $tuition->balance <= 0 ? 'paid' : 'partial';
+        $tuition->status = $tuition->balance <= 0 ? 'paid' : ((float) $tuition->paid_amount > 0 ? 'partial' : 'unpaid');
         $tuition->save();
 
         $student = $tuition->student;

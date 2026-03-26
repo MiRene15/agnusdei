@@ -364,6 +364,56 @@
                 gap: 6px;
             }
         }
+
+        .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.page-item {
+    list-style: none;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.page-link:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.page-item.active .page-link {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
+    background: #f8fafc;
+    color: #94a3b8;
+}
+
+
     </style>
 </head>
 <body>
@@ -391,7 +441,7 @@
         Announcements
     </a>
 
-    <a href="{{ route('admin.reference-codes.index') }}"
+    <a href="{{ route('admin.reference-codes') }}"
        class="{{ request()->routeIs('admin.reference-codes*') ? 'active' : '' }}">
         Reference Codes
     </a>

@@ -11,8 +11,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AcademicEventSeeder::class,
             RoleReferenceCodeSeeder::class,
+            SeedDefaultSubjects::class,
             DefaultStaffSeeder::class,
             SectionSeeder::class,
+            TeachersClassesSchedulesSeeder::class,
             TuitionFeeSeeder::class,
         ]);
     }

@@ -77,10 +77,10 @@
     </div>
 
     @if(method_exists($users, 'links'))
-        <div style="margin-top: 18px;">
-            {{ $users->withQueryString()->links() }}
-        </div>
-    @endif
+    <div style="margin-top:18px; display:flex; justify-content:flex-end;">
+        {{ $users->withQueryString()->onEachSide(1)->links('pagination::bootstrap-5') }}
+    </div>
+@endif
 </div>
 
 @endsection

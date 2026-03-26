@@ -1,20 +1,21 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+namespace Database\Seeders;
+
+use App\Models\Classes;
+use App\Models\Schedule;
+use App\Models\Subject;
+use App\Models\Teacher;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-return new class extends Migration
+class TeachersClassesSchedulesSeeder extends Seeder
 {
-    public function up(): void
+    public function run(): void
     {
         $schoolYear = '2026-2027';
 
-        /*
-        |--------------------------------------------------------------------------
-        | DEFAULT TEACHER USERS + TEACHER PROFILES
-        |--------------------------------------------------------------------------
-        */
         $teacherSeeds = [
             ['first_name' => 'Maria', 'last_name' => 'Santos', 'email' => 'maria.santos@agnusdei.local', 'department' => 'Elementary'],
             ['first_name' => 'Jose', 'last_name' => 'Reyes', 'email' => 'jose.reyes@agnusdei.local', 'department' => 'Elementary'],
@@ -40,53 +41,38 @@ return new class extends Migration
 
         foreach ($teacherSeeds as $index => $teacherSeed) {
             $fullName = $teacherSeed['first_name'] . ' ' . $teacherSeed['last_name'];
+            $phone = '09' . str_pad((string) (100000000 + $index), 9, '0', STR_PAD_LEFT);
 
-            $existingUserId = DB::table('users')->where('email', $teacherSeed['email'])->value('id');
-
-            if (!$existingUserId) {
-                $existingUserId = DB::table('users')->insertGetId([
+            $user = User::updateOrCreate(
+                ['email' => $teacherSeed['email']],
+                [
                     'name' => $fullName,
                     'email' => $teacherSeed['email'],
-                    'contact_number' => '09' . str_pad((string) (100000000 + $index), 9, '0', STR_PAD_LEFT),
+                    'contact_number' => $phone,
                     'role' => 'teacher',
                     'password' => Hash::make('password123'),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+                ]
+            );
 
-            $existingTeacherId = DB::table('teachers')->where('email', $teacherSeed['email'])->value('id');
-
-            if (!$existingTeacherId) {
-                $existingTeacherId = DB::table('teachers')->insertGetId([
-                    'user_id' => $existingUserId,
+            $teacher = Teacher::updateOrCreate(
+                ['email' => $teacherSeed['email']],
+                [
+                    'user_id' => $user->id,
                     'teacher_number' => 'TCH-' . str_pad((string) ($index + 1), 4, '0', STR_PAD_LEFT),
                     'first_name' => $teacherSeed['first_name'],
                     'last_name' => $teacherSeed['last_name'],
                     'email' => $teacherSeed['email'],
-                    'phone' => '09' . str_pad((string) (100000000 + $index), 9, '0', STR_PAD_LEFT),
+                    'phone' => $phone,
                     'department' => $teacherSeed['department'],
                     'status' => 'active',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+                ]
+            );
 
-            $teacherIdsByDepartment[$teacherSeed['department']][] = $existingTeacherId;
+            $teacherIdsByDepartment[$teacherSeed['department']][] = $teacher->id;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SUBJECT LOOKUP
-        |--------------------------------------------------------------------------
-        */
-        $subjectMap = DB::table('subjects')->pluck('id', 'subject_code')->toArray();
+        $subjectMap = Subject::pluck('id', 'subject_code')->toArray();
 
-        /*
-        |--------------------------------------------------------------------------
-        | CLASS PLANS
-        |--------------------------------------------------------------------------
-        */
         $plans = [
             [
                 'grade_level' => 'Grade 1',
@@ -136,7 +122,6 @@ return new class extends Migration
                 'department' => 'Elementary',
                 'subject_codes' => ['G6-ENG', 'G6-FIL', 'G6-MAT', 'G6-SCI', 'G6-AP', 'G6-ESP', 'G6-MAPEH', 'G6-EPP'],
             ],
-
             [
                 'grade_level' => 'Grade 7',
                 'section' => 'Hope',
@@ -169,7 +154,6 @@ return new class extends Migration
                 'department' => 'Junior High School',
                 'subject_codes' => ['G10-ENG', 'G10-FIL', 'G10-MAT', 'G10-SCI', 'G10-AP', 'G10-ESP', 'G10-MAPEH', 'G10-TLE'],
             ],
-
             [
                 'grade_level' => 'Grade 11',
                 'section' => 'STEM-A',
@@ -236,11 +220,6 @@ return new class extends Migration
             ],
         ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | SCHEDULE HELPERS
-        |--------------------------------------------------------------------------
-        */
         $timeSlots = [
             ['07:00:00', '08:00:00'],
             ['08:00:00', '09:00:00'],
@@ -266,18 +245,13 @@ return new class extends Migration
             'Senior High School' => 0,
         ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | INSERT CLASSES + SCHEDULES
-        |--------------------------------------------------------------------------
-        */
         foreach ($plans as $plan) {
             foreach ($plan['subject_codes'] as $subjectIndex => $subjectCode) {
                 if (!isset($subjectMap[$subjectCode])) {
                     continue;
                 }
 
-                $teacherPool = $teacherIdsByDepartment[$plan['department']];
+                $teacherPool = $teacherIdsByDepartment[$plan['department']] ?? [];
                 if (empty($teacherPool)) {
                     continue;
                 }
@@ -288,92 +262,40 @@ return new class extends Migration
                 $roomNumber = 100 + (($subjectIndex + 1) % 10);
                 $room = $plan['room_prefix'] . '-' . $roomNumber;
 
-                $classQuery = DB::table('classes')
-                    ->where('subject_id', $subjectMap[$subjectCode])
-                    ->where('teacher_id', $teacherId)
-                    ->where('section', $plan['section'])
-                    ->where('grade_level', $plan['grade_level'])
-                    ->where('school_year', $schoolYear);
-
-                if (is_null($plan['semester'])) {
-                    $classQuery->whereNull('semester');
-                } else {
-                    $classQuery->where('semester', $plan['semester']);
-                }
-
-                $existingClassId = $classQuery->value('id');
-
-                if (!$existingClassId) {
-                    $existingClassId = DB::table('classes')->insertGetId([
+                $class = Classes::updateOrCreate(
+                    [
                         'subject_id' => $subjectMap[$subjectCode],
                         'teacher_id' => $teacherId,
                         'section' => $plan['section'],
                         'grade_level' => $plan['grade_level'],
                         'school_year' => $schoolYear,
                         'semester' => $plan['semester'],
+                    ],
+                    [
                         'room' => $room,
                         'capacity' => 40,
                         'status' => 'active',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
+                    ]
+                );
+
                 $seedKey = crc32($subjectCode . '|' . $plan['section'] . '|' . $plan['grade_level']);
                 $slot = $timeSlots[$seedKey % count($timeSlots)];
                 $days = $dayPatterns[$seedKey % count($dayPatterns)];
 
                 foreach ($days as $day) {
-                    DB::table('schedules')->updateOrInsert(
+                    Schedule::updateOrCreate(
                         [
-                            'class_id' => $existingClassId,
+                            'class_id' => $class->id,
                             'day_of_week' => $day,
                         ],
                         [
                             'start_time' => $slot[0],
                             'end_time' => $slot[1],
                             'room' => $room,
-                            'updated_at' => now(),
-                            'created_at' => now(),
                         ]
                     );
                 }
             }
         }
     }
-
-    public function down(): void
-    {
-        $emails = [
-            'maria.santos@agnusdei.local',
-            'jose.reyes@agnusdei.local',
-            'ana.cruz@agnusdei.local',
-            'paolo.garcia@agnusdei.local',
-            'liza.mendoza@agnusdei.local',
-            'mark.torres@agnusdei.local',
-            'rina.flores@agnusdei.local',
-            'dennis.aquino@agnusdei.local',
-            'carla.navarro@agnusdei.local',
-            'vincent.luna@agnusdei.local',
-            'sheila.ramos@agnusdei.local',
-            'adrian.castro@agnusdei.local',
-        ];
-
-        $teacherIds = DB::table('teachers')->whereIn('email', $emails)->pluck('id')->toArray();
-        $userIds = DB::table('users')->whereIn('email', $emails)->pluck('id')->toArray();
-
-        $classIds = DB::table('classes')->whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
-
-        if (!empty($classIds)) {
-            DB::table('schedules')->whereIn('class_id', $classIds)->delete();
-            DB::table('classes')->whereIn('id', $classIds)->delete();
-        }
-
-        if (!empty($teacherIds)) {
-            DB::table('teachers')->whereIn('id', $teacherIds)->delete();
-        }
-
-        if (!empty($userIds)) {
-            DB::table('users')->whereIn('id', $userIds)->delete();
-        }
-    }
-};
+}

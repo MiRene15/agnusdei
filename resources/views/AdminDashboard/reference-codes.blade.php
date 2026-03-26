@@ -208,7 +208,7 @@
     <div class="card">
         <h4>Existing Reference Codes</h4>
 
-        <form method="GET" action="{{ route('admin.reference-codes.index') }}" class="reference-filter-grid">
+        <form method="GET" action="{{ route('admin.reference-codes') }}" class="reference-filter-grid">
             <select name="role" class="form-control">
                 <option value="">All Roles</option>
                 <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>

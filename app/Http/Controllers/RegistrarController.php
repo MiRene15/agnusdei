@@ -68,86 +68,41 @@ class RegistrarController extends Controller
     }
 
     public function verifyEnrollment($id)
-    {
-        $admission = Admission::findOrFail($id);
+{
+    $admission = Admission::findOrFail($id);
 
-        if (strtolower((string) $admission->status) === 'approved') {
-            return back()->with('error', 'Approved admission can no longer be modified.');
-        }
-
-        $institutionalEmail = null;
-
-        if (!empty($admission->email) && str_ends_with(strtolower($admission->email), '@agnusdei.local')) {
-            $institutionalEmail = $admission->email;
-        }
-
-        $admission->update([
-            'is_verified' => true,
-            'verified_at' => now(),
-            'verified_by' => Auth::id(),
-            'institutional_email' => $institutionalEmail,
-            'status' => 'under_review',
-            'remarks' => 'Verified by registrar',
-        ]);
-
-        ActivityLog::record(
-            Auth::id(),
-            'admission',
-            'verify',
-            'Admission',
-            $admission->id,
-            'Registrar verified admission #' . $admission->application_number,
-            request()->ip()
-        );
-
-        return back()->with('success', 'Admission verified successfully.');
+    if (strtolower((string) $admission->status) === 'approved') {
+        return back()->with('error', 'Approved admission can no longer be modified.');
     }
 
-    public function approveEnrollment($id)
-    {
-        $admission = Admission::with('requirements')->findOrFail($id);
+    $institutionalEmail = $this->generateInstitutionalEmail(
+        $admission->first_name,
+        $admission->last_name
+    );
 
-        return $this->processApproval($admission);
-    }
+    $admission->update([
+        'is_verified' => true,
+        'verified_at' => now(),
+        'verified_by' => Auth::id(),
+        'institutional_email' => $institutionalEmail,
+        'status' => 'under_review',
+        'remarks' => 'Verified by registrar',
+    ]);
 
-    public function batchApprove(Request $request)
-    {
-        $request->validate([
-            'admission_ids' => 'required|array',
-            'admission_ids.*' => 'exists:admissions,id',
-        ]);
+    ActivityLog::record(
+        Auth::id(),
+        'admission',
+        'verify',
+        'Admission',
+        $admission->id,
+        'Registrar verified admission #' . $admission->application_number,
+        request()->ip()
+    );
 
-        $approvedCount = 0;
-        $skippedCount = 0;
+    return back()->with('success', 'Admission verified successfully.');
+}
 
-        $admissions = Admission::with('requirements')
-            ->whereIn('id', $request->admission_ids)
-            ->get();
-
-        foreach ($admissions as $admission) {
-            $hasIncompleteRequirements = $admission->requirements()->where('submitted', 0)->exists();
-
-            if ($hasIncompleteRequirements || !$admission->is_verified || strtolower((string) $admission->status) === 'approved') {
-                $skippedCount++;
-                continue;
-            }
-
-            $this->approveAdmissionOnly($admission);
-            $approvedCount++;
-        }
-
-        ActivityLog::record(
-            Auth::id(),
-            'admission',
-            'batch_approve',
-            'Admission',
-            null,
-            "Batch approved {$approvedCount} admissions. Skipped {$skippedCount}.",
-            request()->ip()
-        );
-
-        return back()->with('success', "{$approvedCount} admission(s) approved. {$skippedCount} skipped.");
-    }
+    
 
     public function markIncomplete($id)
     {
@@ -433,4 +388,28 @@ class RegistrarController extends Controller
 
         return $studentNumber;
     }
+
+    private function generateInstitutionalEmail(string $firstName, string $lastName): string
+{
+    $first = strtolower(preg_replace('/[^a-z0-9]/i', '', $firstName));
+    $last = strtolower(preg_replace('/[^a-z0-9]/i', '', $lastName));
+
+    $base = trim($first . '.' . $last, '.');
+    if ($base === '') {
+        $base = 'student';
+    }
+
+    $email = $base . '@agnusdei.local';
+    $counter = 1;
+
+    while (
+        Admission::where('institutional_email', $email)->exists() ||
+        Student::where('email', $email)->exists()
+    ) {
+        $email = $base . $counter . '@agnusdei.local';
+        $counter++;
+    }
+
+    return $email;
+}
 }

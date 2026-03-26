@@ -3,64 +3,87 @@
 @section('title', 'Receive Payment')
 
 @section('content')
-<div class="container">
-    <h3>Receive Payment</h3>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+<div class="page-intro">
+    <h4>Receive Payment</h4>
+    <p>Record a new payment transaction for the selected billing account.</p>
+</div>
 
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+@if(session('success'))
+    <div class="card" style="border-left:4px solid #16a34a; color:#166534;">
+        {{ session('success') }}
+    </div>
+@endif
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+@if(session('error'))
+    <div class="card" style="border-left:4px solid #dc2626; color:#991b1b;">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="card" style="border-left:4px solid #f59e0b; color:#92400e;">
+        <strong>Please fix the following:</strong>
+        <ul style="margin:8px 0 0 18px;">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<div class="grid-2">
+    <div class="card">
+        <h4 style="margin-bottom:14px;">Billing Details</h4>
+
+        <div style="display:grid; gap:10px;">
+            <div><strong>Student:</strong> {{ $tuition->student->first_name ?? '-' }} {{ $tuition->student->last_name ?? '' }}</div>
+            <div><strong>Student Number:</strong> {{ $tuition->student->student_number ?? '-' }}</div>
+            <div><strong>LRN:</strong> {{ $tuition->student->lrn ?? '-' }}</div>
+            <div><strong>School Year:</strong> {{ $tuition->school_year }}</div>
+            <div><strong>Total Due:</strong> ₱{{ number_format($tuition->total_due ?? $tuition->total_amount, 2) }}</div>
+            <div><strong>Paid Amount:</strong> ₱{{ number_format($tuition->paid_amount, 2) }}</div>
+            <div><strong>Balance:</strong> ₱{{ number_format($tuition->balance, 2) }}</div>
+            <div><strong>Required Down Payment:</strong> ₱{{ number_format($tuition->down_payment_required ?? 0, 2) }}</div>
         </div>
-    @endif
-
-    <div class="card p-3 mb-3">
-        <p><strong>Student:</strong> {{ $tuitionFee->student->first_name }} {{ $tuitionFee->student->last_name }}</p>
-        <p><strong>Student Number:</strong> {{ $tuitionFee->student->student_number }}</p>
-        <p><strong>School Year:</strong> {{ $tuitionFee->school_year }}</p>
-        <p><strong>Total Amount:</strong> {{ number_format($tuitionFee->total_amount, 2) }}</p>
-        <p><strong>Paid Amount:</strong> {{ number_format($tuitionFee->paid_amount, 2) }}</p>
-        <p><strong>Balance:</strong> {{ number_format($tuitionFee->balance, 2) }}</p>
     </div>
 
-    <form action="{{ route('cashier.payments.store', $tuitionFee->id) }}" method="POST">
-        @csrf
+    <div class="card">
+        <h4 style="margin-bottom:14px;">Payment Form</h4>
 
-        <div class="mb-3">
-            <label class="form-label">Payment Date</label>
-            <input type="date" name="payment_date" class="form-control" value="{{ date('Y-m-d') }}" required>
-        </div>
+        <form action="{{ route('cashier.payments.store', $tuition->id) }}" method="POST" style="display:grid; gap:14px;">
+            @csrf
 
-        <div class="mb-3">
-            <label class="form-label">Amount</label>
-            <input type="number" step="0.01" name="amount" class="form-control" required>
-        </div>
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Amount</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    max="{{ $tuition->balance }}"
+                    name="amount"
+                    value="{{ old('amount') }}"
+                    class="form-control"
+                    required
+                >
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Payment Method</label>
-            <select name="payment_method" class="form-control" required>
-                <option value="Cash">Cash</option>
-                <option value="GCash">GCash</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-            </select>
-        </div>
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Payment Method</label>
+                <select name="payment_method" class="form-control" required>
+                    <option value="">Select payment method</option>
+                    <option value="Cash" {{ old('payment_method') === 'Cash' ? 'selected' : '' }}>Cash</option>
+                    <option value="GCash" {{ old('payment_method') === 'GCash' ? 'selected' : '' }}>GCash</option>
+                    <option value="Bank Transfer" {{ old('payment_method') === 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Reference No.</label>
-            <input type="text" name="reference_no" class="form-control">
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Payment</button>
-    </form>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary">Save Payment</button>
+                <a href="{{ route('cashier.billing') }}" class="btn btn-outline">Back to Billing</a>
+            </div>
+        </form>
+    </div>
 </div>
+
 @endsection

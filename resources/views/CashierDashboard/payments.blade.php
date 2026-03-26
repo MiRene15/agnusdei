@@ -15,15 +15,12 @@
             type="text"
             name="search"
             value="{{ request('search') }}"
-            placeholder="Search by student, LRN, or reference no."
+            placeholder="Search by student, LRN, receipt no., reference no., or method"
         >
         <button type="submit" class="btn btn-primary">Search</button>
         <a href="{{ route('cashier.payments') }}" class="btn btn-outline">Reset</a>
     </form>
 </div>
-
-<div class="card">
-    <h4>Payment List</h4>
 
     <div class="table-wrap">
         <table>
@@ -35,6 +32,7 @@
                     <th>Amount</th>
                     <th>Method</th>
                     <th>Reference No.</th>
+                    <th>Receipt No.</th>
                     <th>Received By</th>
                 </tr>
             </thead>
@@ -50,11 +48,12 @@
                         <td>₱{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ $payment->payment_method ?? '-' }}</td>
                         <td>{{ $payment->reference_no ?? '-' }}</td>
+                        <td>{{ $payment->receipt_number ?? '-' }}</td>
                         <td>{{ $payment->received_by ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#64748b;">No payment records found.</td>
+                        <td colspan="8" style="text-align:center; color:#64748b;">No payment records found.</td>
                     </tr>
                 @endforelse
             </tbody>
