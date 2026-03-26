@@ -110,22 +110,64 @@ class TeacherController extends Controller
         return view('TeacherDashboard.schedule', compact('teacher', 'schedules'));
     }
 
-    public function grades()
+    public function grades(Request $request)
     {
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
 
         $classes = collect();
+        $selectedClass = null;
+        $enrollments = collect();
+        $studentSearch = trim((string) $request->query('student_search'));
 
         if ($teacher) {
-            $classes = Classes::with(['subject', 'enrollments.student', 'enrollments.grades'])
+            $classes = Classes::with('subject')
+                ->withCount('enrollments')
                 ->where('teacher_id', $teacher->id)
                 ->orderBy('grade_level')
                 ->orderBy('section')
                 ->get();
+
+            if ($classes->isNotEmpty()) {
+                $selectedClassId = (int) $request->integer('class_id');
+                $selectedClass = Classes::with(['subject', 'schedules', 'enrollments.student', 'enrollments.grades'])
+                    ->where('teacher_id', $teacher->id)
+                    ->where('id', $selectedClassId ?: (int) $classes->first()->id)
+                    ->first();
+
+                if (!$selectedClass) {
+                    $selectedClass = Classes::with(['subject', 'schedules', 'enrollments.student', 'enrollments.grades'])
+                        ->where('teacher_id', $teacher->id)
+                        ->where('id', (int) $classes->first()->id)
+                        ->first();
+                }
+
+                if ($selectedClass) {
+                    $enrollments = $selectedClass->enrollments
+                        ->sortBy(fn ($enrollment) => mb_strtolower(trim(
+                            ($enrollment->student->last_name ?? '') . ' ' . ($enrollment->student->first_name ?? '')
+                        )))
+                        ->values();
+
+                    if ($studentSearch !== '') {
+                        $needle = mb_strtolower($studentSearch);
+                        $enrollments = $enrollments->filter(function ($enrollment) use ($needle) {
+                            $student = $enrollment->student;
+                            $haystack = implode(' ', [
+                                $student->first_name ?? '',
+                                $student->last_name ?? '',
+                                $student->student_number ?? '',
+                                $student->lrn ?? '',
+                            ]);
+
+                            return str_contains(mb_strtolower($haystack), $needle);
+                        })->values();
+                    }
+                }
+            }
         }
 
-        return view('TeacherDashboard.grades', compact('teacher', 'classes'));
+        return view('TeacherDashboard.grades', compact('teacher', 'classes', 'selectedClass', 'enrollments', 'studentSearch'));
     }
 
     public function saveGrades(Request $request)
@@ -154,26 +196,30 @@ class TeacherController extends Controller
             return back()->with('error', 'PTC must be completed face-to-face before grades can be encoded for this student.');
         }
 
+        $existingGrade = Grade::where('enrollment_id', $request->enrollment_id)
+            ->where('grading_period', $request->grading_period)
+            ->first();
+
+        if ($existingGrade) {
+            return back()->with('error', 'This grading period is already locked after upload and can no longer be edited.');
+        }
+
         $finalGrade = $this->computeFinalGrade(
             (float) $request->seatwork_score,
             (float) $request->quiz_score,
             (float) $request->exam_score
         );
 
-        Grade::updateOrCreate(
-            [
-                'enrollment_id' => $request->enrollment_id,
-                'grading_period' => $request->grading_period,
-            ],
-            [
-                'seatwork_score' => $request->seatwork_score,
-                'quiz_score' => $request->quiz_score,
-                'exam_score' => $request->exam_score,
-                'final_grade' => $finalGrade,
-                'grade' => $finalGrade,
-                'remarks' => $request->remarks ?: ($finalGrade >= 75 ? 'Passed' : 'Needs Intervention'),
-            ]
-        );
+        Grade::create([
+            'enrollment_id' => $request->enrollment_id,
+            'grading_period' => $request->grading_period,
+            'seatwork_score' => $request->seatwork_score,
+            'quiz_score' => $request->quiz_score,
+            'exam_score' => $request->exam_score,
+            'final_grade' => $finalGrade,
+            'grade' => $finalGrade,
+            'remarks' => $request->remarks ?: ($finalGrade >= 75 ? 'Passed' : 'Needs Intervention'),
+        ]);
 
         ActivityLog::record(
             Auth::id(),

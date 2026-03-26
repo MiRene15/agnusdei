@@ -15,7 +15,10 @@ class DatabaseSeeder extends Seeder
             DefaultStaffSeeder::class,
             SectionSeeder::class,
             TeachersClassesSchedulesSeeder::class,
+            DefaultStudentsSeeder::class,
             TuitionFeeSeeder::class,
+            DefaultPaymentsSeeder::class,
+            AnnouncementSeeder::class,
         ]);
     }
 }

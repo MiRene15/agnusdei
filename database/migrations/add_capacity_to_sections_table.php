@@ -13,7 +13,7 @@ return new class extends Migration
         }
 
         Schema::table('sections', function (Blueprint $table) {
-            $table->unsignedInteger('capacity')->default(40)->after('section_name');
+            $table->unsignedInteger('capacity')->default(30)->after('section_name');
         });
     }
 

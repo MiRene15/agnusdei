@@ -57,7 +57,7 @@ class TeachersClassesSchedulesSeeder extends Seeder
                     'email' => $teacherSeed['email'],
                     'contact_number' => $phone,
                     'role' => 'teacher',
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make('Agnus2026!'),
                 ]
             );
 
@@ -185,7 +185,7 @@ class TeachersClassesSchedulesSeeder extends Seeder
                     [
                         'teacher_id' => $assignment['teacher_id'],
                         'room' => $plan['room'],
-                        'capacity' => 40,
+                        'capacity' => 30,
                         'is_advisory' => $subjectIndex === 0,
                         'status' => 'active',
                     ]

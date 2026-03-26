@@ -9,8 +9,15 @@ use App\Http\Controllers\ParentController;
 use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\TeacherController;
+use App\Models\Announcement;
 
-Route::get('/', fn() => view('FrontWebsite.home'))->name('home');
+Route::get('/', fn() => view('FrontWebsite.home', [
+    'announcements' => rescue(
+        fn() => Announcement::latest('posted_at')->take(4)->get(),
+        collect(),
+        report: false
+    ),
+]))->name('home');
 Route::get('/philosophy', fn() => view('FrontWebsite.philosophy'))->name('philosophy');
 Route::get('/background', fn() => view('FrontWebsite.background'))->name('background');
 Route::get('/contact', fn() => view('FrontWebsite.contact'))->name('contact');

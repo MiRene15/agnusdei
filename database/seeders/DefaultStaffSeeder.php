@@ -16,21 +16,21 @@ class DefaultStaffSeeder extends Seeder
                 'email' => 'admin@agnusdei.local',
                 'contact_number' => '09170000001',
                 'role' => 'admin',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Agnus2026!'),
             ],
             [
                 'name' => 'Default Registrar',
                 'email' => 'registrar@agnusdei.local',
                 'contact_number' => '09170000002',
                 'role' => 'registrar',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Agnus2026!'),
             ],
             [
                 'name' => 'Default Cashier',
                 'email' => 'cashier@agnusdei.local',
                 'contact_number' => '09170000003',
                 'role' => 'cashier',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Agnus2026!'),
             ],
         ];
 

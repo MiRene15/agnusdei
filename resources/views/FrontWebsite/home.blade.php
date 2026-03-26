@@ -47,6 +47,34 @@
         </article>
     </div>
 
+    <section class="announcement-panel">
+        <div class="announcement-head">
+            <div>
+                <p class="card-kicker">School Bulletin</p>
+                <h2>Latest announcements from the school admin</h2>
+            </div>
+            <p>Families can now see important reminders, enrollment notices, and school updates directly on the home page.</p>
+        </div>
+
+        <div class="announcement-grid">
+            @forelse($announcements as $announcement)
+                <article class="announcement-card">
+                    <span class="announcement-audience">{{ ucfirst($announcement->audience) }}</span>
+                    <h3>{{ $announcement->title }}</h3>
+                    <p>{{ \Illuminate\Support\Str::limit($announcement->message, 180) }}</p>
+                    <div class="announcement-meta">
+                        Posted {{ optional($announcement->posted_at)->format('M d, Y h:i A') ?? 'Recently' }}
+                    </div>
+                </article>
+            @empty
+                <article class="announcement-card announcement-card-empty">
+                    <h3>No announcements yet</h3>
+                    <p>New announcements posted by the admin will appear here so visitors can quickly see current school updates.</p>
+                </article>
+            @endforelse
+        </div>
+    </section>
+
     <div class="grid-two">
         <section class="content-card">
             <p class="card-kicker">Learning Focus</p>
@@ -85,21 +113,30 @@
 .hero-primary { background: #ffffff; color: #062b8f; }
 .hero-secondary { border: 1px solid rgba(255,255,255,.28); color: #fff; background: rgba(255,255,255,.08); }
 .site-shell { max-width: 1220px; margin: 0 auto; padding: 34px 22px 44px; display: grid; gap: 20px; }
-.section-band, .info-card, .content-card { background: #fff; border: 1px solid #dbeafe; border-radius: 22px; box-shadow: 0 18px 45px rgba(15, 23, 42, .07); }
+.section-band, .info-card, .content-card, .announcement-panel { background: #fff; border: 1px solid #dbeafe; border-radius: 22px; box-shadow: 0 18px 45px rgba(15, 23, 42, .07); }
 .section-band { padding: 26px; display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.9fr); gap: 20px; }
 .section-kicker, .card-kicker { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; color: #1d4ed8; margin-bottom: 10px; }
-.section-band h2, .content-card h2 { font-size: clamp(28px, 4vw, 40px); color: #062b8f; }
-.section-band p, .info-card p, .content-card p { color: #334155; line-height: 1.8; }
+.section-band h2, .content-card h2, .announcement-head h2 { font-size: clamp(28px, 4vw, 40px); color: #062b8f; }
+.section-band p, .info-card p, .content-card p, .announcement-head p, .announcement-card p { color: #334155; line-height: 1.8; }
 .grid-three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
 .grid-two { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(280px,.9fr); gap: 20px; }
 .info-card, .content-card { padding: 26px; }
-.info-card h3 { margin: 10px 0 12px; color: #062b8f; font-size: 24px; line-height: 1.2; }
+.info-card h3, .announcement-card h3 { margin: 10px 0 12px; color: #062b8f; font-size: 24px; line-height: 1.2; }
 .info-card a { text-decoration: none; color: #1d4ed8; font-weight: 600; }
 .content-list { padding-left: 20px; display: grid; gap: 8px; color: #334155; line-height: 1.8; }
 .content-list.compact { gap: 6px; }
 .portal-stack { display: grid; gap: 12px; margin-top: 18px; }
 .portal-stack a { text-decoration: none; padding: 14px 16px; border-radius: 16px; background: #eff6ff; border: 1px solid #bfdbfe; color: #062b8f; font-weight: 600; }
-@media (max-width: 980px) { .section-band, .grid-three, .grid-two { grid-template-columns: 1fr; } }
+.announcement-panel { padding: 26px; display: grid; gap: 18px; }
+.announcement-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr); gap: 18px; align-items: end; }
+.announcement-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.announcement-card { border: 1px solid #dbeafe; border-radius: 18px; padding: 18px; background: linear-gradient(180deg, #ffffff, #f8fbff); box-shadow: 0 12px 28px rgba(15, 23, 42, .05); }
+.announcement-audience { display: inline-flex; align-items: center; padding: 8px 10px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.announcement-meta { margin-top: 16px; font-size: 12px; color: #64748b; }
+.announcement-card-empty { grid-column: 1 / -1; }
+@media (max-width: 1120px) { .announcement-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 980px) { .section-band, .grid-three, .grid-two, .announcement-head { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .announcement-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
 

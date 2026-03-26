@@ -42,6 +42,28 @@
     </div>
 </div>
 
+<div class="card">
+    <h4 style="margin-bottom:14px;">Quick Actions</h4>
+    <div class="quick-actions">
+        <a href="{{ route('teacher.grades') }}" class="action-box">
+            <h5>Open Grade Encoding</h5>
+            <p>Jump straight into class selection, student search, and quarterly grade upload.</p>
+        </a>
+        <a href="{{ route('teacher.classes') }}" class="action-box">
+            <h5>Review My Classes</h5>
+            <p>Check all assigned sections, enrolled learners, and advisory ownership in one view.</p>
+        </a>
+        <a href="{{ route('teacher.schedule') }}" class="action-box">
+            <h5>View Weekly Schedule</h5>
+            <p>Open the improved weekly schedule layout for a cleaner teaching-day overview.</p>
+        </a>
+        <a href="{{ route('teacher.reports') }}" class="action-box">
+            <h5>Open Reports</h5>
+            <p>Track how many classes and grade records are already under your account.</p>
+        </a>
+    </div>
+</div>
+
 <div class="grid-2">
     <div class="card">
         <h4 style="margin-bottom:14px;">Assigned Classes</h4>
