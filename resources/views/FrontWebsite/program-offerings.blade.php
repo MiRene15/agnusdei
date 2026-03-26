@@ -3,218 +3,107 @@
 @section('title', 'Program Offerings - Agnus Dei School Systems INC.')
 
 @section('content')
-
-<section class="hero-program" >
-    <h2>Program Offerings</h2>
+<section class="site-hero">
+    <div class="site-hero-inner">
+        <p class="site-kicker">Program Offerings</p>
+        <h1>Learning paths that grow with every stage of the learner journey</h1>
+        <p>From foundational early years to Senior High specialization, the school offers a guided academic path shaped by values, structure, and learner readiness.</p>
+    </div>
 </section>
 
-<div class="page-container">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h4>About Us</h4>
-        <nav class="sidebar-nav">
+<section class="page-shell">
+    <aside class="page-sidebar">
+        <div class="nav-card">
+            <p class="nav-label">Admissions</p>
             <a href="/program-offerings" class="active">Program Offerings</a>
-            <a href="/requirements">Requirements & Procedures</a>
-            <a href="/discounts">Student Discounts</a>
-        </nav>
-
-        <div class="accreditations">
-            <h5>ACCREDITATIONS AND AFFILIATIONS</h5>
-            <img src="{{ asset('images/accreditation1.png') }}" alt="Accreditation 1">
-            <img src="{{ asset('images/accreditation2.png') }}" alt="Accreditation 2">
+            <a href="/requirements">Requirements and Procedures</a>
+            <a href="/discounts">Discounts and Privileges</a>
+        </div>
+        <div class="side-card">
+            <p class="side-title">What Families Can Expect</p>
+            <div class="side-item"><strong>Progression</strong><span>Structured movement from basic to advanced levels</span></div>
+            <div class="side-item"><strong>Alignment</strong><span>Track-based section, subject, and schedule matching</span></div>
+            <div class="side-item"><strong>Formation</strong><span>Programs supported by values education and discipline</span></div>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <section class="main-content">
-        <div class="content-section">
-    <h3 class="content-title">ACADEMIC PROGRAMS</h3>
-
-    <div class="accordion">
-        <button class="accordion-header">
-            <span>Basic Education</span>
-            <span class="accordion-icon">+</span>
-        </button>
-
-        <div class="accordion-content">
-            <ul>
-                <li>Complete Elementary Program: Kindergarten to Grade 6</li>
-                <li>Junior High School: Grade 7 to Grade 10</li>
-                <li>
-                    Senior High School: Grade 11 to Grade 12
-                    <ul>
-                        <li><strong>Academic Tracks</strong>
-                            <ul>
-                                <li>STEM</li>
-                                <li>ABM</li>
-                                <li>HUMSS</li>
-                                <li>GAS</li>
-                            </ul>
-                        </li>
-                        <li><strong>TVL Tracks</strong>
-                            <ul>
-                                <li>ICT</li>
-                                <li>Home Economics</li>
-                                <li>Industrial Arts</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+    <section class="page-main">
+        <div class="lead-card">
+            <p>Our academic offerings are organized to help students move through each level with clarity, continuity, and preparation for the next stage. Senior High track selection also supports cleaner linking of student schedules, subjects, and teacher assignments in the system.</p>
         </div>
-    </div>
-</div>
+
+        <div class="grid-two">
+            <article class="content-card">
+                <p class="card-kicker">Foundation Years</p>
+                <h3>Nursery and Kinder</h3>
+                <p>Early learning programs support readiness skills, guided routines, language growth, social development, and faith-centered formation.</p>
+                <ul class="content-list compact"><li>Nursery</li><li>Kinder</li></ul>
+            </article>
+
+            <article class="content-card">
+                <p class="card-kicker">Elementary</p>
+                <h3>Grade 1 to Grade 6</h3>
+                <p>Elementary students build academic foundations in literacy, numeracy, values, and core school competencies needed for long-term progress.</p>
+                <ul class="content-list compact"><li>Grade 1</li><li>Grade 2</li><li>Grade 3</li><li>Grade 4</li><li>Grade 5</li><li>Grade 6</li></ul>
+            </article>
+
+            <article class="content-card">
+                <p class="card-kicker">Junior High</p>
+                <h3>Grade 7 to Grade 10</h3>
+                <p>Junior High strengthens discipline, academic maturity, and readiness for advanced coursework while supporting learner identity and responsibility.</p>
+                <ul class="content-list compact"><li>Grade 7</li><li>Grade 8</li><li>Grade 9</li><li>Grade 10</li></ul>
+            </article>
+
+            <article class="content-card">
+                <p class="card-kicker">Senior High</p>
+                <h3>Grade 11 to Grade 12</h3>
+                <p>Senior High students select a track during admission so that sections, subjects, and teacher assignments can be aligned more accurately in the school system.</p>
+                <div class="pill-row"><span>STEM</span><span>ABM</span><span>HUMSS</span><span>GAS</span></div>
+            </article>
+        </div>
+
+        <div class="section-band">
+            <div>
+                <p class="card-kicker">System Alignment</p>
+                <h2>Senior High track selection supports cleaner academic linking</h2>
+            </div>
+            <p>The portal captures the Senior High track during admission so the registrar can align sections, teachers, and subjects more accurately and reduce schedule mismatches.</p>
+        </div>
+    </section>
+</section>
 
 <style>
-
-/* Accordion */
-.accordion {
-    border: 1px solid #e0e0e0;
-}
-
-.accordion-header {
-    width: 100%;
-    background: linear-gradient(to bottom, #f7c46c, #f0a43a);
-    border: none;
-    padding: 12px 16px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #000;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.accordion-icon {
-    font-size: 18px;
-}
-
-.accordion-content {
-    display: none;
-    padding: 15px 25px;
-    background: #fff;
-}
-
-.accordion-content ul {
-    padding-left: 20px;
-}
-
-.accordion-content li {
-    margin-bottom: 6px;
-    font-size: 15px;
-}
-
-.hero-program {
-    background: linear-gradient(135deg, #001e82, #142c7e);
-    color: #fff;
-    text-align: center;
-    min-height: 60px;   /* set your desired height */
-    padding: 50px 20px;  /* optional extra padding */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.hero-program h2 {
-    font-size: 36px;     /* you can resize the text separately */
-}
-
-.page-container {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 0 20px;
-    flex-wrap: wrap;
-}
-
-/* Sidebar */
-.sidebar {
-    flex: 1;
-    min-width: 220px;
-}
-.sidebar h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #142c7e;
-    margin-bottom: 15px;
-}
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.sidebar-nav a {
-    text-decoration: none;
-    color: #001e82;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
-    color: #007bff;
-}
-.accreditations {
-    margin-top: 40px;
-}
-.accreditations h5 {
-    font-size: 14px;
-    color: #001e82;
-    margin-bottom: 10px;
-}
-.accreditations img {
-    width: 80px;
-    display: block;
-    margin-bottom: 10px;
-}
-
-/* Main Content */
-.main-content {
-    flex: 3;
-    min-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-.content-section h3.content-title {
-    color: #142c7e;
-    font-size: 18px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-.content-section p {
-    font-size: 16px;
-    line-height: 1.7;
-}
-
-/* Responsive 
-@media screen and (max-width: 900px) {
-    .page-container {
-        flex-direction: column;
-    }
-    .sidebar, .main-content {
-        min-width: 100%;
-    }
-}*/
+.site-hero { background:
+    radial-gradient(circle at 18% 22%, rgba(191, 219, 254, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(96, 165, 250, 0.16), transparent 28%),
+    linear-gradient(135deg, #041d5c 0%, #07308b 38%, #0a43b7 72%, #0b4dc9 100%); color: #fff; padding: 78px 24px 84px; }
+.site-hero-inner { max-width: 1040px; margin: 0 auto; }
+.site-kicker { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; opacity: .84; margin-bottom: 14px; }
+.site-hero h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.02; max-width: 820px; }
+.site-hero p { margin-top: 18px; max-width: 720px; color: rgba(255,255,255,.86); font-size: 17px; line-height: 1.8; }
+.page-shell { max-width: 1220px; margin: 0 auto; padding: 34px 22px 44px; display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
+.page-sidebar, .page-main { display: grid; gap: 20px; align-content: start; }
+.nav-card, .side-card, .lead-card, .content-card, .section-band { background: #fff; border: 1px solid #dbeafe; border-radius: 22px; box-shadow: 0 18px 45px rgba(15, 23, 42, .07); }
+.nav-card, .side-card, .lead-card, .content-card, .section-band { padding: 26px; }
+.nav-card { display: grid; gap: 12px; }
+.nav-label, .side-title, .card-kicker { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; color: #1d4ed8; margin-bottom: 10px; }
+.nav-card a { text-decoration: none; color: #0f172a; font-weight: 600; padding: 10px 12px; border-radius: 14px; }
+.nav-card a.active, .nav-card a:hover { background: #dbeafe; color: #1d4ed8; }
+.side-item { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid #dbeafe; }
+.side-item:last-child { border-bottom: none; }
+.side-item strong { color: #062b8f; }
+.side-item span { color: #475569; font-size: 14px; }
+.lead-card p, .content-card p, .section-band p { color: #334155; line-height: 1.8; }
+.lead-card p { font-size: 17px; line-height: 1.9; }
+.content-card h3 { color: #062b8f; font-size: 24px; margin-bottom: 12px; }
+.content-list { padding-left: 20px; display: grid; gap: 8px; color: #334155; line-height: 1.8; }
+.content-list.compact { gap: 6px; }
+.pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.pill-row span { padding: 10px 14px; border-radius: 999px; background: #eff6ff; border: 1px solid #bfdbfe; color: #062b8f; font-weight: 600; font-size: 14px; }
+.section-band { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.9fr); gap: 20px; }
+.section-band h2 { color: #062b8f; font-size: clamp(28px, 4vw, 40px); }
+.grid-two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+@media (max-width: 980px) { .page-shell, .grid-two, .section-band { grid-template-columns: 1fr; } }
 </style>
-
-<script>
-document.querySelectorAll('.accordion-header').forEach(button => {
-    button.addEventListener('click', () => {
-        const content = button.nextElementSibling;
-        const icon = button.querySelector('.accordion-icon');
-
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
-            icon.textContent = '+';
-        } else {
-            content.style.display = 'block';
-            icon.textContent = '−';
-        }
-    });
-});
-</script>
-
-
 @endsection
+

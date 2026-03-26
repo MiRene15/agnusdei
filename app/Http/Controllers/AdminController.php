@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicEvent;
+use App\Models\ActivityLog;
 use App\Models\Admission;
 use App\Models\Announcement;
 use App\Models\Classes;
@@ -73,8 +75,9 @@ class AdminController extends Controller
     public function settings()
     {
         $admin = User::findOrFail(Auth::id());
+        $events = AcademicEvent::orderBy('event_name')->get();
 
-        return view('AdminDashboard.settings', compact('admin'));
+        return view('AdminDashboard.settings', compact('admin', 'events'));
     }
 
     public function reports()
@@ -149,6 +152,16 @@ class AdminController extends Controller
             'posted_at' => now(),
         ]);
 
+        ActivityLog::record(
+            Auth::id(),
+            'announcement',
+            'create',
+            'Announcement',
+            null,
+            'Created announcement for ' . $request->audience . '.',
+            $request->ip()
+        );
+
         return back()->with('success', 'Announcement posted successfully.');
     }
 
@@ -156,6 +169,16 @@ class AdminController extends Controller
     {
         $announcement = Announcement::findOrFail($id);
         $announcement->delete();
+
+        ActivityLog::record(
+            Auth::id(),
+            'announcement',
+            'delete',
+            'Announcement',
+            $id,
+            'Deleted announcement #' . $id,
+            request()->ip()
+        );
 
         return back()->with('success', 'Announcement deleted successfully.');
     }
@@ -178,6 +201,16 @@ class AdminController extends Controller
         }
 
         $admin->save();
+
+        ActivityLog::record(
+            Auth::id(),
+            'admin',
+            'update_profile',
+            'User',
+            $admin->id,
+            'Updated admin profile settings.',
+            $request->ip()
+        );
 
         return back()->with('success', 'Settings updated successfully.');
     }
@@ -242,6 +275,16 @@ class AdminController extends Controller
             'used_count' => 0,
         ]);
 
+        ActivityLog::record(
+            Auth::id(),
+            'reference_code',
+            'create',
+            'RoleReferenceCode',
+            null,
+            'Created reference code for ' . $request->role . '.',
+            $request->ip()
+        );
+
         return back()->with('success', 'Reference code created successfully.');
     }
 
@@ -253,6 +296,37 @@ class AdminController extends Controller
             'is_active' => false,
         ]);
 
+        ActivityLog::record(
+            Auth::id(),
+            'reference_code',
+            'deactivate',
+            'RoleReferenceCode',
+            $code->id,
+            'Deactivated reference code ' . $code->code . '.',
+            request()->ip()
+        );
+
         return back()->with('success', 'Reference code deactivated successfully.');
+    }
+
+    public function toggleAcademicEvent(Request $request, $id)
+    {
+        $event = AcademicEvent::findOrFail($id);
+
+        $event->update([
+            'is_enabled' => !$event->is_enabled,
+        ]);
+
+        ActivityLog::record(
+            Auth::id(),
+            'academic_event',
+            'toggle',
+            'AcademicEvent',
+            $event->id,
+            'Set ' . $event->event_name . ' to ' . ($event->is_enabled ? 'enabled' : 'disabled') . '.',
+            $request->ip()
+        );
+
+        return back()->with('success', $event->event_name . ' is now ' . ($event->is_enabled ? 'enabled' : 'disabled') . '.');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicEvent;
+use App\Models\ActivityLog;
 use App\Models\Classes;
 use App\Models\Enrollment;
 use App\Models\Grade;
@@ -24,12 +26,12 @@ class TeacherController extends Controller
         if ($teacher) {
             $classes = Classes::with(['subject', 'schedules', 'enrollments'])
                 ->where('teacher_id', $teacher->id)
+                ->orderBy('grade_level')
+                ->orderBy('section')
                 ->get();
 
             $totalClasses = $classes->count();
-            $totalStudents = $classes->sum(function ($class) {
-                return $class->enrollments->count();
-            });
+            $totalStudents = $classes->sum(fn ($class) => $class->enrollments->count());
 
             $upcomingSchedules = $classes->flatMap(function ($class) {
                 return $class->schedules->map(function ($schedule) use ($class) {
@@ -65,6 +67,8 @@ class TeacherController extends Controller
         if ($teacher) {
             $classes = Classes::with(['subject', 'schedules', 'enrollments.student'])
                 ->where('teacher_id', $teacher->id)
+                ->orderBy('grade_level')
+                ->orderBy('section')
                 ->get();
         }
 
@@ -82,6 +86,8 @@ class TeacherController extends Controller
         if ($teacher) {
             $classes = Classes::with(['subject', 'schedules'])
                 ->where('teacher_id', $teacher->id)
+                ->orderBy('grade_level')
+                ->orderBy('section')
                 ->get();
 
             $schedules = $classes->flatMap(function ($class) {
@@ -89,6 +95,7 @@ class TeacherController extends Controller
                     return [
                         'subject_name' => $class->subject->subject_name ?? '-',
                         'subject_code' => $class->subject->subject_code ?? '-',
+                        'is_advisory' => $class->is_advisory,
                         'grade_level' => $class->grade_level,
                         'section' => $class->section,
                         'day_of_week' => $schedule->day_of_week,
@@ -113,6 +120,8 @@ class TeacherController extends Controller
         if ($teacher) {
             $classes = Classes::with(['subject', 'enrollments.student', 'enrollments.grades'])
                 ->where('teacher_id', $teacher->id)
+                ->orderBy('grade_level')
+                ->orderBy('section')
                 ->get();
         }
 
@@ -124,9 +133,32 @@ class TeacherController extends Controller
         $request->validate([
             'enrollment_id' => 'required|exists:enrollments,id',
             'grading_period' => 'required|string|max:50',
-            'grade' => 'required|numeric|min:0|max:100',
+            'seatwork_score' => 'required|numeric|min:0|max:100',
+            'quiz_score' => 'required|numeric|min:0|max:100',
+            'exam_score' => 'required|numeric|min:0|max:100',
             'remarks' => 'nullable|string|max:255',
         ]);
+
+        $enrollment = Enrollment::with(['student', 'class'])->findOrFail($request->enrollment_id);
+        $teacher = Teacher::where('user_id', Auth::id())->first();
+
+        if (!$teacher || (int) $enrollment->class->teacher_id !== (int) $teacher->id) {
+            return back()->with('error', 'You can only encode grades for your assigned classes.');
+        }
+
+        if (!AcademicEvent::enabled('grade_encoding_open')) {
+            return back()->with('error', 'Grade encoding is currently closed. Please wait until the active grading window is opened by the school.');
+        }
+
+        if (AcademicEvent::enabled('ptc_required') && !$enrollment->student?->ptc_completed) {
+            return back()->with('error', 'PTC must be completed face-to-face before grades can be encoded for this student.');
+        }
+
+        $finalGrade = $this->computeFinalGrade(
+            (float) $request->seatwork_score,
+            (float) $request->quiz_score,
+            (float) $request->exam_score
+        );
 
         Grade::updateOrCreate(
             [
@@ -134,9 +166,23 @@ class TeacherController extends Controller
                 'grading_period' => $request->grading_period,
             ],
             [
-                'grade' => $request->grade,
-                'remarks' => $request->remarks,
+                'seatwork_score' => $request->seatwork_score,
+                'quiz_score' => $request->quiz_score,
+                'exam_score' => $request->exam_score,
+                'final_grade' => $finalGrade,
+                'grade' => $finalGrade,
+                'remarks' => $request->remarks ?: ($finalGrade >= 75 ? 'Passed' : 'Needs Intervention'),
             ]
+        );
+
+        ActivityLog::record(
+            Auth::id(),
+            'grade',
+            'encode',
+            'Enrollment',
+            $enrollment->id,
+            'Encoded ' . $request->grading_period . ' grades for ' . ($enrollment->student->student_number ?? 'student') . '.',
+            $request->ip()
         );
 
         return back()->with('success', 'Grade saved successfully.');
@@ -158,14 +204,9 @@ class TeacherController extends Controller
                 ->get();
 
             $totalClasses = $classes->count();
-            $totalStudents = $classes->sum(function ($class) {
-                return $class->enrollments->count();
-            });
-
+            $totalStudents = $classes->sum(fn ($class) => $class->enrollments->count());
             $totalGradesEncoded = $classes->sum(function ($class) {
-                return $class->enrollments->sum(function ($enrollment) {
-                    return $enrollment->grades->count();
-                });
+                return $class->enrollments->sum(fn ($enrollment) => $enrollment->grades->count());
             });
         }
 
@@ -176,5 +217,10 @@ class TeacherController extends Controller
             'totalStudents',
             'totalGradesEncoded'
         ));
+    }
+
+    private function computeFinalGrade(float $seatworkScore, float $quizScore, float $examScore): float
+    {
+        return round(($seatworkScore * 0.30) + ($quizScore * 0.30) + ($examScore * 0.40), 2);
     }
 }

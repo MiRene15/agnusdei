@@ -27,7 +27,7 @@
             margin-bottom: 30px;
             font-size: 15px;
         ">
-            Register as Teacher, Registrar, Cashier, or Admin using an admin-issued reference code
+            Register as Teacher, Registrar, or Cashier using an admin-issued reference code
         </p>
 
         @if ($errors->any())
@@ -47,7 +47,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.post') }}">
+        <form method="POST" action="{{ route('staff.register.post') }}">
             @csrf
 
             <div style="margin-bottom: 18px;">
@@ -133,7 +133,6 @@
                     <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
                     <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                     <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>
             </div>
 

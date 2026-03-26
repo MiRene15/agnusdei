@@ -3,42 +3,13 @@
 @section('title', 'Register')
 
 @section('content')
-
-<div style="max-width: 550px; margin: 80px auto; padding: 0 20px;">
-    <div style="
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        padding: 40px 30px;
-    ">
-        <h2 style="
-            text-align: center;
-            color: #001e82;
-            margin-bottom: 10px;
-            font-size: 30px;
-            font-weight: 600;
-        ">
-            Register
-        </h2>
-
-        <p style="
-            text-align: center;
-            color: #64748b;
-            margin-bottom: 30px;
-            font-size: 15px;
-        ">
-            Create your Agnus Dei School Systems account
-        </p>
+<div style="max-width: 560px; margin: 80px auto; padding: 0 20px;">
+    <div style="background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.08); padding:40px 30px;">
+        <h2 style="text-align:center; color:#001e82; margin-bottom:10px; font-size:30px; font-weight:600;">Student Account Portal</h2>
+        <p style="text-align:center; color:#64748b; margin-bottom:30px; font-size:15px;">Create a student or parent account to begin the admission and portal process.</p>
 
         @if ($errors->any())
-            <div style="
-                background: #fee2e2;
-                color: #991b1b;
-                padding: 12px 15px;
-                border-radius: 10px;
-                margin-bottom: 20px;
-                font-size: 14px;
-            ">
+            <div style="background:#fee2e2; color:#991b1b; padding:12px 15px; border-radius:10px; margin-bottom:20px; font-size:14px;">
                 <ul style="margin:0; padding-left:18px;">
                     @foreach ($errors->all() as $error)
                         <li style="margin-bottom:4px;">{{ $error }}</li>
@@ -47,216 +18,49 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.post') }}">
+        <form method="POST" action="{{ route('register.post') }}" style="display:grid; gap:18px;">
             @csrf
 
-            <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Full Name
-                </label>
-                <input
-                    type="text"
-                    name="name"
-                    value="{{ old('name') }}"
-                    placeholder="Enter your full name"
-                    required
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Full Name</label>
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Email
-                </label>
-                <input
-                    type="email"
-                    name="email"
-                    value="{{ old('email') }}"
-                    placeholder="Enter your email"
-                    required
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Contact Number
-                </label>
-                <input
-                    type="text"
-                    name="contact_number"
-                    value="{{ old('contact_number') }}"
-                    placeholder="Enter your contact number"
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Contact Number</label>
+                <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="Enter your contact number" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Role
-                </label>
-                <select
-                    name="role"
-                    id="role"
-                    required
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                        background:#fff;
-                    "
-                >
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Role</label>
+                <select name="role" id="role" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none; background:#fff;">
                     <option value="">Select Role</option>
                     <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                    <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                    <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
-                    <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
+                    <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
                 </select>
             </div>
 
-            <div id="reference-code-wrapper" style="margin-bottom: 18px; display: none;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Reference Code
-                </label>
-                <input
-                    type="text"
-                    name="reference_code"
-                    id="reference_code"
-                    value="{{ old('reference_code') }}"
-                    placeholder="Enter the admin-issued reference code"
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
-                <small style="display:block; margin-top:6px; color:#64748b; font-size:13px;">
-                    Required for Teacher, Registrar, and Cashier registration.
-                </small>
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Password
-                </label>
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
+            <div>
+                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Confirm Password</label>
+                <input type="password" name="password_confirmation" placeholder="Confirm your password" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
             </div>
 
-            <div style="margin-bottom: 22px;">
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">
-                    Confirm Password
-                </label>
-                <input
-                    type="password"
-                    name="password_confirmation"
-                    placeholder="Confirm your password"
-                    required
-                    style="
-                        width:100%;
-                        padding:12px 14px;
-                        border:1px solid #cbd5e1;
-                        border-radius:10px;
-                        font-size:15px;
-                        outline:none;
-                    "
-                >
-            </div>
-
-            <button type="submit" style="
-                width:100%;
-                background:#001e82;
-                color:#fff;
-                border:none;
-                padding:13px;
-                border-radius:10px;
-                font-size:16px;
-                font-weight:600;
-                cursor:pointer;
-                transition:0.3s ease;
-            ">
-                Register
-            </button>
+            <button type="submit" style="width:100%; background:#001e82; color:#fff; border:none; padding:13px; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; transition:0.3s ease;">Create Account</button>
         </form>
 
-        <p style="
-            margin-top: 22px;
-            text-align: center;
-            font-size: 14px;
-            color: #64748b;
-        ">
-            Already have an account?
-            <a href="{{ route('login') }}" style="color:#001e82; font-weight:600; text-decoration:none;">
-                Login here
-            </a>
-        </p>
+        <p style="margin-top:22px; text-align:center; font-size:14px; color:#64748b;">Already have an account? <a href="{{ route('login') }}" style="color:#001e82; font-weight:600; text-decoration:none;">Login here</a></p>
+        <p style="margin-top:10px; text-align:center; font-size:14px; color:#64748b;">School staff? <a href="{{ route('staff.register') }}" style="color:#001e82; font-weight:600; text-decoration:none;">Use staff portal</a></p>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const roleSelect = document.getElementById('role');
-    const referenceCodeWrapper = document.getElementById('reference-code-wrapper');
-    const referenceCodeInput = document.getElementById('reference_code');
-
-    function toggleReferenceCodeField() {
-        const protectedRoles = ['teacher', 'registrar', 'cashier'];
-        const selectedRole = roleSelect.value;
-
-        if (protectedRoles.includes(selectedRole)) {
-            referenceCodeWrapper.style.display = 'block';
-            referenceCodeInput.setAttribute('required', 'required');
-        } else {
-            referenceCodeWrapper.style.display = 'none';
-            referenceCodeInput.removeAttribute('required');
-            referenceCodeInput.value = '';
-        }
-    }
-
-    if (roleSelect) {
-        toggleReferenceCodeField();
-        roleSelect.addEventListener('change', toggleReferenceCodeField);
-    }
-});
-</script>
 
 @endsection

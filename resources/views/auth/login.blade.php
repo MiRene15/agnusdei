@@ -27,7 +27,7 @@
             margin-bottom: 30px;
             font-size: 15px;
         ">
-            Sign in to your Agnus Dei School Systems account
+            Sign in using your registered email or institutional email.
         </p>
 
         @if ($errors->any())
@@ -87,11 +87,6 @@
                 >
             </div>
 
-            <div style="margin-bottom: 22px; display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" name="remember" id="remember">
-                <label for="remember" style="font-size:14px; color:#475569;">Remember me</label>
-            </div>
-
             <button type="submit" style="
                 width:100%;
                 background:#001e82;
@@ -114,9 +109,21 @@
             font-size: 14px;
             color: #64748b;
         ">
-            Don't have an account?
+            Need a student or parent account?
             <a href="{{ route('register') }}" style="color:#001e82; font-weight:600; text-decoration:none;">
                 Register here
+            </a>
+        </p>
+
+        <p style="
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        ">
+            Staff member?
+            <a href="{{ route('staff.register') }}" style="color:#001e82; font-weight:600; text-decoration:none;">
+                Use staff registration
             </a>
         </p>
     </div>

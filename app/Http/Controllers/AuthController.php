@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\ParentModel;
 use App\Models\RoleReferenceCode;
 use App\Models\Student;
@@ -23,47 +24,69 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
+    public function showStaffRegister()
+    {
+        return view('auth.staff-register');
+    }
+
     public function registerUser(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'contact_number' => 'nullable|string|max:20',
-            'role' => 'required|in:student,parent,teacher,registrar,cashier',
-            'reference_code' => 'nullable|string|max:255',
+            'role' => 'required|in:student,parent',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $referenceCode = null;
+        $user = $this->createUserFromRegistration($request, null);
 
-        if (in_array($request->role, ['teacher', 'registrar', 'cashier'])) {
-            if (!$request->filled('reference_code')) {
-                return back()->withErrors([
-                    'reference_code' => 'Reference code is required for this role.',
-                ])->withInput();
-            }
+        ActivityLog::record(
+            $user->id,
+            'auth',
+            'register',
+            'User',
+            $user->id,
+            'Public registration completed for ' . $user->role . ' account.',
+            $request->ip()
+        );
 
-            $referenceCode = RoleReferenceCode::where('code', trim($request->reference_code))
-                ->where('role', $request->role)
-                ->first();
+        Auth::login($user);
 
-            if (!$referenceCode) {
-                return back()->withErrors([
-                    'reference_code' => 'Invalid reference code for the selected role.',
-                ])->withInput();
-            }
+        return $this->redirectByRole($user->role);
+    }
 
-            if (!$referenceCode->is_active) {
-                return back()->withErrors([
-                    'reference_code' => 'This reference code is inactive.',
-                ])->withInput();
-            }
+    public function registerStaff(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'contact_number' => 'nullable|string|max:20',
+            'role' => 'required|in:teacher,registrar,cashier,admin',
+            'reference_code' => 'required|string|max:255',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
 
-            if (!$referenceCode->canStillBeUsed()) {
-                return back()->withErrors([
-                    'reference_code' => 'This reference code has already reached its usage limit.',
-                ])->withInput();
-            }
+        $referenceCode = RoleReferenceCode::where('code', trim($request->reference_code))
+            ->where('role', $request->role)
+            ->first();
+
+        if (!$referenceCode) {
+            return back()->withErrors([
+                'reference_code' => 'Invalid reference code for the selected role.',
+            ])->withInput();
+        }
+
+        if (!$referenceCode->is_active) {
+            return back()->withErrors([
+                'reference_code' => 'This reference code is inactive.',
+            ])->withInput();
+        }
+
+        if (!$referenceCode->canStillBeUsed()) {
+            return back()->withErrors([
+                'reference_code' => 'This reference code has already reached its usage limit.',
+            ])->withInput();
         }
 
         if ($request->role === 'cashier' && User::where('role', 'cashier')->count() >= 2) {
@@ -72,6 +95,91 @@ class AuthController extends Controller
             ])->withInput();
         }
 
+        $user = $this->createUserFromRegistration($request, $referenceCode);
+
+        ActivityLog::record(
+            $user->id,
+            'auth',
+            'staff_register',
+            'User',
+            $user->id,
+            'Staff registration completed for ' . $user->role . ' account.',
+            $request->ip()
+        );
+
+        Auth::login($user);
+
+        return $this->redirectByRole($user->role);
+    }
+
+    public function loginUser(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $loginEmail = trim(strtolower($request->email));
+        $credentialEmail = $loginEmail;
+
+        if (!User::whereRaw('LOWER(email) = ?', [$credentialEmail])->exists()) {
+            $student = Student::with('user')
+                ->whereRaw('LOWER(email) = ?', [$loginEmail])
+                ->whereNotNull('user_id')
+                ->first();
+
+            if ($student?->user) {
+                $credentialEmail = strtolower($student->user->email);
+            }
+        }
+
+        if (!Auth::attempt(['email' => $credentialEmail, 'password' => $request->password])) {
+            return back()->withErrors([
+                'email' => 'Invalid credentials.',
+            ])->withInput();
+        }
+
+        $request->session()->regenerate();
+
+        ActivityLog::record(
+            Auth::id(),
+            'auth',
+            'login',
+            'User',
+            Auth::id(),
+            'User logged in using ' . $loginEmail . '.',
+            $request->ip()
+        );
+
+        return $this->redirectByRole(Auth::user()->role);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            ActivityLog::record(
+                $user->id,
+                'auth',
+                'logout',
+                'User',
+                $user->id,
+                'User logged out.',
+                $request->ip()
+            );
+        }
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    private function createUserFromRegistration(Request $request, ?RoleReferenceCode $referenceCode): User
+    {
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -128,37 +236,7 @@ class AuthController extends Controller
             ]);
         }
 
-        Auth::login($user);
-
-        return $this->redirectByRole($user->role);
-    }
-
-    public function loginUser(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return back()->withErrors([
-                'email' => 'Invalid credentials.',
-            ])->withInput();
-        }
-
-        $request->session()->regenerate();
-
-        return $this->redirectByRole(Auth::user()->role);
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('login');
+        return $user;
     }
 
     private function redirectByRole(string $role)

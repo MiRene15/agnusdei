@@ -3,197 +3,120 @@
 @section('title', 'Educational Philosophy - Agnus Dei School Systems INC.')
 
 @section('content')
-
-<section class="hero hero-philosophy">
-    <h2>Educational Philosophy</h2>
+<section class="page-hero">
+    <div class="page-hero-inner">
+        <p class="page-kicker">Educational Philosophy</p>
+        <h1>Formation, integrity, and future-ready learning guided by faith</h1>
+        <p>The school vision, mission, goals, and values work together to form learners who are intellectually prepared, spiritually grounded, and socially responsible.</p>
+    </div>
 </section>
 
-
-<div class="page-container">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h4>About Us</h4>
-        <nav class="sidebar-nav">
+<section class="page-shell">
+    <aside class="page-sidebar">
+        <div class="nav-card">
+            <p class="nav-label">About Us</p>
             <a href="/philosophy" class="active">Educational Philosophy</a>
             <a href="/background">Institutional Background</a>
             <a href="/contact">Contact Information</a>
-        </nav>
-
-        <div class="accreditations">
-            <h5>ACCREDITATIONS AND AFFILIATIONS</h5>
-            <img src="{{ asset('images/accreditation1.png') }}" alt="Accreditation 1">
-            <img src="{{ asset('images/accreditation2.png') }}" alt="Accreditation 2">
+        </div>
+        <div class="summary-card">
+            <p class="summary-title">Focus Areas</p>
+            <div class="summary-item"><strong>Character</strong><span>Faith and integrity in daily formation</span></div>
+            <div class="summary-item"><strong>Readiness</strong><span>21st century skills and responsible action</span></div>
+            <div class="summary-item"><strong>Purpose</strong><span>Learning that serves God, community, and country</span></div>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <section class="main-content">
-        <div class="content-section">
-            <h3 class="content-title">PHILOSOPHY</h3>
-            <p>
-                An integrated catholic formation through effective and meaningful mentoring, parenting,
-                and the personal responsibility of the learner operating in the context of reverence, unity,
-                and love ensure success of every child
-            </p>
+    <section class="page-main">
+        <div class="lead-card">
+            <p>ADSSI believes education must shape the whole learner. Academic knowledge, moral awareness, spiritual growth, discipline, and practical readiness are treated as part of one meaningful formation journey.</p>
         </div>
 
-        <div class="content-section">
-            <h3 class="content-title">VISION</h3>
-            <p>
-                Capacitating the youth develop the 21st century skills with fusion of character formation
-                and intellectual integrity to meet the challenges ahead.
-            </p>
+        <div class="content-card">
+            <h3>School Vision</h3>
+            <p>Capacitating the youth to develop the 21st Century skills with the fusion of character formation and intellectual integrity to meet the challenges ahead.</p>
         </div>
 
-        <div class="content-section">
-            <h3 class="content-title">MISSION</h3>
-            <p>
-                Agnus Dei School Systems, Inc. commits its resources, time and best efforts of the administration,
-                faculty, and staff to provide affordable world-class quality education, to develop strong Christian
-                faith, and to make curriculum instructions more timely and relevant to deepen the civic and spiritual
-                consciousness of the youth.
-            </p>
+        <div class="content-card">
+            <h3>School Mission</h3>
+            <p>The School commits its resources, time, and best efforts of the Administration, faculty, and staff to provide affordable good quality education, to develop strong Christian faith, and to make the curriculum instructions timelier and more relevant in order to deepen the civic and spiritual consciousness of every learner.</p>
         </div>
 
-        <div class="content-section">
-            <h3 class="content-title">GOALS AND OBJECTIVES</h3>
-            <p>These are the goals and objectives of the institution: </p>
-                <ol style="padding-left: 40px">
-                    <li>Uphold moral righteousness and propriety to strengthen and solidify the character of the youth.</li>
-                    <li>Understand fully the meaning of life and make improvements through education.</li>
-                    <li>Embrace the uniqueness of every individual to maintain harmonious and strong human relations.</li>
-                    <li>Develop a positive attitude and aptitude for work.</li>
-                    <li>Understand and develop the basic morals and spiritual values, including the virtues of simplicity, humility,
-                        commitment, and patriotism.
-                    </li>
-                    <li>Develop effective study habits and good command of the basic mathematical processes and critical thinking.</li>
-                </ol>
-        </div> 
+        <div class="content-card">
+            <h3>Goals and Objectives</h3>
+            <ol class="content-list">
+                <li>To provide the basic knowledge and foundation in developing the cognitive, affective, and psychomotor skills, attitudes, and values, including their moral and spiritual dimensions essential to the child's personal development and necessary for living and contributing to a developing and changing social environment.</li>
+                <li>To provide the learning experiences that enhance the child's awareness of and responsiveness to the changes in society and to prepare for constructive and effective involvement.</li>
+                <li>To promote and intensify the child's knowledge of identification with and love for country and people to which he belongs.</li>
+                <li>To develop the child's knowledge, love, and care for the environment.</li>
+                <li>To develop awareness of the interconnectivity of peoples around the world and encourage tolerance of cultural diversity and service to the wider world.</li>
+                <li>To promote work experiences which develop and enhance orientation to the world of work and creativity in order to prepare the learner to engage in honest and gainful work.</li>
+                <li>To enhance mastery in the use of tools and technology and aptitude to innovate as a means of increasing productivity.</li>
+                <li>To develop different aptitudes, interests, and skills to prepare the learner for real work and further formal studies.</li>
+                <li>To help the child realize that in the pursuit of education, he seeks to glorify and serve God.</li>
+                <li>To contribute to the evangelization efforts of the Church.</li>
+            </ol>
+        </div>
 
-        <div class="content-section">
-            <h3 class="content-title">CORE VALUES</h3>
-                <ul style="padding-left: 40px">
-                    <li>Integrity and Ethics</li>
-                    <li>Academic Excellence</li>
-                    <li>Unity</li>
-                    <li>Industry</li>
-                    <li>Respect and Discipline</li>
-                    <li>Christian Discipleship</li>
-                    <li>Social Transformation</li>
+        <div class="split-grid">
+            <div class="content-card">
+                <h3>Core Values</h3>
+                <ul class="content-list compact">
+                    <li>R - Resiliency and Adaptability</li>
+                    <li>I - Industry and Integrity</li>
+                    <li>S - Social Transformation</li>
+                    <li>E - Empathy and Emotional Intelligence</li>
+                    <li>U - Upskilling and Reskilling</li>
+                    <li>P - Proactive Orientation</li>
                 </ul>
-        </div> 
+            </div>
 
-        <div class="content-section">
-            <h3 class="content-title">21ST CENTURY SKILLS</h3>
-                <ul style="padding-left: 40px">
+            <div class="content-card">
+                <h3>21st Century Skills</h3>
+                <ul class="content-list compact">
                     <li>Critical Thinking</li>
-                    <li>Creativity</li>
                     <li>Collaboration</li>
-                    <li>Cross-cultural Understanding</li>
                     <li>Communication</li>
+                    <li>Creativity</li>
+                    <li>Concern for the Environment</li>
                     <li>Computing ICT Literacy</li>
                     <li>Career and Learning Self-Reliance</li>
+                    <li>Cross Cultural Understanding</li>
                 </ul>
+            </div>
         </div>
-
     </section>
-
-    
-</div>
+</section>
 
 <style>
-
-.hero-philosophy {
-    background: linear-gradient(135deg, #001e82, #142c7e);
-    color: #fff;
-    text-align: center;
-    min-height: 60px;   /* set your desired height */
-    padding: 50px 20px;  /* optional extra padding */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.hero-philosophy h2 {
-    font-size: 36px;     /* you can resize the text separately */
-}
-
-.page-container {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 0 20px;
-    flex-wrap: wrap;
-}
-
-/* Sidebar */
-.sidebar {
-    flex: 1;
-    min-width: 220px;
-}
-.sidebar h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #142c7e;
-    margin-bottom: 15px;
-}
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.sidebar-nav a {
-    text-decoration: none;
-    color: #001e82;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
-    color: #007bff;
-}
-.accreditations {
-    margin-top: 40px;
-}
-.accreditations h5 {
-    font-size: 14px;
-    color: #001e82;
-    margin-bottom: 10px;
-}
-.accreditations img {
-    width: 80px;
-    display: block;
-    margin-bottom: 10px;
-}
-
-/* Main Content */
-.main-content {
-    flex: 3;
-    min-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-.content-section h3.content-title {
-    color: #142c7e;
-    font-size: 18px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-.content-section p {
-    font-size: 16px;
-    line-height: 1.7;
-}
-
-/* Responsive 
-@media screen and (max-width: 900px) {
-    .page-container {
-        flex-direction: column;
-    }
-    .sidebar, .main-content {
-        min-width: 100%;
-    }
-}*/
+.page-hero { background:
+    radial-gradient(circle at 18% 22%, rgba(191, 219, 254, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(96, 165, 250, 0.16), transparent 28%),
+    linear-gradient(135deg, #041d5c 0%, #07308b 38%, #0a43b7 72%, #0b4dc9 100%); color: #fff; padding: 78px 24px 84px; }
+.page-hero-inner { max-width: 1040px; margin: 0 auto; }
+.page-kicker { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; opacity: .84; margin-bottom: 14px; }
+.page-hero h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.02; max-width: 760px; }
+.page-hero p { margin-top: 18px; max-width: 720px; color: rgba(255,255,255,.86); font-size: 17px; line-height: 1.8; }
+.page-shell { max-width: 1220px; margin: 0 auto; padding: 34px 22px 44px; display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
+.page-sidebar, .page-main { display: grid; gap: 20px; align-content: start; }
+.nav-card, .summary-card, .lead-card, .content-card { background: #fff; border: 1px solid #dbeafe; border-radius: 22px; box-shadow: 0 18px 45px rgba(15, 23, 42, .07); }
+.nav-card { padding: 22px; display: grid; gap: 12px; }
+.nav-label, .summary-title { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; color: #64748b; }
+.nav-card a { text-decoration: none; color: #0f172a; font-weight: 600; padding: 10px 12px; border-radius: 14px; }
+.nav-card a.active, .nav-card a:hover { background: #dbeafe; color: #1d4ed8; }
+.summary-card { padding: 22px; }
+.summary-item { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid #dbeafe; }
+.summary-item:last-child { border-bottom: none; }
+.summary-item strong { color: #062b8f; }
+.summary-item span { color: #475569; font-size: 14px; }
+.lead-card, .content-card { padding: 26px; }
+.lead-card p { color: #334155; font-size: 17px; line-height: 1.9; }
+.content-card h3 { color: #062b8f; font-size: 24px; margin-bottom: 14px; }
+.content-card p, .content-list { color: #334155; font-size: 15px; line-height: 1.8; }
+.content-list { padding-left: 20px; display: grid; gap: 8px; }
+.content-list.compact { gap: 6px; }
+.split-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 980px) { .page-shell, .split-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
+

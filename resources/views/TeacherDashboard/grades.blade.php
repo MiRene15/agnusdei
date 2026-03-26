@@ -6,7 +6,7 @@
 
 <div class="page-intro">
     <h4>Grade Encoding</h4>
-    <p>Encode or update grades for students under your assigned classes.</p>
+    <p>Encode seatwork, quiz, and exam scores. Final grade is computed automatically.</p>
 </div>
 
 @if(session('success'))
@@ -43,7 +43,7 @@
             ({{ $class->subject->subject_code ?? '-' }})
         </h4>
         <p style="color:#64748b; margin-bottom:16px;">
-            {{ $class->grade_level }} • {{ $class->section }} • {{ $class->school_year }}
+            {{ $class->grade_level }} | {{ $class->section }} | {{ $class->school_year }}
         </p>
 
         <div class="table-wrap">
@@ -52,8 +52,11 @@
                     <tr>
                         <th style="min-width:180px;">Student</th>
                         <th style="min-width:150px;">Grading Period</th>
-                        <th style="min-width:120px;">Grade</th>
-                        <th>Remarks</th>
+                        <th style="min-width:110px;">Seatwork</th>
+                        <th style="min-width:110px;">Quiz</th>
+                        <th style="min-width:110px;">Exam</th>
+                        <th style="min-width:130px;">Final Grade</th>
+                        <th style="min-width:180px;">Remarks</th>
                         <th style="min-width:100px;">Save</th>
                     </tr>
                 </thead>
@@ -67,12 +70,15 @@
                                 <td>
                                     {{ $enrollment->student->first_name ?? '-' }}
                                     {{ $enrollment->student->last_name ?? '' }}
+                                    @if(\App\Models\AcademicEvent::enabled('ptc_required') && !($enrollment->student->ptc_completed ?? false))
+                                        <div style="margin-top:6px; color:#b45309; font-size:12px;">PTC pending</div>
+                                    @endif
                                 </td>
                                 <td>{{ $period }}</td>
-                                <td colspan="3" style="padding:0;">
+                                <td colspan="6" style="padding:0;">
                                     <form method="POST" action="{{ route('teacher.grades.save') }}" style="
                                         display:grid;
-                                        grid-template-columns: 120px 1fr auto;
+                                        grid-template-columns: 110px 110px 110px 130px 1fr auto;
                                         gap:10px;
                                         padding:12px;
                                         align-items:center;
@@ -86,11 +92,43 @@
                                             step="0.01"
                                             min="0"
                                             max="100"
-                                            name="grade"
-                                            value="{{ $existingGrade->grade ?? '' }}"
-                                            placeholder="Grade"
+                                            name="seatwork_score"
+                                            value="{{ $existingGrade->seatwork_score ?? '' }}"
+                                            placeholder="Seatwork"
                                             required
                                             style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px;"
+                                        >
+
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            name="quiz_score"
+                                            value="{{ $existingGrade->quiz_score ?? '' }}"
+                                            placeholder="Quiz"
+                                            required
+                                            style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px;"
+                                        >
+
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            name="exam_score"
+                                            value="{{ $existingGrade->exam_score ?? '' }}"
+                                            placeholder="Exam"
+                                            required
+                                            style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px;"
+                                        >
+
+                                        <input
+                                            type="text"
+                                            value="{{ $existingGrade->final_grade ?? $existingGrade->grade ?? '' }}"
+                                            placeholder="Auto"
+                                            readonly
+                                            style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;"
                                         >
 
                                         <input
@@ -108,7 +146,7 @@
                         @endforeach
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align:center; color:#64748b;">No enrolled students found.</td>
+                            <td colspan="8" style="text-align:center; color:#64748b;">No enrolled students found.</td>
                         </tr>
                     @endforelse
                 </tbody>

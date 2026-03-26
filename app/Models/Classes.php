@@ -15,9 +15,14 @@ class Classes extends Model
         'grade_level',
         'school_year',
         'semester',
+        'is_advisory',
         'room',
         'capacity',
         'status',
+    ];
+
+    protected $casts = [
+        'is_advisory' => 'boolean',
     ];
 
     public function subject()

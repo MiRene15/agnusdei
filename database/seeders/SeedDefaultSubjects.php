@@ -10,11 +10,13 @@ class SeedDefaultSubjects extends Seeder
     public function run(): void
     {
         $subjects = [
-            /*
-            |--------------------------------------------------------------------------
-            | ELEMENTARY
-            |--------------------------------------------------------------------------
-            */
+            ['subject_code' => 'K-ENG', 'subject_name' => 'Kinder English', 'grade_level' => 'Kinder', 'units' => 1],
+            ['subject_code' => 'K-MAT', 'subject_name' => 'Kinder Mathematics', 'grade_level' => 'Kinder', 'units' => 1],
+            ['subject_code' => 'K-SCI', 'subject_name' => 'Kinder Science and Discovery', 'grade_level' => 'Kinder', 'units' => 1],
+            ['subject_code' => 'K-READ', 'subject_name' => 'Reading Readiness', 'grade_level' => 'Kinder', 'units' => 1],
+            ['subject_code' => 'K-MAPEH', 'subject_name' => 'Kinder MAPEH', 'grade_level' => 'Kinder', 'units' => 1],
+            ['subject_code' => 'K-ESP', 'subject_name' => 'Values Education', 'grade_level' => 'Kinder', 'units' => 1],
+
             ['subject_code' => 'G1-ENG', 'subject_name' => 'English 1', 'grade_level' => 'Grade 1', 'units' => 1],
             ['subject_code' => 'G1-FIL', 'subject_name' => 'Filipino 1', 'grade_level' => 'Grade 1', 'units' => 1],
             ['subject_code' => 'G1-MAT', 'subject_name' => 'Mathematics 1', 'grade_level' => 'Grade 1', 'units' => 1],
@@ -64,11 +66,6 @@ class SeedDefaultSubjects extends Seeder
             ['subject_code' => 'G6-MAPEH', 'subject_name' => 'MAPEH 6', 'grade_level' => 'Grade 6', 'units' => 1],
             ['subject_code' => 'G6-EPP', 'subject_name' => 'EPP 6', 'grade_level' => 'Grade 6', 'units' => 1],
 
-            /*
-            |--------------------------------------------------------------------------
-            | JUNIOR HIGH SCHOOL
-            |--------------------------------------------------------------------------
-            */
             ['subject_code' => 'G7-ENG', 'subject_name' => 'English 7', 'grade_level' => 'Grade 7', 'units' => 1],
             ['subject_code' => 'G7-FIL', 'subject_name' => 'Filipino 7', 'grade_level' => 'Grade 7', 'units' => 1],
             ['subject_code' => 'G7-MAT', 'subject_name' => 'Mathematics 7', 'grade_level' => 'Grade 7', 'units' => 1],
@@ -105,11 +102,6 @@ class SeedDefaultSubjects extends Seeder
             ['subject_code' => 'G10-MAPEH', 'subject_name' => 'MAPEH 10', 'grade_level' => 'Grade 10', 'units' => 1],
             ['subject_code' => 'G10-TLE', 'subject_name' => 'TLE 10', 'grade_level' => 'Grade 10', 'units' => 1],
 
-            /*
-            |--------------------------------------------------------------------------
-            | SENIOR HIGH SCHOOL
-            |--------------------------------------------------------------------------
-            */
             ['subject_code' => 'SHS-OC', 'subject_name' => 'Oral Communication', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'SHS-RW', 'subject_name' => 'Reading and Writing', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'SHS-21CL', 'subject_name' => '21st Century Literature from the Philippines and the World', 'grade_level' => 'Grade 11', 'units' => 1],
@@ -129,23 +121,19 @@ class SeedDefaultSubjects extends Seeder
             ['subject_code' => 'SHS-PR1', 'subject_name' => 'Practical Research 1', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'SHS-PR2', 'subject_name' => 'Practical Research 2', 'grade_level' => 'Grade 12', 'units' => 1],
             ['subject_code' => 'SHS-III', 'subject_name' => 'Inquiries, Investigations and Immersion', 'grade_level' => 'Grade 12', 'units' => 1],
-
             ['subject_code' => 'STEM-PCAL', 'subject_name' => 'Pre-Calculus', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'STEM-BCAL', 'subject_name' => 'Basic Calculus', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'STEM-BIO1', 'subject_name' => 'General Biology 1', 'grade_level' => 'Grade 12', 'units' => 1],
             ['subject_code' => 'STEM-CHEM1', 'subject_name' => 'General Chemistry 1', 'grade_level' => 'Grade 12', 'units' => 1],
             ['subject_code' => 'STEM-PHY1', 'subject_name' => 'General Physics 1', 'grade_level' => 'Grade 12', 'units' => 1],
-
             ['subject_code' => 'ABM-BMATH', 'subject_name' => 'Business Mathematics', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'ABM-OAM', 'subject_name' => 'Organization and Management', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'ABM-FABM1', 'subject_name' => 'Fundamentals of Accountancy, Business and Management 1', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'ABM-FABM2', 'subject_name' => 'Fundamentals of Accountancy, Business and Management 2', 'grade_level' => 'Grade 12', 'units' => 1],
-
             ['subject_code' => 'HUMSS-DISS', 'subject_name' => 'Disciplines and Ideas in the Social Sciences', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'HUMSS-DIASS', 'subject_name' => 'Disciplines and Ideas in the Applied Social Sciences', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'HUMSS-CREW', 'subject_name' => 'Creative Writing', 'grade_level' => 'Grade 12', 'units' => 1],
             ['subject_code' => 'HUMSS-TNCT', 'subject_name' => 'Trends, Networks, and Critical Thinking in the 21st Century', 'grade_level' => 'Grade 12', 'units' => 1],
-
             ['subject_code' => 'GAS-HGP', 'subject_name' => 'Humanities and Social Sciences General Preparation', 'grade_level' => 'Grade 11', 'units' => 1],
             ['subject_code' => 'GAS-ORG', 'subject_name' => 'Organization and General Studies', 'grade_level' => 'Grade 12', 'units' => 1],
         ];

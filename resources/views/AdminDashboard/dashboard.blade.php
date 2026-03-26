@@ -57,13 +57,13 @@
 
     <div class="stat-card">
         <div class="stat-label">Collected Payments</div>
-        <div class="stat-value">₱{{ number_format($totalCollected, 2) }}</div>
+        <div class="stat-value">PHP {{ number_format($totalCollected, 2) }}</div>
         <div class="stat-sub">Total school collections</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Outstanding Balance</div>
-        <div class="stat-value">₱{{ number_format($totalOutstanding, 2) }}</div>
+        <div class="stat-value">PHP {{ number_format($totalOutstanding, 2) }}</div>
         <div class="stat-sub">Remaining unpaid balances</div>
     </div>
 </div>
@@ -107,7 +107,7 @@
                     <strong>{{ $announcement->title }}</strong><br>
                     {{ ucfirst($announcement->audience) }}
                     @if($announcement->posted_at)
-                        • {{ $announcement->posted_at->format('M d, Y h:i A') }}
+                        | {{ $announcement->posted_at->format('M d, Y h:i A') }}
                     @endif
                 </li>
             @empty
@@ -126,7 +126,8 @@
                 <tr>
                     <th>Code</th>
                     <th>Role</th>
-                    <th>Assignment</th>
+                    <th>Description</th>
+                    <th>Usage</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -135,38 +136,20 @@
                     <tr>
                         <td style="font-weight:700; color:#001e82;">{{ $code->code }}</td>
                         <td>{{ ucfirst($code->role) }}</td>
+                        <td>{{ $code->description ?? 'No description' }}</td>
                         <td>
-                            @if($code->role === 'teacher')
-                                {{ $code->subject->subject_name ?? 'No subject' }}
-                                <br>
-                                <small style="color:#64748b;">
-                                    {{ $code->grade_level ?? 'N/A' }} /
-                                    {{ $code->section ?? 'N/A' }} /
-                                    {{ $code->school_year ?? 'N/A' }}
-                                </small>
+                            {{ $code->used_count }}
+                            @if($code->max_uses)
+                                / {{ $code->max_uses }}
                             @else
-                                <span style="color:#64748b;">Not applicable</span>
+                                / Unlimited
                             @endif
                         </td>
-                        <td>
-                            @if($code->is_used)
-                                <span style="display:inline-block; padding:6px 10px; background:#dcfce7; color:#166534; border-radius:999px; font-size:12px; font-weight:600;">
-                                    Used
-                                </span>
-                            @elseif(!$code->is_active)
-                                <span style="display:inline-block; padding:6px 10px; background:#fee2e2; color:#991b1b; border-radius:999px; font-size:12px; font-weight:600;">
-                                    Inactive
-                                </span>
-                            @else
-                                <span style="display:inline-block; padding:6px 10px; background:#dbeafe; color:#1d4ed8; border-radius:999px; font-size:12px; font-weight:600;">
-                                    Active
-                                </span>
-                            @endif
-                        </td>
+                        <td>{{ $code->is_active ? 'Active' : 'Inactive' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" style="text-align:center; color:#64748b;">No recent reference codes found.</td>
+                        <td colspan="5" style="text-align:center; color:#64748b;">No recent reference codes found.</td>
                     </tr>
                 @endforelse
             </tbody>

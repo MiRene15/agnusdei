@@ -6,7 +6,7 @@
 
 <div class="page-intro">
     <h4>Settings</h4>
-    <p>Update your account information and keep your admin profile secure.</p>
+    <p>Update your account information, keep your admin profile secure, and control live academic events.</p>
 </div>
 
 <div class="card">
@@ -76,6 +76,45 @@
 
         <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
+</div>
+
+<div class="card">
+    <h4>Academic Event Controls</h4>
+    <p style="color:#64748b; margin-bottom:16px;">Enable or disable live rules that affect enrollment and grade workflows.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($events as $event)
+                    <tr>
+                        <td>{{ $event->event_name }}</td>
+                        <td>{{ $event->description ?? '-' }}</td>
+                        <td>{{ $event->is_enabled ? 'Enabled' : 'Disabled' }}</td>
+                        <td>
+                            <form method="POST" action="{{ route('admin.events.toggle', $event->id) }}">
+                                @csrf
+                                <button type="submit" class="btn {{ $event->is_enabled ? 'btn-danger' : 'btn-primary' }}">
+                                    {{ $event->is_enabled ? 'Disable' : 'Enable' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#64748b;">No academic events configured.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @endsection

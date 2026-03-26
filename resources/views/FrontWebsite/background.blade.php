@@ -3,184 +3,99 @@
 @section('title', 'Institutional Background - Agnus Dei School Systems INC.')
 
 @section('content')
-
-<section class="hero hero-background">
-    <h2>Institutional Background</h2>
+<section class="site-hero">
+    <div class="site-hero-inner">
+        <p class="site-kicker">Institutional Background</p>
+        <h1>Built through faith, service, and steady growth since 1987</h1>
+        <p>Agnus Dei School Systems, Inc. grew from a community-rooted learning space into a full basic education institution committed to affordable quality education, strong values, and future-ready learners.</p>
+    </div>
 </section>
 
-
-<div class="page-container">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h4>About Us</h4>
-        <nav class="sidebar-nav">
+<section class="page-shell">
+    <aside class="page-sidebar">
+        <div class="nav-card">
+            <p class="nav-label">About Us</p>
             <a href="/philosophy">Educational Philosophy</a>
             <a href="/background" class="active">Institutional Background</a>
             <a href="/contact">Contact Information</a>
-        </nav>
-
-        <div class="accreditations">
-            <h5>ACCREDITATIONS AND AFFILIATIONS</h5>
-            <img src="{{ asset('images/accreditation1.png') }}" alt="Accreditation 1">
-            <img src="{{ asset('images/accreditation2.png') }}" alt="Accreditation 2">
+        </div>
+        <div class="side-card">
+            <p class="side-title">Legacy Snapshot</p>
+            <div class="side-item"><strong>1987</strong><span>School foundation</span></div>
+            <div class="side-item"><strong>2005-2006</strong><span>First full high school graduates</span></div>
+            <div class="side-item"><strong>2015</strong><span>Senior High permit granted</span></div>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <section class="main-content">
-        <div class="content-section">
-            <h3 class="content-title">INSTITUTIONAL BACKGROUND</h3>
-            <p>
-                The School was incorporated in 1987 as the AGNUS DEI PREPARATORY SCHOOL SYSTEMS, INC., 
-                a non-stock educational institution giving free pre-elementary education to sons and 
-                daughters of the Agnus Dei Prayer Community. Soon afterwards, it admitted children of 
-                non-members.
-            </p>
-            <br>
-            <p>
-                The parents were not required to pay any school fees. The salaries of the two teachers 
-                were paid out of the personal funds of the founder who, likewise, constructed a two-room 
-                school building. Parents volunteered as teacher-aides and as janitors. On their own 
-                initiative, they contributed to pay for the utilities and the salary of the security 
-                guard. The School was operated as such for a number of years. Enrollment and graduations 
-                were meaningful events for the members of the prayer community. The School was issued 
-                Recognition Certificate No. 100149 by DepEd Director Garma of Region 4-A.
-            </p>
-            <br>
-            <p>
-                The inevitable happened. Parents soon requested that the School offer the full elementary 
-                education course. They agreed to the collection of fees. The first batch of graduates of 
-                elementary course received their diplomas in March 1977. The School was awarded 
-                Recognition Certificate No. 111242.
-            </p>
-            <br>
-            <p>
-                The DepEd required the School to amend its original Articles of Incorporation and 
-                By-Laws to truly reflect the levels of instruction being offered. The Securities 
-                and Exchange Commission issued its Company Registration No. 144863, the Certificate 
-                of Filing of Amended Articles of Incorporation and the Certificate of Amended By-Laws 
-                on October 28, 2005. The DepEd awarded Recognition Certificate No. 116129 to the School 
-                for the complete secondary course (NSEC-BEC). In SY 2005–2006, the School produced its 
-                first batch of high school graduates.
-            </p>
-            <br>
-            <p>
-                The Board of Trustees, composed of the members of the Rosalinas Family, stands 
-                committed to support the School. Over the years, the Trustees had to provide funds, 
-                for building and the facilities. In SY 2006–2007, the School became self-supporting 
-                as far as operational expenses are concerned. The School site and buildings are on a 
-                long-term lease from the founder.
-            </p>
-            <br>
-            <p>
-                On April 24, 2015, the School was granted Government Permit (R-IVA) 
-                No. SHS-75, s. 2015, a provisional permit to operate the Senior High School 
-                Program, offering Academic Track specializing in Accountancy, Business, and 
-                Management (ABM), Humanities and Social Sciences (HUMMS), and General Academics (GAs),
-                and Technical-Vocational (TechVoc) Track focusing on Computer Programming, 
-                Industrial Arts, and Home Economics. At present, the School offers ABM, HUMMS and GAs.
-            </p>
-
+    <section class="page-main">
+        <div class="lead-card">
+            <p>The School began as Agnus Dei Preparatory School Systems, Inc., a non-stock educational institution created to serve the children of the Agnus Dei Prayer Community. It first offered free pre-elementary education and later opened its doors more widely as families asked for a fuller academic journey.</p>
         </div>
 
-    </section>
+        <div class="grid-two">
+            <article class="content-card">
+                <p class="card-kicker">1987</p>
+                <h3>Community-rooted beginnings</h3>
+                <p>The school started with a mission-centered approach to formation, supported by committed families, volunteer service, and a strong sense of stewardship.</p>
+            </article>
 
-    
-</div>
+            <article class="content-card">
+                <p class="card-kicker">Elementary Expansion</p>
+                <h3>Growing with learner needs</h3>
+                <p>As demand increased, the school expanded from pre-elementary to a full elementary offering, giving students a more continuous academic path.</p>
+            </article>
+
+            <article class="content-card">
+                <p class="card-kicker">2005-2006</p>
+                <h3>Complete secondary program</h3>
+                <p>The institution reached a major milestone with full secondary recognition and produced its first batch of high school graduates during school year 2005-2006.</p>
+            </article>
+
+            <article class="content-card">
+                <p class="card-kicker">2006-2007</p>
+                <h3>Operational stability</h3>
+                <p>By school year 2006-2007, the school had become self-supporting in day-to-day operations while continuing to receive guidance and support from its trustees.</p>
+            </article>
+        </div>
+
+        <div class="section-band">
+            <div>
+                <p class="card-kicker">Senior High Milestone</p>
+                <h2>2015 opened a new chapter</h2>
+            </div>
+            <p>On April 24, 2015, the school was granted permit to operate Senior High School, extending its mission into more specialized and future-facing learning paths while keeping faith and character formation at the center.</p>
+        </div>
+    </section>
+</section>
 
 <style>
-
-.hero-background {
-    background: linear-gradient(135deg, #001e82, #142c7e);
-    color: #fff;
-    text-align: center;
-    min-height: 60px;   /* set your desired height */
-    padding: 50px 20px;  /* optional extra padding */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.hero-background h2 {
-    font-size: 36px;     /* you can resize the text separately */
-}
-
-.page-container {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 0 20px;
-    flex-wrap: wrap;
-}
-
-/* Sidebar */
-.sidebar {
-    flex: 1;
-    min-width: 220px;
-}
-.sidebar h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #142c7e;
-    margin-bottom: 15px;
-}
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.sidebar-nav a {
-    text-decoration: none;
-    color: #001e82;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
-    color: #007bff;
-}
-.accreditations {
-    margin-top: 40px;
-}
-.accreditations h5 {
-    font-size: 14px;
-    color: #001e82;
-    margin-bottom: 10px;
-}
-.accreditations img {
-    width: 80px;
-    display: block;
-    margin-bottom: 10px;
-}
-
-/* Main Content */
-.main-content {
-    flex: 3;
-    min-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-.content-section h3.content-title {
-    color: #142c7e;
-    font-size: 18px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-.content-section p {
-    font-size: 16px;
-    line-height: 1.7;
-}
-
-/* Responsive 
-@media screen and (max-width: 900px) {
-    .page-container {
-        flex-direction: column;
-    }
-    .sidebar, .main-content {
-        min-width: 100%;
-    }
-}*/
+.site-hero { background:
+    radial-gradient(circle at 18% 22%, rgba(191, 219, 254, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(96, 165, 250, 0.16), transparent 28%),
+    linear-gradient(135deg, #041d5c 0%, #07308b 38%, #0a43b7 72%, #0b4dc9 100%); color: #fff; padding: 78px 24px 84px; }
+.site-hero-inner { max-width: 1040px; margin: 0 auto; }
+.site-kicker { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px; opacity: .84; margin-bottom: 14px; }
+.site-hero h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.02; max-width: 760px; }
+.site-hero p { margin-top: 18px; max-width: 720px; color: rgba(255,255,255,.86); font-size: 17px; line-height: 1.8; }
+.page-shell { max-width: 1220px; margin: 0 auto; padding: 34px 22px 44px; display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
+.page-sidebar, .page-main { display: grid; gap: 20px; align-content: start; }
+.nav-card, .side-card, .lead-card, .content-card, .section-band { background: #fff; border: 1px solid #dbeafe; border-radius: 22px; box-shadow: 0 18px 45px rgba(15, 23, 42, .07); }
+.nav-card, .side-card, .lead-card, .content-card, .section-band { padding: 26px; }
+.nav-label, .side-title, .card-kicker { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; color: #1d4ed8; margin-bottom: 10px; }
+.nav-card { display: grid; gap: 12px; }
+.nav-card a { text-decoration: none; color: #0f172a; font-weight: 600; padding: 10px 12px; border-radius: 14px; }
+.nav-card a.active, .nav-card a:hover { background: #dbeafe; color: #1d4ed8; }
+.side-item { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid #dbeafe; }
+.side-item:last-child { border-bottom: none; }
+.side-item strong { color: #062b8f; font-size: 20px; }
+.side-item span { color: #475569; font-size: 14px; }
+.lead-card p, .content-card p, .section-band p { color: #334155; line-height: 1.8; }
+.lead-card p { font-size: 17px; line-height: 1.9; }
+.content-card h3 { color: #062b8f; font-size: 24px; margin-bottom: 12px; }
+.section-band { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.9fr); gap: 20px; }
+.section-band h2 { color: #062b8f; font-size: clamp(28px, 4vw, 40px); }
+.grid-two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+@media (max-width: 980px) { .page-shell, .grid-two, .section-band { grid-template-columns: 1fr; } }
 </style>
 @endsection
+

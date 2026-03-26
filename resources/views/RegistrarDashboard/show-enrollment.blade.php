@@ -60,7 +60,7 @@
 
             @unless($isApproved)
                 <div class="section-box">
-                    <h5>Grade Applying For</h5>
+                    <h5>Preferred Grade Level</h5>
                     <p>{{ $admission->applying_for_grade }}</p>
                 </div>
             @endunless

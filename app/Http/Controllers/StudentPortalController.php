@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Admission;
 use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\TuitionFee;
+use App\Support\TuitionPlanner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -16,18 +18,9 @@ class StudentPortalController extends Controller
 {
     public function check()
     {
-        $user = Auth::user();
-
-        if (!$user) {
-            return redirect()->route('login');
-        }
-
-        $student = Student::where('user_id', $user->id)->first();
-
-        if (!$student) {
-            return redirect()->route('login')->withErrors([
-                'email' => 'Student profile not found.',
-            ]);
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
         if (!$student->admission_id) {
@@ -35,29 +28,23 @@ class StudentPortalController extends Controller
         }
 
         $admission = Admission::with('requirements')->find($student->admission_id);
-
         if (!$admission) {
             return redirect()->route('student.admission.create');
         }
 
-        $hasIncompleteRequirements = $admission->requirements()->where('submitted', 0)->exists();
-
-        if ($hasIncompleteRequirements) {
+        if ($admission->requirements()->where('submitted', 0)->exists()) {
             return redirect()->route('student.requirements');
         }
 
-        if (in_array($admission->status, ['pending', 'under_review', 'incomplete'])) {
+        if (in_array($admission->status, ['pending', 'incomplete'], true)) {
             return redirect()->route('student.requirements');
         }
 
-        if ($admission->status === 'approved') {
-            $tuition = TuitionFee::where('student_id', $student->id)
-                ->where('school_year', $student->school_year)
-                ->first();
+        if ($admission->is_verified || in_array($admission->status, ['approved', 'under_review'], true)) {
+            $tuition = $this->currentTuition($student);
 
-            if (!$tuition || !$tuition->is_downpayment_cleared) {
-                return redirect()->route('student.assessment')
-                    ->with('error', 'Please settle the required down payment first before accessing the full dashboard.');
+            if (!$tuition || !$tuition->is_downpayment_cleared || $student->portal_access_status !== 'unlocked') {
+                return redirect()->route('student.assessment')->with('error', 'Your admission is verified. Please settle the required payment with the cashier to unlock the dashboard.');
             }
 
             return redirect()->route('student.dashboard');
@@ -68,18 +55,23 @@ class StudentPortalController extends Controller
 
     public function createAdmission()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
-
-        if ($student && $student->admission_id) {
-            $admission = Admission::find($student->admission_id);
-
-            if ($admission && $admission->status === 'approved') {
-                return redirect()->route('student.dashboard')->with('error', 'Your admission is already approved.');
-            }
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
-        return view('StudentDashboard.admission-create');
+        if ($student->admission_id) {
+            $admission = Admission::find($student->admission_id);
+            if ($admission && ($admission->is_verified || $admission->status === 'approved')) {
+                return redirect()->route('student.portal.check')->with('error', 'Your admission has already been submitted and is locked for review.');
+            }
+
+            return redirect()->route('student.requirements')->with('error', 'You already have an admission application.');
+        }
+
+        return view('StudentDashboard.admission-create', [
+            'shsTracks' => TuitionPlanner::shsTracks(),
+        ]);
     }
 
     public function storeAdmission(Request $request)
@@ -93,8 +85,11 @@ class StudentPortalController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'applying_for_grade' => 'required|string|max:50',
+            'shs_track' => 'nullable|in:' . implode(',', TuitionPlanner::shsTracks()),
             'lrn' => 'required|digits:12|unique:admissions,lrn|unique:students,lrn',
             'previous_school' => 'nullable|string|max:255',
+            'previous_school_type' => 'nullable|in:public,private',
+            'honor_rank' => 'nullable|in:1,2,3',
         ], [
             'birth_date.required' => 'Birth date is required.',
             'birth_date.before' => 'Birth date must be earlier than today.',
@@ -103,24 +98,22 @@ class StudentPortalController extends Controller
             'lrn.digits' => 'LRN must be exactly 12 digits.',
         ]);
 
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        if (TuitionPlanner::requiresShsTrack($request->applying_for_grade) && !TuitionPlanner::normalizeTrack($request->shs_track)) {
+            return back()->withErrors([
+                'shs_track' => 'Please select the Senior High track for Grade 11 or Grade 12 applicants.',
+            ])->withInput();
+        }
 
-        if (!$student) {
-            return redirect()->route('login')->withErrors([
-                'email' => 'Student profile not found.',
-            ]);
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
         if ($student->admission_id) {
-            $existingAdmission = Admission::find($student->admission_id);
-
-            if ($existingAdmission && $existingAdmission->status === 'approved') {
-                return redirect()->route('student.dashboard')->with('error', 'Your admission is already approved and locked.');
-            }
-
             return redirect()->route('student.requirements')->with('error', 'You already have an admission application.');
         }
+
+        $normalizedTrack = TuitionPlanner::normalizeTrack($request->shs_track);
 
         $admission = Admission::create([
             'application_number' => 'APP-' . now()->format('Y') . '-' . strtoupper(Str::random(6)),
@@ -133,20 +126,27 @@ class StudentPortalController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'applying_for_grade' => $request->applying_for_grade,
+            'shs_track' => $normalizedTrack,
             'previous_school' => $request->previous_school,
+            'previous_school_type' => $request->previous_school_type,
+            'honor_rank' => $request->honor_rank,
             'status' => 'pending',
             'application_date' => now(),
             'remarks' => null,
         ]);
 
-        $defaultRequirements = [
+        $requirements = [
             'Birth Certificate',
             'Report Card',
             'Good Moral Certificate',
             '2x2 ID Picture',
         ];
 
-        foreach ($defaultRequirements as $requirement) {
+        if (TuitionPlanner::requiresShsTrack($request->applying_for_grade)) {
+            $requirements[] = 'SHS Voucher';
+        }
+
+        foreach ($requirements as $requirement) {
             $admission->requirements()->create([
                 'requirement_name' => $requirement,
                 'submitted' => 0,
@@ -168,23 +168,31 @@ class StudentPortalController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'grade_level' => $request->applying_for_grade,
+            'shs_track' => $normalizedTrack,
+            'previous_school_type' => $request->previous_school_type,
+            'honor_rank' => $request->honor_rank,
             'status' => 'pending',
+            'portal_access_status' => 'locked',
+            'school_year' => TuitionPlanner::currentSchoolYear(),
         ]);
+
+        ActivityLog::record(Auth::id(), 'admission', 'submit', 'Admission', $admission->id, 'Student submitted admission application #' . $admission->application_number, $request->ip());
 
         return redirect()->route('student.requirements')->with('success', 'Admission application submitted successfully.');
     }
 
     public function requirements()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
+        }
 
-        if (!$student || !$student->admission_id) {
+        if (!$student->admission_id) {
             return redirect()->route('student.admission.create')->with('error', 'Please submit your admission application first.');
         }
 
         $admission = Admission::with('requirements')->find($student->admission_id);
-
         if (!$admission) {
             return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
         }
@@ -199,31 +207,30 @@ class StudentPortalController extends Controller
             'document' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
         ]);
 
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
+        }
 
-        if (!$student || !$student->admission_id) {
+        if (!$student->admission_id) {
             return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
         }
 
         $admission = Admission::find($student->admission_id);
-
         if (!$admission) {
             return redirect()->route('student.admission.create')->with('error', 'Admission record not found.');
         }
 
-        if ($admission->status === 'approved') {
-            return back()->with('error', 'Admission is already approved and locked.');
+        if ($admission->is_verified || $admission->status === 'approved') {
+            return back()->with('error', 'Admission is already verified and locked.');
         }
 
         $requirement = $admission->requirements()->where('id', $request->requirement_id)->first();
-
         if (!$requirement) {
             return back()->with('error', 'Requirement not found.');
         }
 
         $path = $request->file('document')->store('requirements', 'public');
-
         $requirement->update([
             'submitted' => 1,
             'submitted_at' => now(),
@@ -231,55 +238,32 @@ class StudentPortalController extends Controller
             'file_path' => $path,
         ]);
 
+        ActivityLog::record(Auth::id(), 'admission_requirement', 'upload', 'AdmissionRequirement', $requirement->id, 'Uploaded requirement ' . $requirement->requirement_name . '.', $request->ip());
+
         return back()->with('success', 'Requirement uploaded successfully.');
     }
 
     public function enrollment()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
+        }
 
         return view('StudentDashboard.enrollments', compact('student'));
     }
 
     public function dashboard()
     {
-        $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
-
-        if (!$student) {
-            return redirect()->route('login');
+        $student = $this->requireUnlockedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
-        $admission = $student->admission_id ? Admission::find($student->admission_id) : null;
-
-        if (!$admission || $admission->status !== 'approved') {
-            return redirect()->route('student.portal.check')->with('error', 'Your account is not yet approved.');
-        }
-
-        $tuition = TuitionFee::where('student_id', $student->id)
-            ->where('school_year', $student->school_year)
-            ->first();
-
-        if (!$tuition || !$tuition->is_downpayment_cleared) {
-            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing the dashboard.');
-        }
-
-        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
-            ->where('student_id', $student->id)
-            ->get();
-
-        $grades = Grade::with('enrollment.class.subject')
-            ->whereIn('enrollment_id', $enrollments->pluck('id'))
-            ->get();
-
-        $payments = collect();
-
-        if ($tuition) {
-            $payments = Payment::where('tuition_fee_id', $tuition->id)
-                ->latest('payment_date')
-                ->get();
-        }
+        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])->where('student_id', $student->id)->get();
+        $grades = Grade::with('enrollment.class.subject')->whereIn('enrollment_id', $enrollments->pluck('id'))->get();
+        $tuition = $this->currentTuition($student);
+        $payments = $tuition ? Payment::where('tuition_fee_id', $tuition->id)->latest('payment_date')->get() : collect();
 
         $schedule = $enrollments->flatMap(function ($enrollment) {
             return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
@@ -293,84 +277,42 @@ class StudentPortalController extends Controller
             });
         });
 
-        return view('StudentDashboard.dashboard', compact(
-            'student',
-            'enrollments',
-            'grades',
-            'tuition',
-            'payments',
-            'schedule'
-        ));
+        return view('StudentDashboard.dashboard', compact('student', 'enrollments', 'grades', 'tuition', 'payments', 'schedule'));
     }
 
     public function subjects()
     {
-        $student = Student::where('user_id', Auth::id())->first();
-
-        if (!$student) {
-            return redirect()->route('login');
+        $student = $this->requireUnlockedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
-        $tuition = TuitionFee::where('student_id', $student->id)
-            ->where('school_year', $student->school_year)
-            ->first();
-
-        if (!$tuition || !$tuition->is_downpayment_cleared) {
-            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing subjects.');
-        }
-
-        $enrollments = Enrollment::with('class.subject')
-            ->where('student_id', $student->id)
-            ->get();
+        $enrollments = Enrollment::with('class.subject')->where('student_id', $student->id)->get();
 
         return view('StudentDashboard.subjects', compact('student', 'enrollments'));
     }
 
     public function grades()
     {
-        $student = Student::where('user_id', Auth::id())->first();
-
-        if (!$student) {
-            return redirect()->route('login');
-        }
-
-        $tuition = TuitionFee::where('student_id', $student->id)
-            ->where('school_year', $student->school_year)
-            ->first();
-
-        if (!$tuition || !$tuition->is_downpayment_cleared) {
-            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing grades.');
+        $student = $this->requireUnlockedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
         $enrollmentIds = Enrollment::where('student_id', $student->id)->pluck('id');
-
-        $grades = Grade::with('enrollment.class.subject')
-            ->whereIn('enrollment_id', $enrollmentIds)
-            ->get();
+        $grades = Grade::with('enrollment.class.subject')->whereIn('enrollment_id', $enrollmentIds)->get();
 
         return view('StudentDashboard.grades', compact('student', 'grades'));
     }
 
     public function scheduleView()
     {
-        $student = Student::where('user_id', Auth::id())->first();
-
-        if (!$student) {
-            return redirect()->route('login');
+        $student = $this->requireUnlockedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
         }
 
-        $tuition = TuitionFee::where('student_id', $student->id)
-            ->where('school_year', $student->school_year)
-            ->first();
-
-        if (!$tuition || !$tuition->is_downpayment_cleared) {
-            return redirect()->route('student.assessment')->with('error', 'Please settle the required down payment first before accessing schedule.');
-        }
-
-        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])
-            ->where('student_id', $student->id)
-            ->get();
-
+        $enrollments = Enrollment::with(['class.subject', 'class.schedules'])->where('student_id', $student->id)->get();
         $schedule = $enrollments->flatMap(function ($enrollment) {
             return $enrollment->class->schedules->map(function ($schedule) use ($enrollment) {
                 return [
@@ -388,24 +330,64 @@ class StudentPortalController extends Controller
 
     public function assessment()
     {
-        $student = Student::where('user_id', Auth::id())->first();
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
+        }
 
-        if (!$student) {
+        $tuition = $this->currentTuition($student);
+        $payments = $tuition ? Payment::where('tuition_fee_id', $tuition->id)->latest('payment_date')->get() : collect();
+        $quarterAmount = $tuition ? round(((float) $tuition->total_due) / 4, 2) : 0;
+        $remainingForUnlock = $tuition ? max(0, (float) $tuition->down_payment_required - (float) $tuition->paid_amount) : 0;
+
+        return view('StudentDashboard.assessment', compact('student', 'tuition', 'payments', 'quarterAmount', 'remainingForUnlock'));
+    }
+
+    private function authenticatedStudent()
+    {
+        $user = Auth::user();
+        if (!$user) {
             return redirect()->route('login');
         }
 
-        $tuition = TuitionFee::where('student_id', $student->id)
-            ->where('school_year', $student->school_year)
-            ->first();
-
-        $payments = collect();
-
-        if ($tuition) {
-            $payments = Payment::where('tuition_fee_id', $tuition->id)
-                ->latest('payment_date')
-                ->get();
+        $student = Student::where('user_id', $user->id)->first();
+        if (!$student) {
+            return redirect()->route('login')->withErrors(['email' => 'Student profile not found.']);
         }
 
-        return view('StudentDashboard.assessment', compact('student', 'tuition', 'payments'));
+        if ($student->is_transferred) {
+            return redirect()->route('login')->withErrors(['email' => 'This student account has been marked as transferred and is no longer active.']);
+        }
+
+        return $student;
+    }
+
+    private function requireUnlockedStudent()
+    {
+        $student = $this->authenticatedStudent();
+        if ($student instanceof \Illuminate\Http\RedirectResponse) {
+            return $student;
+        }
+
+        $admission = $student->admission_id ? Admission::find($student->admission_id) : null;
+        if (!$admission || (!$admission->is_verified && $admission->status !== 'approved')) {
+            return redirect()->route('student.portal.check')->with('error', 'Your account is not yet verified.');
+        }
+
+        $tuition = $this->currentTuition($student);
+        if (!$tuition || !$tuition->is_downpayment_cleared || $student->portal_access_status !== 'unlocked') {
+            return redirect()->route('student.assessment')->with('error', 'Please settle the required payment with the cashier first before accessing the dashboard.');
+        }
+
+        return $student;
+    }
+
+    private function currentTuition(Student $student)
+    {
+        $schoolYear = $student->school_year ?: TuitionPlanner::currentSchoolYear();
+
+        return TuitionFee::where('student_id', $student->id)
+            ->where('school_year', $schoolYear)
+            ->first();
     }
 }

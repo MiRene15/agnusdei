@@ -22,6 +22,12 @@ class AcademicEventSeeder extends Seeder
                 'is_enabled' => false,
                 'description' => 'Controls whether PTC is required before grades release.',
             ],
+            [
+                'event_key' => 'grade_encoding_open',
+                'event_name' => 'Grade Encoding Open',
+                'is_enabled' => true,
+                'description' => 'Controls whether teachers are allowed to encode grades during the active grading window.',
+            ],
         ];
 
         foreach ($events as $event) {

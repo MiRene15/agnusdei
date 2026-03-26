@@ -3,66 +3,7 @@
 @section('title', 'Payments')
 
 @section('content')
-
-<div class="page-intro">
-    <h4>Payment Records</h4>
-    <p>Track all recorded payment transactions.</p>
-</div>
-
-<div class="card">
-    <form method="GET" action="{{ route('cashier.payments') }}" class="search-row">
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Search by student, LRN, receipt no., reference no., or method"
-        >
-        <button type="submit" class="btn btn-primary">Search</button>
-        <a href="{{ route('cashier.payments') }}" class="btn btn-outline">Reset</a>
-    </form>
-</div>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>LRN</th>
-                    <th>Payment Date</th>
-                    <th>Amount</th>
-                    <th>Method</th>
-                    <th>Reference No.</th>
-                    <th>Receipt No.</th>
-                    <th>Received By</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($payments as $payment)
-                    <tr>
-                        <td>
-                            {{ $payment->tuitionFee->student->first_name ?? '-' }}
-                            {{ $payment->tuitionFee->student->last_name ?? '' }}
-                        </td>
-                        <td>{{ $payment->tuitionFee->student->lrn ?? '-' }}</td>
-                        <td>{{ $payment->payment_date ?? '-' }}</td>
-                        <td>₱{{ number_format($payment->amount, 2) }}</td>
-                        <td>{{ $payment->payment_method ?? '-' }}</td>
-                        <td>{{ $payment->reference_no ?? '-' }}</td>
-                        <td>{{ $payment->receipt_number ?? '-' }}</td>
-                        <td>{{ $payment->received_by ?? '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" style="text-align:center; color:#64748b;">No payment records found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div style="margin-top:18px;">
-        {{ $payments->links() }}
-    </div>
-</div>
-
+<div class="page-intro" style="margin-bottom:20px;"><h4>Payment Records</h4><p>Review posted payments, installment labels, and face-to-face cash details.</p></div>
+<div class="card" style="margin-bottom:18px;"><form method="GET" action="{{ route('cashier.payments') }}" class="search-row" style="align-items:center; gap:12px;"><input type="text" name="search" value="{{ request('search') }}" placeholder="Search by student, receipt, reference, payment label, cashier, or notes"><select name="payment_method" class="form-control" style="max-width:220px;"><option value="">All methods</option><option value="Cash" {{ request('payment_method') === 'Cash' ? 'selected' : '' }}>Cash</option><option value="GCash" {{ request('payment_method') === 'GCash' ? 'selected' : '' }}>GCash</option><option value="Bank Transfer" {{ request('payment_method') === 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option></select><button type="submit" class="btn btn-primary">Filter</button><a href="{{ route('cashier.payments') }}" class="btn btn-outline">Reset</a></form></div>
+<div class="card" style="padding:0; overflow:hidden; border:1px solid #e5e7eb; border-radius:22px;"><div style="display:flex; justify-content:space-between; gap:16px; align-items:center; padding:20px 22px; border-bottom:1px solid #eef2f7; background:linear-gradient(180deg, #ffffff, #fafaf9);"><div><h4 style="margin:0;">Posted Payments</h4><p style="margin:6px 0 0; color:#64748b;">Each installment or purchase stays linked to the student and the cashier audit trail.</p></div></div><div class="table-wrap" style="margin:0;"><table style="min-width:1450px;"><thead><tr><th>Student</th><th>Date</th><th>Label</th><th>Applied Amount</th><th>Cash Tendered</th><th>Change</th><th>Method</th><th>Reference</th><th>Cashier</th><th>Receipt</th></tr></thead><tbody>@forelse($payments as $payment)<tr><td><div style="display:grid; gap:4px;"><strong>{{ $payment->tuitionFee->student->first_name ?? '-' }} {{ $payment->tuitionFee->student->last_name ?? '' }}</strong><span style="color:#64748b;">{{ $payment->tuitionFee->student->student_number ?? '-' }}</span><span style="color:#94a3b8; font-size:13px;">LRN: {{ $payment->tuitionFee->student->lrn ?? '-' }}</span></div></td><td>{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y') : '-' }}</td><td>{{ $payment->payment_label ?? 'Tuition Payment' }}</td><td>PHP {{ number_format($payment->amount, 2) }}</td><td>{{ $payment->cash_tendered ? 'PHP ' . number_format($payment->cash_tendered, 2) : '-' }}</td><td>{{ $payment->change_amount ? 'PHP ' . number_format($payment->change_amount, 2) : '-' }}</td><td>{{ $payment->payment_method ?? '-' }}</td><td><div style="display:grid; gap:4px;"><span>{{ $payment->reference_no ?? '-' }}</span><span style="color:#94a3b8; font-size:13px;">{{ $payment->receipt_number ?? '-' }}</span></div></td><td>{{ $payment->received_by ?? '-' }}</td><td><a href="{{ route('cashier.payments.receipt', $payment->id) }}" class="btn btn-outline">View Receipt</a></td></tr>@empty<tr><td colspan="10" style="text-align:center; padding:28px; color:#64748b;">No payment records found.</td></tr>@endforelse</tbody></table></div><div style="padding:18px 22px; border-top:1px solid #eef2f7;">{{ $payments->links() }}</div></div>
 @endsection

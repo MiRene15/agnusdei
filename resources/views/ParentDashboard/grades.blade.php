@@ -6,7 +6,7 @@
 
 <div class="page-intro">
     <h4>Child Grades</h4>
-    <p>Review encoded grades for each linked student.</p>
+    <p>Review encoded component scores and computed final grades for each linked student.</p>
 </div>
 
 @forelse($children as $child)
@@ -24,7 +24,10 @@
                     <tr>
                         <th>Subject</th>
                         <th>Grading Period</th>
-                        <th>Grade</th>
+                        <th>Seatwork</th>
+                        <th>Quiz</th>
+                        <th>Exam</th>
+                        <th>Final Grade</th>
                         <th>Remarks</th>
                     </tr>
                 </thead>
@@ -37,12 +40,15 @@
                         <tr>
                             <td>{{ $grade->enrollment->class->subject->subject_name ?? '-' }}</td>
                             <td>{{ $grade->grading_period }}</td>
-                            <td>{{ $grade->grade }}</td>
+                            <td>{{ $grade->seatwork_score ?? '-' }}</td>
+                            <td>{{ $grade->quiz_score ?? '-' }}</td>
+                            <td>{{ $grade->exam_score ?? '-' }}</td>
+                            <td>{{ $grade->final_grade ?? $grade->grade }}</td>
                             <td>{{ $grade->remarks ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" style="text-align:center; color:#64748b;">No grades available yet.</td>
+                            <td colspan="7" style="text-align:center; color:#64748b;">No grades available yet.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Classes;
 use App\Models\Schedule;
+use App\Models\Section;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
@@ -21,16 +22,22 @@ class TeachersClassesSchedulesSeeder extends Seeder
             ['first_name' => 'Jose', 'last_name' => 'Reyes', 'email' => 'jose.reyes@agnusdei.local', 'department' => 'Elementary'],
             ['first_name' => 'Ana', 'last_name' => 'Cruz', 'email' => 'ana.cruz@agnusdei.local', 'department' => 'Elementary'],
             ['first_name' => 'Paolo', 'last_name' => 'Garcia', 'email' => 'paolo.garcia@agnusdei.local', 'department' => 'Elementary'],
-
+            ['first_name' => 'Rosa', 'last_name' => 'Villanueva', 'email' => 'rosa.villanueva@agnusdei.local', 'department' => 'Elementary'],
+            ['first_name' => 'Daniel', 'last_name' => 'Mercado', 'email' => 'daniel.mercado@agnusdei.local', 'department' => 'Elementary'],
             ['first_name' => 'Liza', 'last_name' => 'Mendoza', 'email' => 'liza.mendoza@agnusdei.local', 'department' => 'Junior High School'],
             ['first_name' => 'Mark', 'last_name' => 'Torres', 'email' => 'mark.torres@agnusdei.local', 'department' => 'Junior High School'],
             ['first_name' => 'Rina', 'last_name' => 'Flores', 'email' => 'rina.flores@agnusdei.local', 'department' => 'Junior High School'],
             ['first_name' => 'Dennis', 'last_name' => 'Aquino', 'email' => 'dennis.aquino@agnusdei.local', 'department' => 'Junior High School'],
-
+            ['first_name' => 'Grace', 'last_name' => 'Domingo', 'email' => 'grace.domingo@agnusdei.local', 'department' => 'Junior High School'],
+            ['first_name' => 'Carlo', 'last_name' => 'Bautista', 'email' => 'carlo.bautista@agnusdei.local', 'department' => 'Junior High School'],
             ['first_name' => 'Carla', 'last_name' => 'Navarro', 'email' => 'carla.navarro@agnusdei.local', 'department' => 'Senior High School'],
             ['first_name' => 'Vincent', 'last_name' => 'Luna', 'email' => 'vincent.luna@agnusdei.local', 'department' => 'Senior High School'],
             ['first_name' => 'Sheila', 'last_name' => 'Ramos', 'email' => 'sheila.ramos@agnusdei.local', 'department' => 'Senior High School'],
             ['first_name' => 'Adrian', 'last_name' => 'Castro', 'email' => 'adrian.castro@agnusdei.local', 'department' => 'Senior High School'],
+            ['first_name' => 'Elaine', 'last_name' => 'Sy', 'email' => 'elaine.sy@agnusdei.local', 'department' => 'Senior High School'],
+            ['first_name' => 'Patrick', 'last_name' => 'Lopez', 'email' => 'patrick.lopez@agnusdei.local', 'department' => 'Senior High School'],
+            ['first_name' => 'Teresa', 'last_name' => 'Natividad', 'email' => 'teresa.natividad@agnusdei.local', 'department' => 'Elementary'],
+            ['first_name' => 'Nico', 'last_name' => 'Salazar', 'email' => 'nico.salazar@agnusdei.local', 'department' => 'Elementary'],
         ];
 
         $teacherIdsByDepartment = [
@@ -58,7 +65,7 @@ class TeachersClassesSchedulesSeeder extends Seeder
                 ['email' => $teacherSeed['email']],
                 [
                     'user_id' => $user->id,
-                    'teacher_number' => 'TCH-' . str_pad((string) ($index + 1), 4, '0', STR_PAD_LEFT),
+                    'teacher_number' => Teacher::where('email', $teacherSeed['email'])->value('teacher_number') ?: $this->generateTeacherNumber(),
                     'first_name' => $teacherSeed['first_name'],
                     'last_name' => $teacherSeed['last_name'],
                     'email' => $teacherSeed['email'],
@@ -72,153 +79,65 @@ class TeachersClassesSchedulesSeeder extends Seeder
         }
 
         $subjectMap = Subject::pluck('id', 'subject_code')->toArray();
+        $sectionsByGrade = Section::where('is_active', true)
+            ->orderBy('grade_level')
+            ->orderBy('section_name')
+            ->get()
+            ->groupBy('grade_level');
 
-        $plans = [
-            [
-                'grade_level' => 'Grade 1',
-                'section' => 'St. Mary',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G1-ENG', 'G1-FIL', 'G1-MAT', 'G1-ESP', 'G1-MAPEH', 'G1-AP'],
-            ],
-            [
-                'grade_level' => 'Grade 2',
-                'section' => 'St. Joseph',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G2-ENG', 'G2-FIL', 'G2-MAT', 'G2-ESP', 'G2-MAPEH', 'G2-AP'],
-            ],
-            [
-                'grade_level' => 'Grade 3',
-                'section' => 'St. John',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G3-ENG', 'G3-FIL', 'G3-MAT', 'G3-SCI', 'G3-ESP', 'G3-MAPEH', 'G3-AP'],
-            ],
-            [
-                'grade_level' => 'Grade 4',
-                'section' => 'St. Luke',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G4-ENG', 'G4-FIL', 'G4-MAT', 'G4-SCI', 'G4-AP', 'G4-ESP', 'G4-MAPEH', 'G4-EPP'],
-            ],
-            [
-                'grade_level' => 'Grade 5',
-                'section' => 'St. Mark',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G5-ENG', 'G5-FIL', 'G5-MAT', 'G5-SCI', 'G5-AP', 'G5-ESP', 'G5-MAPEH', 'G5-EPP'],
-            ],
-            [
-                'grade_level' => 'Grade 6',
-                'section' => 'St. Matthew',
-                'semester' => null,
-                'room_prefix' => 'E',
-                'department' => 'Elementary',
-                'subject_codes' => ['G6-ENG', 'G6-FIL', 'G6-MAT', 'G6-SCI', 'G6-AP', 'G6-ESP', 'G6-MAPEH', 'G6-EPP'],
-            ],
-            [
-                'grade_level' => 'Grade 7',
-                'section' => 'Hope',
-                'semester' => null,
-                'room_prefix' => 'J',
-                'department' => 'Junior High School',
-                'subject_codes' => ['G7-ENG', 'G7-FIL', 'G7-MAT', 'G7-SCI', 'G7-AP', 'G7-ESP', 'G7-MAPEH', 'G7-TLE'],
-            ],
-            [
-                'grade_level' => 'Grade 8',
-                'section' => 'Faith',
-                'semester' => null,
-                'room_prefix' => 'J',
-                'department' => 'Junior High School',
-                'subject_codes' => ['G8-ENG', 'G8-FIL', 'G8-MAT', 'G8-SCI', 'G8-AP', 'G8-ESP', 'G8-MAPEH', 'G8-TLE'],
-            ],
-            [
-                'grade_level' => 'Grade 9',
-                'section' => 'Charity',
-                'semester' => null,
-                'room_prefix' => 'J',
-                'department' => 'Junior High School',
-                'subject_codes' => ['G9-ENG', 'G9-FIL', 'G9-MAT', 'G9-SCI', 'G9-AP', 'G9-ESP', 'G9-MAPEH', 'G9-TLE'],
-            ],
-            [
-                'grade_level' => 'Grade 10',
-                'section' => 'Courage',
-                'semester' => null,
-                'room_prefix' => 'J',
-                'department' => 'Junior High School',
-                'subject_codes' => ['G10-ENG', 'G10-FIL', 'G10-MAT', 'G10-SCI', 'G10-AP', 'G10-ESP', 'G10-MAPEH', 'G10-TLE'],
-            ],
-            [
-                'grade_level' => 'Grade 11',
-                'section' => 'STEM-A',
-                'semester' => '1st Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-GMATH', 'SHS-ELS', 'SHS-PD', 'SHS-PEH', 'STEM-PCAL', 'STEM-BCAL'],
-            ],
-            [
-                'grade_level' => 'Grade 12',
-                'section' => 'STEM-A',
-                'semester' => '2nd Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-EAPP', 'SHS-PR2', 'SHS-EMTECH', 'SHS-III', 'STEM-BIO1', 'STEM-CHEM1', 'STEM-PHY1'],
-            ],
-            [
-                'grade_level' => 'Grade 11',
-                'section' => 'ABM-A',
-                'semester' => '1st Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-GMATH', 'SHS-UCSP', 'SHS-PEH', 'ABM-BMATH', 'ABM-OAM', 'ABM-FABM1'],
-            ],
-            [
-                'grade_level' => 'Grade 12',
-                'section' => 'ABM-A',
-                'semester' => '2nd Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-EAPP', 'SHS-FPL', 'SHS-ENTREP', 'SHS-III', 'ABM-FABM2', 'SHS-PR2'],
-            ],
-            [
-                'grade_level' => 'Grade 11',
-                'section' => 'HUMSS-A',
-                'semester' => '1st Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-OC', 'SHS-21CL', 'SHS-UCSP', 'SHS-PEH', 'HUMSS-DISS', 'HUMSS-DIASS', 'SHS-PR1'],
-            ],
-            [
-                'grade_level' => 'Grade 12',
-                'section' => 'HUMSS-A',
-                'semester' => '2nd Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-EAPP', 'SHS-FPL', 'HUMSS-CREW', 'HUMSS-TNCT', 'SHS-III', 'SHS-PR2'],
-            ],
-            [
-                'grade_level' => 'Grade 11',
-                'section' => 'GAS-A',
-                'semester' => '1st Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-MIL', 'SHS-UCSP', 'SHS-PEH', 'GAS-HGP'],
-            ],
-            [
-                'grade_level' => 'Grade 12',
-                'section' => 'GAS-A',
-                'semester' => '2nd Semester',
-                'room_prefix' => 'S',
-                'department' => 'Senior High School',
-                'subject_codes' => ['SHS-EAPP', 'SHS-ENTREP', 'SHS-EMTECH', 'SHS-III', 'GAS-ORG'],
-            ],
+        $gradeSubjectCodes = [
+            'Kinder' => ['K-ENG', 'K-MAT', 'K-SCI', 'K-READ', 'K-MAPEH', 'K-ESP'],
+            'Grade 1' => ['G1-ENG', 'G1-FIL', 'G1-MAT', 'G1-ESP', 'G1-MAPEH', 'G1-AP'],
+            'Grade 2' => ['G2-ENG', 'G2-FIL', 'G2-MAT', 'G2-ESP', 'G2-MAPEH', 'G2-AP'],
+            'Grade 3' => ['G3-ENG', 'G3-FIL', 'G3-MAT', 'G3-SCI', 'G3-ESP', 'G3-MAPEH', 'G3-AP'],
+            'Grade 4' => ['G4-ENG', 'G4-FIL', 'G4-MAT', 'G4-SCI', 'G4-AP', 'G4-ESP', 'G4-MAPEH', 'G4-EPP'],
+            'Grade 5' => ['G5-ENG', 'G5-FIL', 'G5-MAT', 'G5-SCI', 'G5-AP', 'G5-ESP', 'G5-MAPEH', 'G5-EPP'],
+            'Grade 6' => ['G6-ENG', 'G6-FIL', 'G6-MAT', 'G6-SCI', 'G6-AP', 'G6-ESP', 'G6-MAPEH', 'G6-EPP'],
+            'Grade 7' => ['G7-ENG', 'G7-FIL', 'G7-MAT', 'G7-SCI', 'G7-AP', 'G7-ESP', 'G7-MAPEH', 'G7-TLE'],
+            'Grade 8' => ['G8-ENG', 'G8-FIL', 'G8-MAT', 'G8-SCI', 'G8-AP', 'G8-ESP', 'G8-MAPEH', 'G8-TLE'],
+            'Grade 9' => ['G9-ENG', 'G9-FIL', 'G9-MAT', 'G9-SCI', 'G9-AP', 'G9-ESP', 'G9-MAPEH', 'G9-TLE'],
+            'Grade 10' => ['G10-ENG', 'G10-FIL', 'G10-MAT', 'G10-SCI', 'G10-AP', 'G10-ESP', 'G10-MAPEH', 'G10-TLE'],
         ];
+
+        $seniorHighPlans = [
+            ['grade_level' => 'Grade 11', 'section' => 'STEM-A', 'semester' => '1st Semester', 'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-GMATH', 'SHS-ELS', 'SHS-PD', 'SHS-PEH', 'STEM-PCAL', 'STEM-BCAL']],
+            ['grade_level' => 'Grade 12', 'section' => 'STEM-A', 'semester' => '2nd Semester', 'subject_codes' => ['SHS-EAPP', 'SHS-PR2', 'SHS-EMTECH', 'SHS-III', 'STEM-BIO1', 'STEM-CHEM1', 'STEM-PHY1']],
+            ['grade_level' => 'Grade 11', 'section' => 'ABM-A', 'semester' => '1st Semester', 'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-GMATH', 'SHS-UCSP', 'SHS-PEH', 'ABM-BMATH', 'ABM-OAM', 'ABM-FABM1']],
+            ['grade_level' => 'Grade 12', 'section' => 'ABM-A', 'semester' => '2nd Semester', 'subject_codes' => ['SHS-EAPP', 'SHS-FPL', 'SHS-ENTREP', 'SHS-III', 'ABM-FABM2', 'SHS-PR2']],
+            ['grade_level' => 'Grade 11', 'section' => 'HUMSS-A', 'semester' => '1st Semester', 'subject_codes' => ['SHS-OC', 'SHS-21CL', 'SHS-UCSP', 'SHS-PEH', 'HUMSS-DISS', 'HUMSS-DIASS', 'SHS-PR1']],
+            ['grade_level' => 'Grade 12', 'section' => 'HUMSS-A', 'semester' => '2nd Semester', 'subject_codes' => ['SHS-EAPP', 'SHS-FPL', 'HUMSS-CREW', 'HUMSS-TNCT', 'SHS-III', 'SHS-PR2']],
+            ['grade_level' => 'Grade 11', 'section' => 'GAS-A', 'semester' => '1st Semester', 'subject_codes' => ['SHS-OC', 'SHS-RW', 'SHS-MIL', 'SHS-UCSP', 'SHS-PEH', 'GAS-HGP']],
+            ['grade_level' => 'Grade 12', 'section' => 'GAS-A', 'semester' => '2nd Semester', 'subject_codes' => ['SHS-EAPP', 'SHS-ENTREP', 'SHS-EMTECH', 'SHS-III', 'GAS-ORG']],
+        ];
+
+        $plans = [];
+
+        foreach ($gradeSubjectCodes as $gradeLevel => $subjectCodes) {
+            $department = $this->departmentForGrade($gradeLevel);
+            $roomPrefix = $gradeLevel === 'Kinder' ? 'K' : ($department === 'Elementary' ? 'E' : 'J');
+
+            foreach (($sectionsByGrade[$gradeLevel] ?? collect()) as $sectionIndex => $section) {
+                $plans[] = [
+                    'grade_level' => $gradeLevel,
+                    'section' => $section->section_name,
+                    'semester' => null,
+                    'room' => $roomPrefix . '-' . str_pad((string) ($sectionIndex + 101), 3, '0', STR_PAD_LEFT),
+                    'department' => $department,
+                    'subject_codes' => $subjectCodes,
+                ];
+            }
+        }
+
+        foreach ($seniorHighPlans as $index => $plan) {
+            $plans[] = [
+                'grade_level' => $plan['grade_level'],
+                'section' => $plan['section'],
+                'semester' => $plan['semester'],
+                'room' => 'S-' . str_pad((string) ($index + 201), 3, '0', STR_PAD_LEFT),
+                'department' => 'Senior High School',
+                'subject_codes' => $plan['subject_codes'],
+            ];
+        }
 
         $timeSlots = [
             ['07:00:00', '08:00:00'],
@@ -239,63 +158,146 @@ class TeachersClassesSchedulesSeeder extends Seeder
             ['Wednesday', 'Friday'],
         ];
 
-        $departmentTeacherCounters = [
-            'Elementary' => 0,
-            'Junior High School' => 0,
-            'Senior High School' => 0,
-        ];
+        $teacherAvailability = [];
 
-        foreach ($plans as $plan) {
+        foreach ($plans as $planIndex => $plan) {
+            $teacherPool = $teacherIdsByDepartment[$plan['department']] ?? [];
+            if (empty($teacherPool)) {
+                continue;
+            }
+
             foreach ($plan['subject_codes'] as $subjectIndex => $subjectCode) {
                 if (!isset($subjectMap[$subjectCode])) {
                     continue;
                 }
 
-                $teacherPool = $teacherIdsByDepartment[$plan['department']] ?? [];
-                if (empty($teacherPool)) {
-                    continue;
-                }
-
-                $teacherId = $teacherPool[$departmentTeacherCounters[$plan['department']] % count($teacherPool)];
-                $departmentTeacherCounters[$plan['department']]++;
-
-                $roomNumber = 100 + (($subjectIndex + 1) % 10);
-                $room = $plan['room_prefix'] . '-' . $roomNumber;
+                $seedKey = abs(crc32($plan['grade_level'] . '|' . $plan['section'] . '|' . $subjectCode));
+                $assignment = $this->resolveAssignment($teacherPool, $teacherAvailability, $timeSlots, $dayPatterns, $seedKey);
 
                 $class = Classes::updateOrCreate(
                     [
                         'subject_id' => $subjectMap[$subjectCode],
-                        'teacher_id' => $teacherId,
                         'section' => $plan['section'],
                         'grade_level' => $plan['grade_level'],
                         'school_year' => $schoolYear,
                         'semester' => $plan['semester'],
                     ],
                     [
-                        'room' => $room,
+                        'teacher_id' => $assignment['teacher_id'],
+                        'room' => $plan['room'],
                         'capacity' => 40,
+                        'is_advisory' => $subjectIndex === 0,
                         'status' => 'active',
                     ]
                 );
 
-                $seedKey = crc32($subjectCode . '|' . $plan['section'] . '|' . $plan['grade_level']);
-                $slot = $timeSlots[$seedKey % count($timeSlots)];
-                $days = $dayPatterns[$seedKey % count($dayPatterns)];
+                Schedule::where('class_id', $class->id)
+                    ->whereNotIn('day_of_week', $assignment['days'])
+                    ->delete();
 
-                foreach ($days as $day) {
+                foreach ($assignment['days'] as $day) {
                     Schedule::updateOrCreate(
                         [
                             'class_id' => $class->id,
                             'day_of_week' => $day,
                         ],
                         [
-                            'start_time' => $slot[0],
-                            'end_time' => $slot[1],
-                            'room' => $room,
+                            'start_time' => $assignment['slot'][0],
+                            'end_time' => $assignment['slot'][1],
+                            'room' => $plan['room'],
                         ]
                     );
                 }
             }
         }
     }
+
+    private function generateTeacherNumber(): string
+    {
+        do {
+            $teacherNumber = 'TCH-' . str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (Teacher::where('teacher_number', $teacherNumber)->exists());
+
+        return $teacherNumber;
+    }
+
+    private function departmentForGrade(string $gradeLevel): string
+    {
+        if ($gradeLevel === 'Kinder') {
+            return 'Elementary';
+        }
+
+        $gradeNumber = (int) filter_var($gradeLevel, FILTER_SANITIZE_NUMBER_INT);
+
+        if ($gradeNumber >= 11) {
+            return 'Senior High School';
+        }
+
+        if ($gradeNumber >= 7) {
+            return 'Junior High School';
+        }
+
+        return 'Elementary';
+    }
+
+    private function resolveAssignment(array $teacherPool, array &$teacherAvailability, array $timeSlots, array $dayPatterns, int $seedKey): array
+    {
+        for ($slotOffset = 0; $slotOffset < count($timeSlots); $slotOffset++) {
+            $slotIndex = ($seedKey + $slotOffset) % count($timeSlots);
+            $patternIndex = ($seedKey + $slotOffset) % count($dayPatterns);
+            $slot = $timeSlots[$slotIndex];
+            $days = $dayPatterns[$patternIndex];
+
+            for ($teacherOffset = 0; $teacherOffset < count($teacherPool); $teacherOffset++) {
+                $teacherId = $teacherPool[($seedKey + $teacherOffset) % count($teacherPool)];
+
+                if ($this->teacherIsAvailable($teacherAvailability, $teacherId, $days, $slot)) {
+                    $this->reserveTeacherSlot($teacherAvailability, $teacherId, $days, $slot);
+
+                    return [
+                        'teacher_id' => $teacherId,
+                        'slot' => $slot,
+                        'days' => $days,
+                    ];
+                }
+            }
+        }
+
+        $fallbackTeacherId = $teacherPool[$seedKey % count($teacherPool)];
+        $fallbackSlot = $timeSlots[$seedKey % count($timeSlots)];
+        $fallbackDays = $dayPatterns[$seedKey % count($dayPatterns)];
+        $this->reserveTeacherSlot($teacherAvailability, $fallbackTeacherId, $fallbackDays, $fallbackSlot);
+
+        return [
+            'teacher_id' => $fallbackTeacherId,
+            'slot' => $fallbackSlot,
+            'days' => $fallbackDays,
+        ];
+    }
+
+    private function teacherIsAvailable(array $teacherAvailability, int $teacherId, array $days, array $slot): bool
+    {
+        $slotKey = implode('-', $slot);
+
+        foreach ($days as $day) {
+            if (!empty($teacherAvailability[$teacherId][$day][$slotKey])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function reserveTeacherSlot(array &$teacherAvailability, int $teacherId, array $days, array $slot): void
+    {
+        $slotKey = implode('-', $slot);
+
+        foreach ($days as $day) {
+            $teacherAvailability[$teacherId][$day][$slotKey] = true;
+        }
+    }
 }
+
+
+
+
