@@ -1,4 +1,4 @@
-@extends('layouts.teacher')
+﻿@extends('layouts.teacher')
 
 @section('title', 'Grade Encoding')
 
@@ -44,7 +44,7 @@
             <h4 style="margin-bottom:6px;">Class Picker</h4>
             <p style="color:#64748b; max-width:720px;">Choose the class you want to work on, then narrow the list by student name, LRN, or student number. Uploaded quarterly grades lock right away for safer records.</p>
         </div>
-        <div style="padding:12px 14px; border-radius:16px; background:#eff6ff; color:#1d4ed8; font-weight:700;">{{ \$selectedClass?->subject?->subject_code ?? 'No Class Selected' }}</div>
+        <div style="padding:12px 14px; border-radius:16px; background:#eff6ff; color:#1d4ed8; font-weight:700;">{{ optional($selectedClass?->subject)->subject_code ?? 'No Class Selected' }}</div>
     </div>
 
     <form method="GET" action="{{ route('teacher.grades') }}" class="search-row" style="margin-bottom:18px;">
@@ -66,7 +66,7 @@
         @forelse($classes as $class)
             <a href="{{ route('teacher.grades', ['class_id' => $class->id]) }}" class="action-box" style="{{ $selectedClass && (int) $selectedClass->id === (int) $class->id ? 'border-color:#60a5fa; background:linear-gradient(135deg,#dbeafe,#eff6ff); box-shadow:0 16px 30px rgba(37,99,235,.12);' : '' }}">
                 <h5>{{ $class->section }}</h5>
-                <p>{{ $class->grade_level }} · {{ $class->subject->subject_code ?? '-' }}</p>
+                <p>{{ $class->grade_level }} | {{ $class->subject->subject_code ?? '-' }}</p>
                 <p>{{ $class->enrollments_count }} students ready</p>
             </a>
         @empty
@@ -158,7 +158,6 @@
     gap:12px;
     align-items:center;
 }
-
 .grade-entry-form input {
     width:100%;
     padding:13px 14px;
@@ -170,25 +169,21 @@
     color:#0f172a;
     box-shadow:inset 0 1px 2px rgba(15, 23, 42, .04);
 }
-
 .grade-entry-form input:focus {
     outline:none;
     border-color:#2563eb;
     box-shadow:0 0 0 4px rgba(37, 99, 235, .12);
 }
-
 .grade-entry-form input[readonly] {
     background:#eff6ff;
     font-weight:700;
     color:#1e3a8a;
 }
-
 .grade-preview-grid {
     display:grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap:12px;
 }
-
 .preview-pill {
     border-radius:16px;
     border:1px solid #dbe7f5;
@@ -197,31 +192,26 @@
     display:grid;
     gap:6px;
 }
-
 .preview-pill span {
     font-size:12px;
     text-transform:uppercase;
     letter-spacing:.08em;
     color:#64748b;
 }
-
 .preview-pill strong {
     font-size:18px;
     color:#0f172a;
 }
-
 .preview-pill-primary {
     background:linear-gradient(135deg, #dbeafe, #eff6ff);
     border-color:#93c5fd;
 }
-
 @media (max-width: 1200px) {
     .grade-entry-form,
     .grade-preview-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
-
 @media (max-width: 640px) {
     .grade-entry-form,
     .grade-preview-grid {
@@ -253,5 +243,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endsection
-
-

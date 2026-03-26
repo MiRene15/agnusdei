@@ -25,7 +25,7 @@
                 </div>
                 <div class="auth-tip auth-tip-green">
                     <div class="auth-tip-title">One Sign-In Format</div>
-                    <p>Student, parent, teacher, cashier, and registrar accounts now all follow the same school email standard.</p>
+                    <p>Student, teacher, cashier, and registrar accounts now all follow the same school email standard.</p>
                 </div>
             </div>
 

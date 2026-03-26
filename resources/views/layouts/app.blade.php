@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -88,5 +88,35 @@ document.addEventListener('click', function() {
     });
 });
 </script>
-</body>
+<script>
+(function () {
+    function sanitizeNumericInputs(root) {
+        (root || document).querySelectorAll('input[type="number"]').forEach(function (input) {
+            input.addEventListener('keydown', function (event) {
+                if (['e', 'E', '+', '-'].includes(event.key)) {
+                    event.preventDefault();
+                }
+            });
+            input.addEventListener('input', function () {
+                var allowDecimal = (input.step || '').includes('.') || input.dataset.decimal === 'true';
+                var value = input.value;
+                value = allowDecimal ? value.replace(/[^\d.]/g, '') : value.replace(/\D/g, '');
+                if (allowDecimal) {
+                    var parts = value.split('.');
+                    value = parts.shift() + (parts.length ? '.' + parts.join('') : '');
+                }
+                input.value = value;
+            });
+        });
+        (root || document).querySelectorAll('input[inputmode="numeric"]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                input.value = input.value.replace(/\D/g, '');
+            });
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () { sanitizeNumericInputs(document); });
+})();
+</script></body>
 </html>
+
+

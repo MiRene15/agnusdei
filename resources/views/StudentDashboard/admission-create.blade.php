@@ -37,7 +37,7 @@
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Age</label><input type="text" id="age" readonly placeholder="Auto computed age" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;"></div>
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Gender</label><select name="sex" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;"><option value="">Select Gender</option><option value="Male" {{ old('sex') == 'Male' ? 'selected' : '' }}>Male</option><option value="Female" {{ old('sex') == 'Female' ? 'selected' : '' }}>Female</option></select></div>
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Email</label><input type="email" name="email" value="{{ old('email') }}" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
-                        <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Phone</label><input type="text" name="phone" value="{{ old('phone') }}" placeholder="09XXXXXXXXX or +639XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
+                        <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Phone</label><input type="text" name="phone" value="{{ old('phone') }}" placeholder="09XXXXXXXXX or +639XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$" inputmode="numeric" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
                     </div>
                     <div style="margin-top:18px;"><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Address</label><textarea name="address" rows="3" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; resize:vertical;">{{ old('address') }}</textarea></div>
                 </div>
@@ -70,7 +70,7 @@
 
                         <div>
                             <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">LRN</label>
-                            <input type="text" name="lrn" id="lrn" value="{{ old('lrn') }}" maxlength="12" required disabled placeholder="Select grade first" pattern="^4\d{11}$" inputmode="numeric" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;">
+                            <input type="text" name="lrn" id="lrn" value="{{ old('lrn', '4') }}" maxlength="12" required disabled placeholder="4XXXXXXXXXXX" pattern="^4\d{11}$" inputmode="numeric" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;">
                             <small id="lrn_note" style="color:#64748b;">Choose a grade level to enable the LRN field. It must be 12 digits, numbers only, and start with 4.</small>
                         </div>
 
@@ -151,12 +151,15 @@ function updateAcademicFields() {
         lrnInput.disabled = false;
         lrnInput.required = true;
         lrnInput.style.background = '#ffffff';
-        lrnInput.placeholder = 'Enter 12-digit LRN starting with 4';
+        if (!lrnInput.value) {
+            lrnInput.value = '4';
+        }
+        lrnInput.placeholder = '4XXXXXXXXXXX';
         lrnNote.textContent = 'LRN is required. It must be 12 digits, numbers only, and start with 4.';
     } else {
         lrnInput.disabled = true;
         lrnInput.required = false;
-        lrnInput.value = '';
+        lrnInput.value = '4';
         lrnInput.style.background = '#f8fafc';
         lrnInput.placeholder = 'Select grade first';
         lrnNote.textContent = 'Choose a grade level to enable the LRN field. It must be 12 digits, numbers only, and start with 4.';
@@ -171,7 +174,11 @@ birthDateInput.addEventListener('change', computeAge);
 birthDateInput.addEventListener('input', computeAge);
 gradeInput.addEventListener('change', updateAcademicFields);
 lrnInput.addEventListener('input', function () {
-    this.value = this.value.replace(/\D/g, '').slice(0, 12);
+    let digits = this.value.replace(/\D/g, '');
+    if (!digits.startsWith('4')) {
+        digits = '4' + digits.replace(/^4*/, '');
+    }
+    this.value = digits.slice(0, 12);
 });
 window.addEventListener('load', function () { computeAge(); updateAcademicFields(); });
 </script>

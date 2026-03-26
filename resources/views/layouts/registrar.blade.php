@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,12 +14,16 @@
             font-family: 'Poppins', sans-serif;
             background: #f4f7fb;
             display: flex;
+            align-items: flex-start;
             min-height: 100vh;
             color: #1e293b;
         }
 
-        .sidebar {
-            width: 260px;
+        .sidebar {`r`n            width: 260px;`r`n            min-width: 260px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
             background: linear-gradient(180deg, #001e82 0%, #0c2fa0 100%);
             padding: 28px 18px;
             display: flex;
@@ -66,7 +70,7 @@
             border: none;
             background: transparent;
             text-align: left;
-            width: 100%;
+            width: 100%;`r`n                min-width: 100%;`r`n                height: auto;`r`n                position: relative;
             font-family: inherit;
             cursor: pointer;
         }
@@ -306,7 +310,7 @@
         }
 
         table {
-            width: 100%;
+            width: 100%;`r`n                min-width: 100%;`r`n                height: auto;`r`n                position: relative;
             border-collapse: collapse;
             margin-top: 8px;
             min-width: 760px;
@@ -427,7 +431,8 @@
             }
 
             .sidebar {
-                width: 220px;
+                width: 220px;`r`n                min-width: 220px;
+                min-width: 220px;`r`n                min-width: 220px;
             }
 
             .topbar {
@@ -445,7 +450,10 @@
             }
 
             .sidebar {
-                width: 100%;
+                width: 100%;`r`n                min-width: 100%;`r`n                height: auto;`r`n                position: relative;
+                min-width: 100%;`r`n                min-width: 100%;`r`n                height: auto;`r`n                position: relative;
+                height: auto;
+                position: relative;
             }
         }
     </style>
@@ -504,5 +512,39 @@
     </div>
 </div>
 
-</body>
+<script>
+(function () {
+    function sanitizeNumericInputs(root) {
+        (root || document).querySelectorAll('input[type="number"]').forEach(function (input) {
+            input.addEventListener('keydown', function (event) {
+                if (['e', 'E', '+', '-'].includes(event.key)) {
+                    event.preventDefault();
+                }
+            });
+            input.addEventListener('input', function () {
+                var allowDecimal = (input.step || '').includes('.') || input.dataset.decimal === 'true';
+                var value = input.value;
+                value = allowDecimal ? value.replace(/[^\d.]/g, '') : value.replace(/\D/g, '');
+                if (allowDecimal) {
+                    var parts = value.split('.');
+                    value = parts.shift() + (parts.length ? '.' + parts.join('') : '');
+                }
+                input.value = value;
+            });
+        });
+        (root || document).querySelectorAll('input[inputmode="numeric"]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                input.value = input.value.replace(/\D/g, '');
+            });
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () { sanitizeNumericInputs(document); });
+})();
+</script></body>
 </html>
+
+
+
+
+
+

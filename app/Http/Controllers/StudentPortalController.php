@@ -203,11 +203,6 @@ class StudentPortalController extends Controller
 
     public function uploadRequirement(Request $request)
     {
-        $request->validate([
-            'requirement_id' => 'required|exists:admission_requirements,id',
-            'document' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
-        ]);
-
         $student = $this->authenticatedStudent();
         if ($student instanceof \Illuminate\Http\RedirectResponse) {
             return $student;
@@ -225,6 +220,48 @@ class StudentPortalController extends Controller
         if ($admission->is_verified || $admission->status === 'approved') {
             return back()->with('error', 'Admission is already verified and locked.');
         }
+
+        if ($request->hasFile('documents')) {
+            $request->validate([
+                'documents' => 'required|array',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+            ]);
+
+            $uploadedCount = 0;
+
+            foreach ((array) $request->file('documents') as $requirementId => $document) {
+                if (!$document) {
+                    continue;
+                }
+
+                $requirement = $admission->requirements()->where('id', $requirementId)->first();
+                if (!$requirement) {
+                    continue;
+                }
+
+                $path = $document->store('requirements', 'public');
+                $requirement->update([
+                    'submitted' => 1,
+                    'submitted_at' => now(),
+                    'status' => 'submitted',
+                    'file_path' => $path,
+                ]);
+
+                ActivityLog::record(Auth::id(), 'admission_requirement', 'upload', 'AdmissionRequirement', $requirement->id, 'Uploaded requirement ' . $requirement->requirement_name . '.', $request->ip());
+                $uploadedCount++;
+            }
+
+            if ($uploadedCount === 0) {
+                return back()->with('error', 'Please choose at least one file to upload.');
+            }
+
+            return back()->with('success', $uploadedCount . ' requirement file(s) uploaded successfully.');
+        }
+
+        $request->validate([
+            'requirement_id' => 'required|exists:admission_requirements,id',
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+        ]);
 
         $requirement = $admission->requirements()->where('id', $request->requirement_id)->first();
         if (!$requirement) {

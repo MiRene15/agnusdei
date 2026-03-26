@@ -48,7 +48,7 @@
                     <select name="role" id="role" required>
                         <option value="">Select Role</option>
                         <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                        <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
+                        {{-- <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option> --}}
                     </select>
                 </div>
 

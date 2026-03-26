@@ -42,16 +42,25 @@
 <div class="grid-2">
     <div class="card">
         <h4 style="margin-bottom:14px;">Quick Actions</h4>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:12px;">
-            <a href="{{ route('cashier.billing') }}" class="btn btn-primary" style="text-align:center;">Open Billing Board</a>
-            <a href="{{ route('cashier.payments') }}" class="btn btn-outline" style="text-align:center;">Review Payments</a>
-            <a href="{{ route('cashier.reports') }}" class="btn btn-outline" style="text-align:center;">Collection Reports</a>
+        <div class="quick-actions">
+            <a href="{{ route('cashier.billing') }}" class="action-box">
+                <h5>Open Billing Board</h5>
+                <p>Review balances, search students quickly, and move straight into cashier posting.</p>
+            </a>
+            <a href="{{ route('cashier.payments') }}" class="action-box">
+                <h5>Review Payments</h5>
+                <p>Trace receipt numbers, posted amounts, and cashier audit names in one place.</p>
+            </a>
+            <a href="{{ route('cashier.reports') }}" class="action-box">
+                <h5>Collection Reports</h5>
+                <p>Check total collections, paid accounts, and students still carrying balances.</p>
+            </a>
         </div>
     </div>
 
     <div class="card">
         <h4 style="margin-bottom:14px;">Quick Search</h4>
-        <form action="{{ route('cashier.billing') }}" method="GET" class="search-row" style="align-items:center; gap:12px;">
+        <form action="{{ route('cashier.billing') }}" method="GET" class="search-row" style="align-items:center; gap:12px; padding:16px; border:1px solid #dbeafe; border-radius:18px; background:linear-gradient(180deg,#ffffff,#f8fbff);">
             <input type="text" name="search" placeholder="Search student, LRN, student number, or school year" value="{{ request('search') }}">
             <select name="status" class="form-control" style="max-width:220px;">
                 <option value="">All statuses</option>

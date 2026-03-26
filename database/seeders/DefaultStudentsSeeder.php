@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admission;
 use App\Models\Classes;
 use App\Models\Enrollment;
 use App\Models\ParentModel;
@@ -112,6 +113,55 @@ class DefaultStudentsSeeder extends Seeder
                         'is_transferred' => false,
                     ]
                 );
+
+                $admission = Admission::updateOrCreate(
+                    ['lrn' => $student->lrn],
+                    [
+                        'application_number' => 'APP-SEED-' . str_pad((string) $counter, 6, '0', STR_PAD_LEFT),
+                        'first_name' => $student->first_name,
+                        'last_name' => $student->last_name,
+                        'birth_date' => $student->birth_date,
+                        'sex' => $student->gender,
+                        'email' => $student->email,
+                        'institutional_email' => $student->email,
+                        'phone' => $student->phone,
+                        'address' => $student->address,
+                        'applying_for_grade' => $student->grade_level,
+                        'shs_track' => $student->shs_track,
+                        'previous_school' => 'Seeded Previous School',
+                        'previous_school_type' => $student->previous_school_type,
+                        'honor_rank' => $student->honor_rank,
+                        'status' => 'approved',
+                        'is_verified' => true,
+                        'verified_at' => now()->subDays($counter % 20),
+                        'verified_by' => null,
+                        'application_date' => now()->subDays(($counter + $slot) % 40),
+                        'remarks' => 'Seeded admission record.',
+                    ]
+                );
+
+                $requirementNames = ['Birth Certificate', 'Report Card', 'Good Moral Certificate', '2x2 ID Picture'];
+                if (TuitionPlanner::requiresShsTrack($student->grade_level)) {
+                    $requirementNames[] = 'SHS Voucher';
+                }
+
+                foreach ($requirementNames as $requirementName) {
+                    $admission->requirements()->updateOrCreate(
+                        ['requirement_name' => $requirementName],
+                        [
+                            'submitted' => 1,
+                            'submitted_at' => now()->subDays($counter % 15),
+                            'status' => 'approved',
+                            'remarks' => 'Seeded submitted requirement.',
+                            'file_path' => null,
+                        ]
+                    );
+                }
+
+                if ((int) $student->admission_id !== (int) $admission->id) {
+                    $student->admission_id = $admission->id;
+                    $student->save();
+                }
 
                 $studentUser->update(['name' => $student->first_name . ' ' . $student->last_name]);
 
