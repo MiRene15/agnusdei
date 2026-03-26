@@ -16,6 +16,7 @@ class DefaultPaymentsSeeder extends Seeder
         $cashier = User::where('role', 'cashier')->orderBy('id')->first();
         $tuitionFees = TuitionFee::with('student')->orderBy('id')->get();
         $receiptCounter = 1;
+        $updatedStudentIds = [];
 
         foreach ($tuitionFees as $index => $tuition) {
             $student = $tuition->student;
@@ -56,9 +57,18 @@ class DefaultPaymentsSeeder extends Seeder
             }
 
             $student->update([
-                'portal_access_status' => $tuition->is_downpayment_cleared ? 'unlocked' : 'locked',
-                'portal_unlocked_at' => $tuition->is_downpayment_cleared ? now()->subDays($index % 20) : null,
-                'status' => $tuition->is_downpayment_cleared ? 'payment_cleared' : 'active',
+                'portal_access_status' => 'unlocked',
+                'portal_unlocked_at' => now()->subDays($index % 20),
+                'status' => 'enrolled',
+            ]);
+
+            $updatedStudentIds[] = $student->id;
+        }
+
+        if ($updatedStudentIds !== []) {
+            Student::whereIn('id', array_unique($updatedStudentIds))->update([
+                'portal_access_status' => 'unlocked',
+                'status' => 'enrolled',
             ]);
         }
     }
@@ -83,7 +93,7 @@ class DefaultPaymentsSeeder extends Seeder
         }
 
         return match ($seed % 5) {
-            0 => round(min($totalDue, max(500, $downPayment * 0.6)), 2),
+            0 => round(min($totalDue, $downPayment), 2),
             1 => round(min($totalDue, $downPayment), 2),
             2 => round(min($totalDue, $downPayment + $monthly), 2),
             3 => round(min($totalDue, $downPayment + ($monthly * 2)), 2),

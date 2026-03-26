@@ -464,9 +464,15 @@
                 position: relative;
             }
         }
-    </style>
+    .loading-screen { position:fixed; inset:0; background:rgba(244, 247, 251, 0.9); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; z-index:9999; opacity:0; pointer-events:none; transition:opacity .22s ease; }
+.loading-screen.active { opacity:1; pointer-events:auto; }
+.loading-spinner { width:54px; height:54px; border-radius:50%; border:4px solid rgba(37,99,235,.16); border-top-color:#0b3fc7; animation:spin .8s linear infinite; }
+.loading-label { color:#0f172a; font-weight:700; letter-spacing:.04em; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
 </head>
 <body>
+<div class="loading-screen active" id="loading-screen"><div class="loading-spinner"></div><div class="loading-label">Loading, please wait...</div></div>
 
 <div class="sidebar">
     <div class="brand-box">
@@ -548,8 +554,28 @@
     }
     document.addEventListener('DOMContentLoaded', function () { sanitizeNumericInputs(document); });
 })();
+</script><script>
+(function () {
+    function bindLoadingScreen() {
+        var loadingScreen = document.getElementById('loading-screen');
+        if (!loadingScreen) { return; }
+        window.addEventListener('load', function () { loadingScreen.classList.remove('active'); });
+        document.querySelectorAll('a[href]').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                var href = link.getAttribute('href') || '';
+                if (!href || href.startsWith('#') || link.target === '_blank' || event.ctrlKey || event.metaKey) { return; }
+                loadingScreen.classList.add('active');
+            });
+        });
+        document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', function () { loadingScreen.classList.add('active'); });
+        });
+    }
+    document.addEventListener('DOMContentLoaded', bindLoadingScreen);
+})();
 </script></body>
 </html>
+
 
 
 

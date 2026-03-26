@@ -65,11 +65,17 @@
             @csrf
             <div>
                 <label style="display:block; margin-bottom:6px; font-weight:600;">Payment Plan</label>
-                <select name="payment_plan" id="payment_plan" class="form-control" style="width:100%;">
+                @if((float) $tuition->paid_amount > 0)
+                    <input type="hidden" name="payment_plan" value="{{ $selectedPlan }}">
+                @endif
+                <select name="payment_plan" id="payment_plan" class="form-control" style="width:100%;" @disabled((float) $tuition->paid_amount > 0)>
                     <option value="cash" {{ old('payment_plan', $selectedPlan) === 'cash' ? 'selected' : '' }}>Plan A - Full Cash Payment</option>
                     <option value="monthly" {{ old('payment_plan', $selectedPlan) === 'monthly' ? 'selected' : '' }}>Plan B - Monthly Schedule</option>
                     <option value="alternative" {{ old('payment_plan', $selectedPlan) === 'alternative' ? 'selected' : '' }}>Plan C - Flexible Installment</option>
                 </select>
+                @if((float) $tuition->paid_amount > 0)
+                    <small style="display:block; margin-top:6px; color:#64748b;">The payment plan is locked after the first posted payment and can no longer be changed.</small>
+                @endif
             </div>
 
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">

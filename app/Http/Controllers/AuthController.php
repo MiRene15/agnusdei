@@ -32,6 +32,7 @@ class AuthController extends Controller
     public function registerUser(Request $request)
     {
         $request->merge([
+            'role' => 'student',
             'email' => $this->normalizeInstitutionalEmail($request->input('email_local')),
         ]);
 
@@ -40,7 +41,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._-]+$/',
             'contact_number' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
-            'role' => 'required|in:student,parent',
+            'role' => 'required|in:student',
             'reference_code' => 'nullable|string|max:255',
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/'],
         ], [

@@ -8,7 +8,7 @@
         <div class="auth-hero auth-hero-student">
             <div>
                 <div class="auth-kicker">Agnus Dei Portal</div>
-                <h2>Student And Parent Registration</h2>
+                <h2>Student Registration</h2>
                 <p>All portal accounts use the institutional school email format. Students still require an active student reference code.</p>
             </div>
         </div>
@@ -37,6 +37,7 @@
 
             <form method="POST" action="{{ route('register.post') }}" class="auth-form">
                 @csrf
+                <input type="hidden" name="role" value="student">
 
                 <div class="auth-field">
                     <label>Full Name</label>
@@ -44,12 +45,9 @@
                 </div>
 
                 <div class="auth-field">
-                    <label>Role</label>
-                    <select name="role" id="role" required>
-                        <option value="">Select Role</option>
-                        <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                        {{-- <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option> --}}
-                    </select>
+                    <label>Registration Type</label>
+                    <input type="text" value="Student Account" readonly>
+                    {{-- Parent public registration intentionally kept hidden in code. --}}
                 </div>
 
                 <div class="auth-field">
@@ -125,23 +123,4 @@
 @media (max-width: 640px) { .auth-shell { margin:40px auto; } .auth-body, .auth-hero { padding:24px 20px; } .email-fixed-wrap { grid-template-columns:1fr; } .email-fixed-wrap span { border-left:none; border-top:1px solid #cbd5e1; justify-content:flex-start; padding:10px 14px; } }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const roleSelect = document.getElementById('role');
-    const referenceWrap = document.getElementById('reference_code_wrap');
-    const referenceInput = document.getElementById('reference_code');
-
-    function syncRoleFields() {
-        const isStudent = roleSelect.value === 'student' || roleSelect.value === '';
-        referenceWrap.style.display = isStudent ? 'block' : 'none';
-        referenceInput.required = isStudent;
-        if (!isStudent) {
-            referenceInput.value = '';
-        }
-    }
-
-    syncRoleFields();
-    roleSelect.addEventListener('change', syncRoleFields);
-});
-</script>
 @endsection
