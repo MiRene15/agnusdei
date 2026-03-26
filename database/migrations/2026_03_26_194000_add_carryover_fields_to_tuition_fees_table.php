@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tuition_fees', function (Blueprint $table) {
-            $table->boolean('carryover_approved')->default(false)->after('is_downpayment_cleared');
+            $table->boolean('carryover_approved')->default(false)->after('balance');
             $table->timestamp('carryover_approved_at')->nullable()->after('carryover_approved');
             $table->unsignedBigInteger('carryover_approved_by')->nullable()->after('carryover_approved_at');
             $table->string('carried_over_to_school_year')->nullable()->after('carryover_approved_by');

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('tuition_fees', function (Blueprint $table) {
             if (!Schema::hasColumn('tuition_fees', 'discount_type')) {
-                $table->string('discount_type')->nullable()->after('previous_balance');
+                $table->string('discount_type')->nullable()->after('carried_over_to_school_year');
             }
 
             if (!Schema::hasColumn('tuition_fees', 'discount_rate')) {

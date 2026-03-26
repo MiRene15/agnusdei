@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('payments', function (Blueprint $table) {
             $table->decimal('cash_tendered', 12, 2)->nullable()->after('amount');
             $table->decimal('change_amount', 12, 2)->nullable()->after('cash_tendered');
-            $table->string('notes')->nullable()->after('receipt_number');
+            $table->string('notes')->nullable()->after('change_amount');
         });
     }
 

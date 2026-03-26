@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('grade_level', 50);
             $table->string('section_name', 100);
+            $table->unsignedInteger('capacity')->default(40);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

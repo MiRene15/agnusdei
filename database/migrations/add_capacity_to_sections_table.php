@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('sections') || Schema::hasColumn('sections', 'capacity')) {
+            return;
+        }
+
         Schema::table('sections', function (Blueprint $table) {
             $table->unsignedInteger('capacity')->default(40)->after('section_name');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('sections') || !Schema::hasColumn('sections', 'capacity')) {
+            return;
+        }
+
         Schema::table('sections', function (Blueprint $table) {
             $table->dropColumn('capacity');
         });
