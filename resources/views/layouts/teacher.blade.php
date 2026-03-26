@@ -480,6 +480,11 @@
         Reports
     </a>
 
+    <a href="{{ route('teacher.settings') }}"
+       class="{{ request()->routeIs('teacher.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf

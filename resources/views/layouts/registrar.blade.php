@@ -480,6 +480,11 @@
         Section
     </a>
 
+    <a href="{{ route('registrar.settings') }}"
+       class="{{ request()->routeIs('registrar.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf

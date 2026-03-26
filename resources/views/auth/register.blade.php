@@ -3,64 +3,145 @@
 @section('title', 'Register')
 
 @section('content')
-<div style="max-width: 560px; margin: 80px auto; padding: 0 20px;">
-    <div style="background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.08); padding:40px 30px;">
-        <h2 style="text-align:center; color:#001e82; margin-bottom:10px; font-size:30px; font-weight:600;">Student Account Portal</h2>
-        <p style="text-align:center; color:#64748b; margin-bottom:30px; font-size:15px;">Create a student or parent account to begin the admission and portal process.</p>
-
-        @if ($errors->any())
-            <div style="background:#fee2e2; color:#991b1b; padding:12px 15px; border-radius:10px; margin-bottom:20px; font-size:14px;">
-                <ul style="margin:0; padding-left:18px;">
-                    @foreach ($errors->all() as $error)
-                        <li style="margin-bottom:4px;">{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('register.post') }}" style="display:grid; gap:18px;">
-            @csrf
-
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-hero auth-hero-student">
             <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Full Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
+                <div class="auth-kicker">Agnus Dei Portal</div>
+                <h2>Student And Parent Registration</h2>
+                <p>All portal accounts use the institutional school email format. Students still require an active student reference code.</p>
+            </div>
+        </div>
+
+        <div class="auth-body">
+            @if ($errors->any())
+                <div class="auth-alert auth-alert-error">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="auth-tip-grid">
+                <div class="auth-tip auth-tip-blue">
+                    <div class="auth-tip-title">Institutional Email Only</div>
+                    <p>Every account uses the fixed <strong>@agnusdei.local</strong> domain. Users only complete the username part.</p>
+                </div>
+                <div class="auth-tip auth-tip-green">
+                    <div class="auth-tip-title">Password Rule</div>
+                    <p>Use 8 or more characters with uppercase, lowercase, 2 numbers, and 1 special character.</p>
+                </div>
             </div>
 
-            <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
+            <form method="POST" action="{{ route('register.post') }}" class="auth-form">
+                @csrf
+
+                <div class="auth-field">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="auth-field">
+                    <label>Role</label>
+                    <select name="role" id="role" required>
+                        <option value="">Select Role</option>
+                        <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
+                        <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
+                    </select>
+                </div>
+
+                <div class="auth-field">
+                    <label>Institutional Email</label>
+                    <div class="email-fixed-wrap">
+                        <input type="text" name="email_local" id="email_local" value="{{ old('email_local', str_replace('@agnusdei.local', '', (string) old('email'))) }}" placeholder="portal.username" autocomplete="off" required>
+                        <span>@agnusdei.local</span>
+                    </div>
+                    <small>Only the username part is needed. The school domain is fixed automatically.</small>
+                </div>
+
+                <div class="auth-field" id="reference_code_wrap">
+                    <label>Student Reference Code</label>
+                    <input type="text" name="reference_code" id="reference_code" value="{{ old('reference_code') }}" placeholder="Enter your student verification code" style="text-transform:uppercase;">
+                    <small>This verifies that the student is an upcoming Agnus Dei learner.</small>
+                </div>
+
+                <div class="auth-field">
+                    <label>Contact Number</label>
+                    <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="09XXXXXXXXX or +639XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$">
+                </div>
+
+                <div class="auth-field">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Create a strong password" required>
+                </div>
+
+                <div class="auth-field">
+                    <label>Confirm Password</label>
+                    <input type="password" name="password_confirmation" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="auth-submit">Create Account</button>
+            </form>
+
+            <div class="auth-links">
+                <p>Already have an account? <a href="{{ route('login') }}">Login here</a></p>
+                <p>School staff? <a href="{{ route('staff.register') }}">Use staff portal</a></p>
             </div>
-
-            <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Contact Number</label>
-                <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="Enter your contact number" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
-            </div>
-
-            <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Role</label>
-                <select name="role" id="role" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none; background:#fff;">
-                    <option value="">Select Role</option>
-                    <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                    <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                </select>
-            </div>
-
-            <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Password</label>
-                <input type="password" name="password" placeholder="Enter your password" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
-            </div>
-
-            <div>
-                <label style="display:block; margin-bottom:8px; font-weight:500; color:#334155;">Confirm Password</label>
-                <input type="password" name="password_confirmation" placeholder="Confirm your password" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; outline:none;">
-            </div>
-
-            <button type="submit" style="width:100%; background:#001e82; color:#fff; border:none; padding:13px; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; transition:0.3s ease;">Create Account</button>
-        </form>
-
-        <p style="margin-top:22px; text-align:center; font-size:14px; color:#64748b;">Already have an account? <a href="{{ route('login') }}" style="color:#001e82; font-weight:600; text-decoration:none;">Login here</a></p>
-        <p style="margin-top:10px; text-align:center; font-size:14px; color:#64748b;">School staff? <a href="{{ route('staff.register') }}" style="color:#001e82; font-weight:600; text-decoration:none;">Use staff portal</a></p>
+        </div>
     </div>
 </div>
 
+<style>
+.auth-shell { max-width: 700px; margin: 70px auto; padding: 0 20px; }
+.auth-card { background:#fff; border-radius:24px; overflow:hidden; border:1px solid #dbe2ea; box-shadow:0 20px 44px rgba(15,23,42,0.10); }
+.auth-hero { padding:30px 32px; color:#fff; }
+.auth-hero-student { background:linear-gradient(135deg, #0f172a, #1d4ed8); }
+.auth-kicker { font-size:12px; text-transform:uppercase; letter-spacing:.14em; opacity:.8; margin-bottom:10px; }
+.auth-hero h2 { margin:0; font-size:31px; line-height:1.15; }
+.auth-hero p { margin:10px 0 0; color:rgba(255,255,255,.88); line-height:1.7; }
+.auth-body { padding:28px 32px 32px; }
+.auth-alert { border-radius:14px; padding:14px 16px; margin-bottom:18px; }
+.auth-alert ul { margin:0; padding-left:18px; }
+.auth-alert-error { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+.auth-tip-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:18px; }
+.auth-tip { padding:16px; border-radius:16px; border:1px solid; }
+.auth-tip-title { font-size:12px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:8px; }
+.auth-tip p { margin:0; line-height:1.6; font-size:14px; }
+.auth-tip-blue { background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a; }
+.auth-tip-green { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+.auth-form { display:grid; gap:18px; }
+.auth-field label { display:block; margin-bottom:8px; color:#334155; font-weight:600; }
+.auth-field small { display:block; margin-top:6px; color:#64748b; }
+.auth-field input, .auth-field select { width:100%; padding:13px 14px; border:1px solid #cbd5e1; border-radius:12px; font-size:15px; outline:none; background:#fff; }
+.auth-field input:focus, .auth-field select:focus { border-color:#1d4ed8; box-shadow:0 0 0 3px rgba(29,78,216,.12); }
+.email-fixed-wrap { display:grid; grid-template-columns:1fr auto; align-items:center; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden; background:#fff; }
+.email-fixed-wrap input { border:none; border-radius:0; }
+.email-fixed-wrap span { padding:0 14px; height:100%; display:flex; align-items:center; background:#eff6ff; color:#1e3a8a; font-weight:700; border-left:1px solid #cbd5e1; }
+.auth-submit { width:100%; border:none; border-radius:12px; padding:14px; background:#0f172a; color:#fff; font-size:16px; font-weight:700; cursor:pointer; }
+.auth-links { margin-top:22px; display:grid; gap:8px; text-align:center; color:#64748b; }
+.auth-links a { color:#1d4ed8; font-weight:700; text-decoration:none; }
+@media (max-width: 640px) { .auth-shell { margin:40px auto; } .auth-body, .auth-hero { padding:24px 20px; } .email-fixed-wrap { grid-template-columns:1fr; } .email-fixed-wrap span { border-left:none; border-top:1px solid #cbd5e1; justify-content:flex-start; padding:10px 14px; } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const roleSelect = document.getElementById('role');
+    const referenceWrap = document.getElementById('reference_code_wrap');
+    const referenceInput = document.getElementById('reference_code');
+
+    function syncRoleFields() {
+        const isStudent = roleSelect.value === 'student' || roleSelect.value === '';
+        referenceWrap.style.display = isStudent ? 'block' : 'none';
+        referenceInput.required = isStudent;
+        if (!isStudent) {
+            referenceInput.value = '';
+        }
+    }
+
+    syncRoleFields();
+    roleSelect.addEventListener('change', syncRoleFields);
+});
+</script>
 @endsection

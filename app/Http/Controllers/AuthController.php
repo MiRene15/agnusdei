@@ -31,15 +31,45 @@ class AuthController extends Controller
 
     public function registerUser(Request $request)
     {
+        $request->merge([
+            'email' => $this->normalizeInstitutionalEmail($request->input('email_local')),
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'contact_number' => 'nullable|string|max:20',
+            'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._-]+$/',
+            'contact_number' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'role' => 'required|in:student,parent',
-            'password' => 'required|string|min:8|confirmed',
+            'reference_code' => 'nullable|string|max:255',
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/'],
+        ], [
+            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
+            'password.regex' => 'Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 2 numbers, and 1 special character.',
+            'email_local.regex' => 'Institutional email may only use letters, numbers, periods, underscores, and hyphens.',
         ]);
 
-        $user = $this->createUserFromRegistration($request, null);
+        if ($request->role === 'student') {
+            if (!preg_match('/@agnusdei\.local$/i', trim((string) $request->email))) {
+                return back()->withErrors([
+                    'email' => 'Student email must end with @agnusdei.local.',
+                ])->withInput();
+            }
+
+            $referenceCode = RoleReferenceCode::where('code', trim((string) $request->reference_code))
+                ->where('role', 'student')
+                ->first();
+
+            if (!$referenceCode || !$referenceCode->is_active || !$referenceCode->canStillBeUsed()) {
+                return back()->withErrors([
+                    'reference_code' => 'A valid active student reference code is required for student registration.',
+                ])->withInput();
+            }
+        } else {
+            $referenceCode = null;
+        }
+
+        $user = $this->createUserFromRegistration($request, $referenceCode);
 
         ActivityLog::record(
             $user->id,
@@ -58,13 +88,22 @@ class AuthController extends Controller
 
     public function registerStaff(Request $request)
     {
+        $request->merge([
+            'email' => $this->normalizeInstitutionalEmail($request->input('email_local')),
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'contact_number' => 'nullable|string|max:20',
-            'role' => 'required|in:teacher,registrar,cashier,admin',
+            'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._-]+$/',
+            'contact_number' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'role' => 'required|in:teacher,registrar,cashier',
             'reference_code' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/'],
+        ], [
+            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
+            'password.regex' => 'Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 2 numbers, and 1 special character.',
+            'email_local.regex' => 'Institutional email may only use letters, numbers, periods, underscores, and hyphens.',
         ]);
 
         $referenceCode = RoleReferenceCode::where('code', trim($request->reference_code))
@@ -115,11 +154,20 @@ class AuthController extends Controller
     public function loginUser(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._@-]+$/',
             'password' => 'required|string',
+        ], [
+            'email_local.regex' => 'Institutional email may only use letters, numbers, periods, underscores, hyphens, and the @ symbol.',
         ]);
 
-        $loginEmail = trim(strtolower($request->email));
+        $loginEmail = $this->normalizeInstitutionalLogin($request->input('email_local'));
+
+        if ($loginEmail === '') {
+            return back()->withErrors([
+                'email_local' => 'Please enter your institutional email username.',
+            ])->withInput();
+        }
+
         $credentialEmail = $loginEmail;
 
         if (!User::whereRaw('LOWER(email) = ?', [$credentialEmail])->exists()) {
@@ -237,6 +285,37 @@ class AuthController extends Controller
         }
 
         return $user;
+    }
+
+    private function normalizeInstitutionalEmail(?string $emailLocal): string
+    {
+        $emailLocal = trim(strtolower((string) $emailLocal));
+
+        if ($emailLocal === '') {
+            return '';
+        }
+
+        if (str_contains($emailLocal, '@')) {
+            [$localPart] = explode('@', $emailLocal, 2);
+            $emailLocal = $localPart;
+        }
+
+        return $emailLocal . '@agnusdei.local';
+    }
+
+    private function normalizeInstitutionalLogin(?string $value): string
+    {
+        $value = trim(strtolower((string) $value));
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (str_contains($value, '@')) {
+            return $value;
+        }
+
+        return $value . '@agnusdei.local';
     }
 
     private function redirectByRole(string $role)

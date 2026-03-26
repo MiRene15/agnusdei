@@ -3,10 +3,9 @@
 @section('title', 'Reference Codes')
 
 @section('content')
-
 <div class="page-intro">
     <h4>Reference Codes</h4>
-    <p>Create and manage registration codes for teacher, registrar, cashier, and admin accounts.</p>
+    <p>Create and manage verification codes for upcoming students and internal staff accounts.</p>
 </div>
 
 <div class="grid-2">
@@ -20,36 +19,21 @@
                 <label for="role">Role</label>
                 <select name="role" id="role" class="form-control" required>
                     <option value="">Select Role</option>
+                    <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
                     <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
                     <option value="registrar" {{ old('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                     <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <input
-                    type="text"
-                    name="description"
-                    id="description"
-                    class="form-control"
-                    value="{{ old('description') }}"
-                    placeholder="What is this code for?"
-                >
+                <input type="text" name="description" id="description" class="form-control" value="{{ old('description') }}" placeholder="What is this code for?">
             </div>
 
             <div class="form-group">
                 <label for="max_uses">Max Uses</label>
-                <input
-                    type="number"
-                    min="1"
-                    name="max_uses"
-                    id="max_uses"
-                    class="form-control"
-                    value="{{ old('max_uses') }}"
-                    placeholder="Leave blank for unlimited"
-                >
+                <input type="number" min="1" name="max_uses" id="max_uses" class="form-control" value="{{ old('max_uses') }}" placeholder="Leave blank for unlimited">
             </div>
 
             <button type="submit" class="btn btn-primary">Create Reference Code</button>
@@ -62,10 +46,10 @@
         <form method="GET" action="{{ route('admin.reference-codes') }}" class="search-row">
             <select name="role" class="form-control">
                 <option value="">All Roles</option>
+                <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
                 <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
                 <option value="registrar" {{ request('role') == 'registrar' ? 'selected' : '' }}>Registrar</option>
                 <option value="cashier" {{ request('role') == 'cashier' ? 'selected' : '' }}>Cashier</option>
-                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
 
             <select name="status" class="form-control">
@@ -76,13 +60,7 @@
                 <option value="unused" {{ request('status') == 'unused' ? 'selected' : '' }}>Unused</option>
             </select>
 
-            <input
-                type="text"
-                name="search"
-                class="form-control"
-                value="{{ request('search') }}"
-                placeholder="Search code, role, or description"
-            >
+            <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search code, role, or description">
 
             <button type="submit" class="btn btn-primary">Filter</button>
         </form>
@@ -139,5 +117,4 @@
         </div>
     </div>
 </div>
-
 @endsection

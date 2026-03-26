@@ -5,9 +5,12 @@ namespace App\Support;
 use App\Models\Student;
 use App\Models\TuitionFee;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class TuitionPlanner
 {
+    private static array $columnCache = [];
+
     public static function shsTracks(): array
     {
         return ['STEM', 'ABM', 'HUMSS', 'GAS'];
@@ -190,6 +193,10 @@ class TuitionPlanner
 
     public static function approvedCarryoverAmount(Student $student, string $schoolYear): float
     {
+        if (!self::hasTuitionColumn('carryover_approved') || !self::hasTuitionColumn('carried_over_to_school_year')) {
+            return 0.0;
+        }
+
         return round((float) TuitionFee::where('student_id', $student->id)
             ->where('school_year', '!=', $schoolYear)
             ->where('balance', '>', 0)
@@ -237,6 +244,15 @@ class TuitionPlanner
         ];
     }
 
+    public static function persistableTuitionPayload(array $payload): array
+    {
+        return array_filter(
+            $payload,
+            fn ($value, $column) => self::hasTuitionColumn((string) $column),
+            ARRAY_FILTER_USE_BOTH
+        );
+    }
+
     public static function nextMonthlyDueDate(?Carbon $baseDate = null): Carbon
     {
         $baseDate = ($baseDate ?: now())->copy()->startOfDay();
@@ -247,5 +263,16 @@ class TuitionPlanner
         }
 
         return $dueDate;
+    }
+
+    private static function hasTuitionColumn(string $column): bool
+    {
+        $key = 'tuition_fees.' . $column;
+
+        if (!array_key_exists($key, self::$columnCache)) {
+            self::$columnCache[$key] = Schema::hasColumn('tuition_fees', $column);
+        }
+
+        return self::$columnCache[$key];
     }
 }

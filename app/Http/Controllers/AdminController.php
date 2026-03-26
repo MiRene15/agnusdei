@@ -186,15 +186,18 @@ class AdminController extends Controller
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => [
+                'nullable',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/',
+            ],
+        ], [
+            'password.regex' => 'Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 2 numbers, and 1 special character.',
         ]);
 
         $admin = User::findOrFail(Auth::id());
-
-        $admin->name = $request->name;
-        $admin->contact_number = $request->contact_number;
 
         if ($request->filled('password')) {
             $admin->password = Hash::make($request->password);
@@ -205,14 +208,14 @@ class AdminController extends Controller
         ActivityLog::record(
             Auth::id(),
             'admin',
-            'update_profile',
+            'change_password',
             'User',
             $admin->id,
-            'Updated admin profile settings.',
+            'Updated admin password.',
             $request->ip()
         );
 
-        return back()->with('success', 'Settings updated successfully.');
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function referenceCodes(Request $request)
@@ -257,7 +260,7 @@ class AdminController extends Controller
     public function storeReferenceCode(Request $request)
     {
         $request->validate([
-            'role' => 'required|in:teacher,registrar,cashier,admin',
+            'role' => 'required|in:student,teacher,registrar,cashier',
             'description' => 'nullable|string|max:255',
             'max_uses' => 'nullable|integer|min:1',
         ]);

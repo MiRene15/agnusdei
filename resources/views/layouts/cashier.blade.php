@@ -304,6 +304,11 @@
         Reports
     </a>
 
+    <a href="{{ route('cashier.settings') }}"
+       class="{{ request()->routeIs('cashier.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf

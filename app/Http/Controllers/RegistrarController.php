@@ -569,13 +569,16 @@ class RegistrarController extends Controller
         $tuition = TuitionFee::updateOrCreate([
             'student_id' => $student->id,
             'school_year' => $schoolYear,
-        ], $payload);
+        ], TuitionPlanner::persistableTuitionPayload($payload));
 
-        TuitionFee::where('student_id', $student->id)
-            ->where('school_year', '!=', $schoolYear)
-            ->where('balance', '>', 0)
-            ->where('carryover_approved', true)
-            ->update(['carried_over_to_school_year' => $schoolYear]);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('tuition_fees', 'carryover_approved')
+            && \Illuminate\Support\Facades\Schema::hasColumn('tuition_fees', 'carried_over_to_school_year')) {
+            TuitionFee::where('student_id', $student->id)
+                ->where('school_year', '!=', $schoolYear)
+                ->where('balance', '>', 0)
+                ->where('carryover_approved', true)
+                ->update(['carried_over_to_school_year' => $schoolYear]);
+        }
 
         return $tuition;
     }

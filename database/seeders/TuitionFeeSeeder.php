@@ -30,16 +30,19 @@ class TuitionFeeSeeder extends Seeder
                     'student_id' => $student->id,
                     'school_year' => $effectiveSchoolYear,
                 ],
-                $payload
+                TuitionPlanner::persistableTuitionPayload($payload)
             );
 
-            TuitionFee::where('student_id', $student->id)
-                ->where('school_year', '!=', $effectiveSchoolYear)
-                ->where('balance', '>', 0)
-                ->where('carryover_approved', true)
-                ->update([
-                    'carried_over_to_school_year' => $effectiveSchoolYear,
-                ]);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('tuition_fees', 'carryover_approved')
+                && \Illuminate\Support\Facades\Schema::hasColumn('tuition_fees', 'carried_over_to_school_year')) {
+                TuitionFee::where('student_id', $student->id)
+                    ->where('school_year', '!=', $effectiveSchoolYear)
+                    ->where('balance', '>', 0)
+                    ->where('carryover_approved', true)
+                    ->update([
+                        'carried_over_to_school_year' => $effectiveSchoolYear,
+                    ]);
+            }
         }
     }
 }

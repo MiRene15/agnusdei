@@ -314,6 +314,11 @@
         Billing
     </a>
 
+    <a href="{{ route('parent.settings') }}"
+       class="{{ request()->routeIs('parent.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf

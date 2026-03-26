@@ -5,7 +5,7 @@
 @section('content')
 <div class="page-intro" style="margin-bottom:20px;">
     <h4>Receive Payment</h4>
-    <p>Record face-to-face tuition payments, installments, purchases, or SHS voucher credit against the student billing record.</p>
+    <p>Choose Plan A, B, or C. The system computes the bill automatically, and the cashier only enters the cash received.</p>
 </div>
 
 @if(session('success'))<div class="card" style="border-left:4px solid #16a34a; color:#166534; margin-bottom:16px;">{{ session('success') }}</div>@endif
@@ -25,8 +25,8 @@
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:18px;">
     <div class="card" style="background:linear-gradient(135deg, #fffaf5, #ffffff); border:1px solid #fed7aa;"><div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#9a3412;">Student</div><div style="font-size:24px; font-weight:700; color:#7c2d12; margin-top:6px;">{{ $student->first_name ?? '-' }} {{ $student->last_name ?? '' }}</div><div style="color:#9a3412; margin-top:6px;">{{ $student->student_number ?? '-' }} | {{ $tuition->school_year }}</div></div>
-    <div class="card" style="background:linear-gradient(135deg, #f0fdf4, #ffffff); border:1px solid #bbf7d0;"><div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#166534;">Unlock Status</div><div style="font-size:24px; font-weight:700; color:#14532d; margin-top:6px;">{{ $tuition->is_downpayment_cleared ? 'Unlocked' : 'Locked' }}</div><div style="color:#166534; margin-top:6px;">Remaining to unlock: PHP {{ number_format($remainingForUnlock, 2) }}</div></div>
-    <div class="card" style="background:linear-gradient(135deg, #eff6ff, #ffffff); border:1px solid #bfdbfe;"><div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#1d4ed8;">Monthly Due</div><div style="font-size:24px; font-weight:700; color:#1e3a8a; margin-top:6px;">Every 15th</div><div style="color:#1d4ed8; margin-top:6px;">Down payment minimum: PHP {{ number_format($tuition->down_payment_required, 2) }}</div></div>
+    <div class="card" style="background:linear-gradient(135deg, #f0fdf4, #ffffff); border:1px solid #bbf7d0;"><div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#166534;">Portal Status</div><div style="font-size:24px; font-weight:700; color:#14532d; margin-top:6px;">{{ $tuition->is_downpayment_cleared ? 'Unlocked' : 'Locked' }}</div><div style="color:#166534; margin-top:6px;">Remaining to unlock: PHP {{ number_format($remainingForUnlock, 2) }}</div></div>
+    <div class="card" style="background:linear-gradient(135deg, #eff6ff, #ffffff); border:1px solid #bfdbfe;"><div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#1d4ed8;">Cashiering Rule</div><div style="font-size:24px; font-weight:700; color:#1e3a8a; margin-top:6px;">Cash Only</div><div style="color:#1d4ed8; margin-top:6px;">The cashier only records physical cash received and system-computed application.</div></div>
 </div>
 
 <div class="grid-2">
@@ -35,28 +35,73 @@
         <div style="display:grid; gap:12px;">
             <div><strong>LRN:</strong> {{ $student->lrn ?? '-' }}</div>
             <div><strong>Grade Level:</strong> {{ $student->grade_level ?? '-' }}{{ $student->shs_track ? ' | ' . $student->shs_track : '' }}</div>
-            <div><strong>Payment Plan:</strong> {{ ucfirst($tuition->payment_plan ?? 'monthly') }}</div>
+            <div><strong>Current Plan:</strong> {{ strtoupper($selectedPlan === 'cash' ? 'Plan A' : ($selectedPlan === 'monthly' ? 'Plan B' : 'Plan C')) }}</div>
             <div><strong>Total Tuition:</strong> PHP {{ number_format($tuition->total_amount, 2) }}</div>
             <div><strong>Automatic Discount:</strong> {{ $tuition->discount_type ? ucwords(str_replace('_', ' ', $tuition->discount_type)) : 'None' }}</div>
             <div><strong>Discount Amount:</strong> PHP {{ number_format($tuition->discount_amount ?? 0, 2) }}</div>
             <div><strong>Approved Carryover:</strong> PHP {{ number_format($tuition->previous_balance, 2) }}</div>
             <div><strong>Total Due:</strong> PHP {{ number_format($tuition->total_due, 2) }}</div>
-            <div><strong>Balance:</strong> PHP {{ number_format($tuition->balance, 2) }}</div>
+            <div><strong>Already Paid:</strong> PHP {{ number_format($tuition->paid_amount, 2) }}</div>
+            <div><strong>Current Balance:</strong> PHP {{ number_format($tuition->balance, 2) }}</div>
             <div><strong>Voucher Status:</strong> {{ ucwords(str_replace('_', ' ', $tuition->voucher_status ?? 'not_applicable')) }}</div>
         </div>
     </div>
 
     <div class="card">
-        <h4 style="margin-bottom:14px;">Payment Form</h4>
+        <h4 style="margin-bottom:14px;">Cash Receiving Form</h4>
+
+        <div style="display:grid; gap:12px; margin-bottom:18px;">
+            <div style="padding:14px; border:1px solid #dbeafe; border-radius:14px; background:#f8fbff;">
+                <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#1d4ed8;">Plan Guide</div>
+                <div style="color:#334155; margin-top:8px; line-height:1.7; font-size:14px;">
+                    Plan A: full payment with automatic cash-plan tuition discount.<br>
+                    Plan B: down payment first, then monthly tuition posting.<br>
+                    Plan C: flexible installment amount suggested automatically.
+                </div>
+            </div>
+        </div>
+
         <form action="{{ route('cashier.payments.store', $tuition->id) }}" method="POST" style="display:grid; gap:14px;" id="payment-form">
             @csrf
-            <div><label style="display:block; margin-bottom:6px; font-weight:600;">Payment Plan</label><select name="payment_plan" id="payment_plan" class="form-control" style="width:100%;"><option value="monthly" {{ old('payment_plan', $tuition->payment_plan ?? 'monthly') === 'monthly' ? 'selected' : '' }}>Plan B - Monthly</option><option value="cash" {{ old('payment_plan', $tuition->payment_plan) === 'cash' ? 'selected' : '' }}>Plan A - Cash</option><option value="alternative" {{ old('payment_plan', $tuition->payment_plan) === 'alternative' ? 'selected' : '' }}>Plan C - Alternative</option></select><small style="display:block; margin-top:6px; color:#64748b;">If a student also qualifies for honors, the system keeps only the higher automatic tuition discount.</small></div>
-            <div><label style="display:block; margin-bottom:6px; font-weight:600;">Payment Label</label><select name="payment_label" class="form-control" style="width:100%;"><option value="Down Payment" {{ old('payment_label') === 'Down Payment' ? 'selected' : '' }}>Down Payment</option><option value="Monthly Installment" {{ old('payment_label', 'Monthly Installment') === 'Monthly Installment' ? 'selected' : '' }}>Monthly Installment</option><option value="Full Payment" {{ old('payment_label') === 'Full Payment' ? 'selected' : '' }}>Full Payment</option><option value="School Purchase" {{ old('payment_label') === 'School Purchase' ? 'selected' : '' }}>School Purchase</option></select></div>
-            <div><label style="display:block; margin-bottom:6px; font-weight:600;">Amount Applied to Tuition</label><input type="number" step="0.01" min="1" max="{{ $tuition->balance }}" name="amount" id="amount" value="{{ old('amount', $remainingForUnlock > 0 ? min($remainingForUnlock, $tuition->balance) : '') }}" class="form-control" required><small style="display:block; margin-top:6px; color:#64748b;">Monthly-plan accounts must clear at least PHP {{ number_format($tuition->down_payment_required, 2) }} to unlock the portal.</small></div>
-            <div><label style="display:block; margin-bottom:6px; font-weight:600;">Payment Method</label><select name="payment_method" id="payment_method" class="form-control" required><option value="Cash" {{ old('payment_method', 'Cash') === 'Cash' ? 'selected' : '' }}>Cash</option><option value="GCash" {{ old('payment_method') === 'GCash' ? 'selected' : '' }}>GCash</option><option value="Bank Transfer" {{ old('payment_method') === 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option></select></div>
-            <div id="cash-fields"><div><label style="display:block; margin-bottom:6px; font-weight:600;">Cash Tendered</label><input type="number" step="0.01" min="0" name="cash_tendered" id="cash_tendered" value="{{ old('cash_tendered') }}" class="form-control"></div><div style="margin-top:10px; color:#64748b; font-size:13px;">Change to return: <strong id="change-preview">PHP 0.00</strong></div></div>
-            <div><label style="display:block; margin-bottom:6px; font-weight:600;">Notes</label><input type="text" name="notes" value="{{ old('notes') }}" class="form-control" placeholder="Optional cashier note or purchase detail"></div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;"><button type="submit" class="btn btn-primary">Post Payment</button><a href="{{ route('cashier.billing') }}" class="btn btn-outline">Back to Billing</a></div>
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Payment Plan</label>
+                <select name="payment_plan" id="payment_plan" class="form-control" style="width:100%;">
+                    <option value="cash" {{ old('payment_plan', $selectedPlan) === 'cash' ? 'selected' : '' }}>Plan A - Full Cash Payment</option>
+                    <option value="monthly" {{ old('payment_plan', $selectedPlan) === 'monthly' ? 'selected' : '' }}>Plan B - Monthly Schedule</option>
+                    <option value="alternative" {{ old('payment_plan', $selectedPlan) === 'alternative' ? 'selected' : '' }}>Plan C - Flexible Installment</option>
+                </select>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+                <div style="padding:14px; border:1px solid #dbeafe; border-radius:14px; background:#eff6ff;">
+                    <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#1d4ed8;">Auto Label</div>
+                    <div id="auto-label" style="margin-top:8px; font-size:20px; font-weight:700; color:#1e3a8a;">-</div>
+                </div>
+                <div style="padding:14px; border:1px solid #dcfce7; border-radius:14px; background:#f0fdf4;">
+                    <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#166534;">Applied To Tuition</div>
+                    <div id="applied-amount" style="margin-top:8px; font-size:20px; font-weight:700; color:#166534;">PHP 0.00</div>
+                </div>
+                <div style="padding:14px; border:1px solid #fef3c7; border-radius:14px; background:#fffbeb;">
+                    <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#b45309;">Cash Change</div>
+                    <div id="change-preview" style="margin-top:8px; font-size:20px; font-weight:700; color:#92400e;">PHP 0.00</div>
+                </div>
+            </div>
+
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Cash Received</label>
+                <input type="number" step="0.01" min="1" name="cash_tendered" id="cash_tendered" value="{{ old('cash_tendered') }}" class="form-control" required>
+                <small style="display:block; margin-top:6px; color:#64748b;">Enter only the actual money physically received by the cashier.</small>
+            </div>
+
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Cashier Notes</label>
+                <input type="text" name="notes" value="{{ old('notes') }}" class="form-control" placeholder="Optional note for this cash transaction">
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary">Post Cash Payment</button>
+                <a href="{{ route('cashier.billing') }}" class="btn btn-outline">Back to Billing</a>
+            </div>
         </form>
     </div>
 </div>
@@ -87,23 +132,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const amountInput = document.getElementById('amount');
-    const methodInput = document.getElementById('payment_method');
-    const cashTenderedInput = document.getElementById('cash_tendered');
-    const cashFields = document.getElementById('cash-fields');
+    const planInput = document.getElementById('payment_plan');
+    const cashInput = document.getElementById('cash_tendered');
+    const autoLabel = document.getElementById('auto-label');
+    const appliedAmount = document.getElementById('applied-amount');
     const changePreview = document.getElementById('change-preview');
-    function syncCashView() {
-        const isCash = methodInput.value === 'Cash';
-        cashFields.style.display = isCash ? 'block' : 'none';
-        const amount = parseFloat(amountInput.value || '0');
-        const tendered = parseFloat(cashTenderedInput.value || '0');
-        const change = Math.max(0, tendered - amount);
-        changePreview.textContent = 'PHP ' + change.toFixed(2);
+    const planOptions = @json($planOptions);
+
+    function syncPaymentPreview() {
+        const selected = planOptions[planInput.value] || planOptions.monthly;
+        const amount = Number(selected.recommended_amount || 0);
+        const cash = Number(cashInput.value || 0);
+        autoLabel.textContent = selected.payment_label || 'Pending';
+        appliedAmount.textContent = 'PHP ' + amount.toFixed(2);
+        changePreview.textContent = 'PHP ' + Math.max(0, cash - amount).toFixed(2);
     }
-    amountInput.addEventListener('input', syncCashView);
-    methodInput.addEventListener('change', syncCashView);
-    cashTenderedInput.addEventListener('input', syncCashView);
-    syncCashView();
+
+    planInput.addEventListener('change', syncPaymentPreview);
+    cashInput.addEventListener('input', syncPaymentPreview);
+    syncPaymentPreview();
 });
 </script>
 @endsection

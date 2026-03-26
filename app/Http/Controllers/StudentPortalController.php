@@ -82,11 +82,11 @@ class StudentPortalController extends Controller
             'birth_date' => 'required|date|before:today',
             'sex' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
             'address' => 'nullable|string',
             'applying_for_grade' => 'required|string|max:50',
             'shs_track' => 'nullable|in:' . implode(',', TuitionPlanner::shsTracks()),
-            'lrn' => 'required|digits:12|unique:admissions,lrn|unique:students,lrn',
+            'lrn' => ['required', 'regex:/^4\d{11}$/', 'unique:admissions,lrn', 'unique:students,lrn'],
             'previous_school' => 'nullable|string|max:255',
             'previous_school_type' => 'nullable|in:public,private',
             'honor_rank' => 'nullable|in:1,2,3',
@@ -95,7 +95,8 @@ class StudentPortalController extends Controller
             'birth_date.before' => 'Birth date must be earlier than today.',
             'sex.required' => 'Gender is required.',
             'lrn.required' => 'LRN is required.',
-            'lrn.digits' => 'LRN must be exactly 12 digits.',
+            'lrn.regex' => 'LRN must be exactly 12 digits, numbers only, and start with 4.',
+            'phone.regex' => 'Phone number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
         ]);
 
         if (TuitionPlanner::requiresShsTrack($request->applying_for_grade) && !TuitionPlanner::normalizeTrack($request->shs_track)) {

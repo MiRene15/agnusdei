@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ParentController;
@@ -36,6 +37,8 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])
     Route::get('/grades', [StudentPortalController::class, 'grades'])->name('grades');
     Route::get('/schedule', [StudentPortalController::class, 'scheduleView'])->name('schedule');
     Route::get('/assessment', [StudentPortalController::class, 'assessment'])->name('assessment');
+    Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
+    Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:registrar'])->group(function () {
@@ -56,6 +59,8 @@ Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:regist
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
     Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
     Route::post('/sectioning/auto-assign/{id}', [RegistrarController::class, 'autoAssignSection'])->name('section.autoAssign');
+    Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
+    Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
@@ -80,6 +85,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])
     Route::get('/grades', [TeacherController::class, 'grades'])->name('grades');
     Route::post('/grades/save', [TeacherController::class, 'saveGrades'])->name('grades.save');
     Route::get('/reports', [TeacherController::class, 'reports'])->name('reports');
+    Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
+    Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::prefix('parent')->name('parent.')->middleware(['auth', 'role:parent'])->group(function () {
@@ -87,6 +94,8 @@ Route::prefix('parent')->name('parent.')->middleware(['auth', 'role:parent'])->g
     Route::get('/children', [ParentController::class, 'children'])->name('children');
     Route::get('/grades', [ParentController::class, 'grades'])->name('grades');
     Route::get('/billing', [ParentController::class, 'billing'])->name('billing');
+    Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
+    Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::prefix('cashier')->name('cashier.')->middleware(['auth', 'role:cashier'])->group(function () {
@@ -98,4 +107,6 @@ Route::prefix('cashier')->name('cashier.')->middleware(['auth', 'role:cashier'])
     Route::post('/payments/voucher/{tuitionFeeId}', [CashierController::class, 'verifyShsVoucher'])->name('payments.voucher');
     Route::get('/payments/{id}/receipt', [CashierController::class, 'showReceipt'])->name('payments.receipt');
     Route::get('/reports', [CashierController::class, 'reports'])->name('reports');
+    Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
+    Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });

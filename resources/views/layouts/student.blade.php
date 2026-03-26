@@ -485,6 +485,11 @@
         Assessment
     </a>
 
+    <a href="{{ route('student.settings') }}"
+       class="{{ request()->routeIs('student.settings*') ? 'active' : '' }}">
+        Settings
+    </a>
+
     <div class="logout-wrap">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
