@@ -1,132 +1,180 @@
 @extends('layouts.registrar')
 
-@section('title', 'Student Details')
+@section('title', 'Application Details')
 
 @section('content')
 
 <div class="page-intro">
-    <h4>Student Details</h4>
-    <p>View all available information for this student record.</p>
+    <h4>Application Details</h4>
+    <p>Review applicant information, requirements, and update the admission decision.</p>
 </div>
 
-<div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-        <h4 style="margin-bottom:0;">Student Profile</h4>
-
-        <a href="{{ route('registrar.students') }}" class="btn btn-outline">
-            Back to Student Records
-        </a>
+@if(session('success'))
+    <div class="card" style="border-left:4px solid #16a34a; color:#166534;">
+        {{ session('success') }}
     </div>
-</div>
+@endif
+
+@if(session('error'))
+    <div class="card" style="border-left:4px solid #dc2626; color:#991b1b;">
+        {{ session('error') }}
+    </div>
+@endif
+
+@php
+    $status = strtolower((string) $admission->status);
+@endphp
 
 <div class="grid-2">
     <div class="card">
-        <h4>Basic Information</h4>
+        <h4>Applicant Information</h4>
 
-        <div class="section-box">
-            <h5>Student Number</h5>
-            <p>{{ $student->student_number }}</p>
+        <div class="grid-3">
+            <div class="section-box">
+                <h5>Application No.</h5>
+                <p>{{ $admission->application_number }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>LRN</h5>
+                <p>{{ $admission->lrn ?? '-' }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Status</h5>
+                <p style="text-transform:capitalize;">{{ str_replace('_', ' ', $status) }}</p>
+            </div>
         </div>
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>LRN</h5>
-            <p>{{ $student->lrn ?? '-' }}</p>
+        <div class="grid-3" style="margin-top:16px;">
+            <div class="section-box">
+                <h5>First Name</h5>
+                <p>{{ $admission->first_name }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Last Name</h5>
+                <p>{{ $admission->last_name }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Grade Applying For</h5>
+                <p>{{ $admission->applying_for_grade }}</p>
+            </div>
         </div>
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Full Name</h5>
-            <p>{{ $student->first_name }} {{ $student->last_name }}</p>
+        <div class="grid-3" style="margin-top:16px;">
+            <div class="section-box">
+                <h5>Birth Date</h5>
+                <p>{{ $admission->birth_date ?? '-' }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Sex</h5>
+                <p>{{ $admission->sex ?? '-' }}</p>
+            </div>
+
+            <div class="section-box">
+                <h5>Application Date</h5>
+                <p>{{ $admission->application_date ?? '-' }}</p>
+            </div>
         </div>
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Birth Date</h5>
-            <p>{{ $student->birth_date ?? '-' }}</p>
-        </div>
-
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Gender</h5>
-            <p>{{ $student->gender ?? '-' }}</p>
-        </div>
-
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Status</h5>
-            <p>{{ ucfirst($student->status) }}</p>
+        <div style="margin-top:16px;" class="section-box">
+            <h5>Contact Details</h5>
+            <p><strong>Submitted Email:</strong> {{ $admission->email ?? '-' }}</p>
+            <p><strong>Institutional Email:</strong> {{ $admission->institutional_email ?? 'Not generated yet' }}</p>
+            <p><strong>Phone:</strong> {{ $admission->phone ?? '-' }}</p>
+            <p><strong>Address:</strong> {{ $admission->address ?? '-' }}</p>
+            <p><strong>Previous School:</strong> {{ $admission->previous_school ?? '-' }}</p>
+            <p><strong>Verified:</strong> {{ $admission->is_verified ? 'Yes' : 'No' }}</p>
         </div>
     </div>
 
     <div class="card">
-        <h4>School Information</h4>
+        <h4>Registrar Actions</h4>
 
-        <div class="section-box">
-            <h5>Grade Level</h5>
-            <p>{{ $student->grade_level ?? '-' }}</p>
-        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            @if(!$admission->is_verified && $status !== 'approved')
+                <form method="POST" action="{{ route('registrar.enrollments.verify', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline" style="width:100%;">Verify Admission</button>
+                </form>
+            @endif
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Section</h5>
-            <p>{{ $student->section ?? '-' }}</p>
-        </div>
+            @if($admission->is_verified && $status !== 'approved')
+                <form method="POST" action="{{ route('registrar.enrollments.approve', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-success" style="width:100%;">Approve Admission</button>
+                </form>
+            @endif
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>School Year</h5>
-            <p>{{ $student->school_year ?? '-' }}</p>
-        </div>
+            @if($status !== 'approved')
+                <form method="POST" action="{{ route('registrar.enrollments.incomplete', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-danger" style="width:100%;">Mark as Incomplete</button>
+                </form>
+            @endif
 
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Email</h5>
-            <p>{{ $student->email ?? '-' }}</p>
-        </div>
-
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Phone</h5>
-            <p>{{ $student->phone ?? '-' }}</p>
-        </div>
-
-        <div class="section-box" style="margin-top:14px;">
-            <h5>Address</h5>
-            <p>{{ $student->address ?? '-' }}</p>
+            <a href="{{ route('registrar.enrollments') }}" class="btn btn-outline" style="text-align:center;">
+                Back to Enrollment Requests
+            </a>
         </div>
     </div>
 </div>
 
-@if($student->admission)
 <div class="card">
-    <h4>Admission Information</h4>
+    <h4>Requirement Checklist</h4>
 
-    <div class="grid-3">
-        <div class="section-box">
-            <h5>Application Number</h5>
-            <p>{{ $student->admission->application_number ?? '-' }}</p>
-        </div>
-
-        <div class="section-box">
-            <h5>Admission Status</h5>
-            <p>{{ ucfirst($student->admission->status ?? '-') }}</p>
-        </div>
-
-        <div class="section-box">
-            <h5>Applying For Grade</h5>
-            <p>{{ $student->admission->applying_for_grade ?? '-' }}</p>
-        </div>
-    </div>
-
-    <div class="grid-3" style="margin-top:16px;">
-        <div class="section-box">
-            <h5>Previous School</h5>
-            <p>{{ $student->admission->previous_school ?? '-' }}</p>
-        </div>
-
-        <div class="section-box">
-            <h5>Application Date</h5>
-            <p>{{ $student->admission->application_date ?? '-' }}</p>
-        </div>
-
-        <div class="section-box">
-            <h5>Remarks</h5>
-            <p>{{ $student->admission->remarks ?? '-' }}</p>
-        </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Requirement</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Submitted Date</th>
+                    <th>File</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($admission->requirements as $req)
+                    @php
+                        $reqStatus = strtolower((string) $req->status);
+                    @endphp
+                    <tr>
+                        <td>{{ $req->requirement_name }}</td>
+                        <td>
+                            @if($reqStatus === 'approved')
+                                <span class="badge badge-approved">Approved</span>
+                            @elseif($reqStatus === 'submitted')
+                                <span class="badge badge-review">Submitted</span>
+                            @elseif($reqStatus === 'pending')
+                                <span class="badge badge-pending">Pending</span>
+                            @else
+                                <span class="badge badge-incomplete">{{ ucfirst($reqStatus ?: 'unknown') }}</span>
+                            @endif
+                        </td>
+                        <td>{{ $req->submitted ? 'Yes' : 'No' }}</td>
+                        <td>{{ $req->submitted_at ?? '-' }}</td>
+                        <td>
+                            @if($req->file_path)
+                                <a href="{{ asset('storage/' . $req->file_path) }}" target="_blank" class="btn btn-outline">
+                                    View File
+                                </a>
+                            @else
+                                <span style="color:#64748b;">No file uploaded</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#64748b;">No requirements found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
-@endif
 
 @endsection

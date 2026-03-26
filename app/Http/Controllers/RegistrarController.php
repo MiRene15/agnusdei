@@ -68,41 +68,46 @@ class RegistrarController extends Controller
     }
 
     public function verifyEnrollment($id)
-{
-    $admission = Admission::findOrFail($id);
+    {
+        $admission = Admission::findOrFail($id);
 
-    if (strtolower((string) $admission->status) === 'approved') {
-        return back()->with('error', 'Approved admission can no longer be modified.');
+        if (strtolower((string) $admission->status) === 'approved') {
+            return back()->with('error', 'Approved admission can no longer be modified.');
+        }
+
+        $institutionalEmail = $this->generateInstitutionalEmail(
+            $admission->first_name,
+            $admission->last_name
+        );
+
+        $admission->update([
+            'is_verified' => true,
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+            'institutional_email' => $institutionalEmail,
+            'status' => 'under_review',
+            'remarks' => 'Verified by registrar',
+        ]);
+
+        ActivityLog::record(
+            Auth::id(),
+            'admission',
+            'verify',
+            'Admission',
+            $admission->id,
+            'Registrar verified admission #' . $admission->application_number,
+            request()->ip()
+        );
+
+        return back()->with('success', 'Admission verified successfully.');
     }
 
-    $institutionalEmail = $this->generateInstitutionalEmail(
-        $admission->first_name,
-        $admission->last_name
-    );
+    public function approveEnrollment($id)
+    {
+        $admission = Admission::with('requirements')->findOrFail($id);
 
-    $admission->update([
-        'is_verified' => true,
-        'verified_at' => now(),
-        'verified_by' => Auth::id(),
-        'institutional_email' => $institutionalEmail,
-        'status' => 'under_review',
-        'remarks' => 'Verified by registrar',
-    ]);
-
-    ActivityLog::record(
-        Auth::id(),
-        'admission',
-        'verify',
-        'Admission',
-        $admission->id,
-        'Registrar verified admission #' . $admission->application_number,
-        request()->ip()
-    );
-
-    return back()->with('success', 'Admission verified successfully.');
-}
-
-    
+        return $this->processApproval($admission);
+    }
 
     public function markIncomplete($id)
     {
@@ -158,47 +163,63 @@ class RegistrarController extends Controller
     }
 
     public function students(Request $request)
-    {
-        $query = Student::query();
+{
+    $query = Student::query();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('student_number', 'like', "%{$search}%")
-                    ->orWhere('lrn', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('grade_level')) {
-            $query->where('grade_level', $request->grade_level);
-        }
-
-        if ($request->filled('section')) {
-            $query->where('section', $request->section);
-        }
-
-        $students = $query->latest()->paginate(10);
-
-        return view('RegistrarDashboard.students', compact('students'));
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('student_number', 'like', "%{$search}%")
+                ->orWhere('lrn', 'like', "%{$search}%")
+                ->orWhere('first_name', 'like', "%{$search}%")
+                ->orWhere('last_name', 'like', "%{$search}%");
+        });
     }
+
+    if ($request->filled('grade_level')) {
+        $query->where('grade_level', $request->grade_level);
+    }
+
+    if ($request->filled('section')) {
+        $query->where('section', $request->section);
+    }
+
+    $students = $query->latest()->paginate(10)->withQueryString();
+
+    $sections = Section::where('is_active', true)
+        ->orderBy('grade_level')
+        ->orderBy('section_name')
+        ->get()
+        ->groupBy('grade_level');
+
+    return view('RegistrarDashboard.students', compact('students', 'sections'));
+}
 
     public function sectioning(Request $request)
-    {
-        $students = Student::whereIn('status', ['approved', 'enrolled'])
-            ->where('is_transferred', false)
-            ->get();
+{
+    $students = Student::whereIn('status', ['approved', 'enrolled'])
+        ->where('is_transferred', false)
+        ->orderBy('grade_level')
+        ->orderBy('last_name')
+        ->orderBy('first_name')
+        ->get();
 
-        $sections = Section::where('is_active', true)
-            ->orderBy('grade_level')
-            ->orderBy('section_name')
-            ->get()
-            ->groupBy('grade_level');
+    $sections = Section::where('is_active', true)
+        ->orderBy('grade_level')
+        ->orderBy('section_name')
+        ->get()
+        ->groupBy('grade_level');
 
-        return view('RegistrarDashboard.section', compact('students', 'sections'));
-    }
+    $sectionCounts = Student::selectRaw('grade_level, section, school_year, COUNT(*) as total')
+        ->whereNotNull('section')
+        ->groupBy('grade_level', 'section', 'school_year')
+        ->get()
+        ->keyBy(function ($item) {
+            return $item->grade_level . '|' . $item->section . '|' . $item->school_year;
+        });
 
+    return view('RegistrarDashboard.section', compact('students', 'sections', 'sectionCounts'));
+}
     public function updateSection(Request $request, $id)
     {
         if (!AcademicEvent::enabled('enrollment_open')) {
@@ -216,15 +237,24 @@ class RegistrarController extends Controller
             return back()->with('error', 'Transferred students cannot be enrolled.');
         }
 
-        $validSection = Section::where('grade_level', $student->grade_level)
+        $currentSectionCount = Student::where('grade_level', $student->grade_level)
+            ->where('section', $request->section)
+            ->where('school_year', $request->school_year)
+            ->where('id', '!=', $student->id)
+            ->count();
+
+        $sectionRecord = Section::where('grade_level', $student->grade_level)
             ->where('section_name', $request->section)
             ->where('is_active', true)
-            ->exists();
+            ->first();
 
-        if (!$validSection) {
+        if (!$sectionRecord) {
             return back()->with('error', 'Selected section is invalid for this grade level.');
         }
 
+        if ($currentSectionCount >= $sectionRecord->capacity) {
+            return back()->with('error', 'Selected section is already full.');
+        }
         $tuition = TuitionFee::where('student_id', $student->id)
             ->where('school_year', $request->school_year)
             ->first();
@@ -316,6 +346,9 @@ class RegistrarController extends Controller
     {
         $schoolYear = now()->year . '-' . (now()->year + 1);
 
+        $institutionalEmail = $admission->institutional_email
+            ?: $this->generateInstitutionalEmail($admission->first_name, $admission->last_name);
+
         $student = Student::where('admission_id', $admission->id)->first();
 
         if ($student) {
@@ -325,7 +358,7 @@ class RegistrarController extends Controller
                 'last_name' => $admission->last_name,
                 'birth_date' => $admission->birth_date,
                 'gender' => $admission->sex,
-                'email' => $admission->email,
+                'email' => $institutionalEmail,
                 'phone' => $admission->phone,
                 'address' => $admission->address,
                 'grade_level' => $admission->applying_for_grade,
@@ -344,7 +377,7 @@ class RegistrarController extends Controller
                 'last_name' => $admission->last_name,
                 'birth_date' => $admission->birth_date,
                 'gender' => $admission->sex,
-                'email' => $admission->email,
+                'email' => $institutionalEmail,
                 'phone' => $admission->phone,
                 'address' => $admission->address,
                 'grade_level' => $admission->applying_for_grade,
@@ -356,6 +389,7 @@ class RegistrarController extends Controller
         }
 
         $admission->update([
+            'institutional_email' => $institutionalEmail,
             'status' => 'approved',
             'remarks' => 'Approved by registrar',
         ]);
@@ -390,26 +424,117 @@ class RegistrarController extends Controller
     }
 
     private function generateInstitutionalEmail(string $firstName, string $lastName): string
+    {
+        $first = strtolower(preg_replace('/[^a-z0-9]/i', '', $firstName));
+        $last = strtolower(preg_replace('/[^a-z0-9]/i', '', $lastName));
+
+        $base = trim($first . '.' . $last, '.');
+        if ($base === '') {
+            $base = 'student';
+        }
+
+        $email = $base . '@agnusdei.local';
+        $counter = 1;
+
+        while (
+            Admission::where('institutional_email', $email)->exists() ||
+            Student::where('email', $email)->exists()
+        ) {
+            $email = $base . $counter . '@agnusdei.local';
+            $counter++;
+        }
+
+        return $email;
+    }
+
+    public function autoAssignSection($id)
 {
-    $first = strtolower(preg_replace('/[^a-z0-9]/i', '', $firstName));
-    $last = strtolower(preg_replace('/[^a-z0-9]/i', '', $lastName));
-
-    $base = trim($first . '.' . $last, '.');
-    if ($base === '') {
-        $base = 'student';
+    if (!AcademicEvent::enabled('enrollment_open')) {
+        return back()->with('error', 'Enrollment is currently closed by admin.');
     }
 
-    $email = $base . '@agnusdei.local';
-    $counter = 1;
+    $student = Student::findOrFail($id);
 
-    while (
-        Admission::where('institutional_email', $email)->exists() ||
-        Student::where('email', $email)->exists()
-    ) {
-        $email = $base . $counter . '@agnusdei.local';
-        $counter++;
+    if ($student->is_transferred) {
+        return back()->with('error', 'Transferred students cannot be enrolled.');
     }
 
-    return $email;
+    $schoolYear = $student->school_year ?: (now()->year . '-' . (now()->year + 1));
+
+    $tuition = TuitionFee::where('student_id', $student->id)
+        ->where('school_year', $schoolYear)
+        ->first();
+
+    if (!$tuition) {
+        return back()->with('error', 'Billing record not found for this student.');
+    }
+
+    if (!$tuition->is_downpayment_cleared && $tuition->paid_amount < $tuition->down_payment_required) {
+        return back()->with('error', 'Student must settle the required down payment before enrollment.');
+    }
+
+    $sections = Section::where('grade_level', $student->grade_level)
+        ->where('is_active', true)
+        ->get();
+
+    if ($sections->isEmpty()) {
+        return back()->with('error', 'No active sections available for this grade level.');
+    }
+
+    $bestSection = null;
+    $lowestCount = PHP_INT_MAX;
+
+    foreach ($sections as $section) {
+        $count = Student::where('grade_level', $student->grade_level)
+            ->where('section', $section->section_name)
+            ->where('school_year', $schoolYear)
+            ->count();
+
+        if ($count < $section->capacity && $count < $lowestCount) {
+            $lowestCount = $count;
+            $bestSection = $section;
+        }
+    }
+
+    if (!$bestSection) {
+        return back()->with('error', 'All available sections for this grade level are already full.');
+    }
+
+    $student->update([
+        'section' => $bestSection->section_name,
+        'school_year' => $schoolYear,
+        'status' => 'enrolled',
+    ]);
+
+    $classes = Classes::where('grade_level', $student->grade_level)
+        ->where('section', $bestSection->section_name)
+        ->where('school_year', $schoolYear)
+        ->get();
+
+    foreach ($classes as $class) {
+        Enrollment::firstOrCreate(
+            [
+                'student_id' => $student->id,
+                'class_id' => $class->id,
+            ],
+            [
+                'enrollment_date' => now(),
+                'status' => 'enrolled',
+            ]
+        );
+    }
+
+    ActivityLog::record(
+        Auth::id(),
+        'enrollment',
+        'auto_assign_section',
+        'Student',
+        $student->id,
+        'Auto-assigned section ' . $bestSection->section_name . ' for ' . $schoolYear,
+        request()->ip()
+    );
+
+    return back()->with('success', 'Student auto-assigned to section ' . $bestSection->section_name . '.');
 }
+    
 }

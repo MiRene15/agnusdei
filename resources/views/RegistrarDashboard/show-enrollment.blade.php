@@ -23,6 +23,7 @@
 
 @php
     $status = strtolower((string) $admission->status);
+    $isApproved = $status === 'approved';
 @endphp
 
 <div class="grid-2">
@@ -57,10 +58,12 @@
                 <p>{{ $admission->last_name }}</p>
             </div>
 
-            <div class="section-box">
-                <h5>Grade Applying For</h5>
-                <p>{{ $admission->applying_for_grade }}</p>
-            </div>
+            @unless($isApproved)
+                <div class="section-box">
+                    <h5>Grade Applying For</h5>
+                    <p>{{ $admission->applying_for_grade }}</p>
+                </div>
+            @endunless
         </div>
 
         <div class="grid-3" style="margin-top:16px;">
@@ -83,9 +86,11 @@
         <div style="margin-top:16px;" class="section-box">
             <h5>Contact Details</h5>
             <p><strong>Email:</strong> {{ $admission->email ?? '-' }}</p>
+            <p><strong>Institutional Email:</strong> {{ $admission->institutional_email ?? 'Not generated yet' }}</p>
             <p><strong>Phone:</strong> {{ $admission->phone ?? '-' }}</p>
             <p><strong>Address:</strong> {{ $admission->address ?? '-' }}</p>
             <p><strong>Previous School:</strong> {{ $admission->previous_school ?? '-' }}</p>
+            <p><strong>Verified:</strong> {{ $admission->is_verified ? 'Yes' : 'No' }}</p>
         </div>
     </div>
 
@@ -93,15 +98,30 @@
         <h4>Registrar Actions</h4>
 
         <div style="display:flex; flex-direction:column; gap:12px;">
-            <form method="POST" action="{{ route('registrar.enrollments.approve', $admission->id) }}">
-                @csrf
-                <button type="submit" class="btn btn-success" style="width:100%;">Approve Admission</button>
-            </form>
+            @if(!$admission->is_verified && !$isApproved)
+                <form method="POST" action="{{ route('registrar.enrollments.verify', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline" style="width:100%;">Verify Admission</button>
+                </form>
+            @endif
 
-            <form method="POST" action="{{ route('registrar.enrollments.incomplete', $admission->id) }}">
-                @csrf
-                <button type="submit" class="btn btn-danger" style="width:100%;">Mark as Incomplete</button>
-            </form>
+            @if($admission->is_verified && !$isApproved)
+                <form method="POST" action="{{ route('registrar.enrollments.approve', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-success" style="width:100%;">Approve Admission</button>
+                </form>
+            @endif
+
+            @if(!$isApproved)
+                <form method="POST" action="{{ route('registrar.enrollments.incomplete', $admission->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-danger" style="width:100%;">Mark as Incomplete</button>
+                </form>
+            @else
+                <div class="btn btn-outline" style="width:100%; text-align:center; pointer-events:none; opacity:.7;">
+                    Admission Already Approved
+                </div>
+            @endif
 
             <a href="{{ route('registrar.enrollments') }}" class="btn btn-outline" style="text-align:center;">
                 Back to Enrollment Requests

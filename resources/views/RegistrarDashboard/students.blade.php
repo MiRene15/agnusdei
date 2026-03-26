@@ -18,7 +18,7 @@
             placeholder="Search by student number, LRN, or name"
         >
 
-        <select name="grade_level">
+        <select name="grade_level" id="grade_level_filter" class="form-control">
             <option value="">All Grade Levels</option>
             <option value="Nursery" {{ request('grade_level') == 'Nursery' ? 'selected' : '' }}>Nursery</option>
             <option value="Kinder" {{ request('grade_level') == 'Kinder' ? 'selected' : '' }}>Kinder</option>
@@ -36,12 +36,20 @@
             <option value="Grade 12" {{ request('grade_level') == 'Grade 12' ? 'selected' : '' }}>Grade 12</option>
         </select>
 
-        <input
-            type="text"
-            name="section"
-            value="{{ request('section') }}"
-            placeholder="Filter by section"
-        >
+        <select name="section" id="section_filter" class="form-control">
+            <option value="">All Sections</option>
+            @foreach($sections as $grade => $gradeSections)
+                @foreach($gradeSections as $section)
+                    <option
+                        value="{{ $section->section_name }}"
+                        data-grade="{{ $section->grade_level }}"
+                        {{ request('section') == $section->section_name ? 'selected' : '' }}
+                    >
+                        {{ $section->grade_level }} - {{ $section->section_name }}
+                    </option>
+                @endforeach
+            @endforeach
+        </select>
 
         <button type="submit" class="btn btn-primary">Filter</button>
         <a href="{{ route('registrar.students') }}" class="btn btn-outline">Reset</a>
@@ -62,11 +70,15 @@
                     <th>Section</th>
                     <th>School Year</th>
                     <th>Status</th>
+                    <th>Institutional Email</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($students as $student)
+                    @php
+                        $status = strtolower((string) $student->status);
+                    @endphp
                     <tr>
                         <td>{{ $student->student_number }}</td>
                         <td>{{ $student->lrn ?? '-' }}</td>
@@ -75,14 +87,15 @@
                         <td>{{ $student->section ?? '-' }}</td>
                         <td>{{ $student->school_year ?? '-' }}</td>
                         <td>
-                            @if($student->status === 'Approved')
-                                <span class="badge badge-approved">Approved</span>
-                            @elseif($student->status === 'pending')
+                            @if($status === 'approved' || $status === 'enrolled')
+                                <span class="badge badge-approved">{{ ucfirst($status) }}</span>
+                            @elseif($status === 'pending')
                                 <span class="badge badge-pending">Pending</span>
                             @else
-                                <span class="badge badge-review">{{ ucfirst($student->status) }}</span>
+                                <span class="badge badge-review">{{ ucfirst($status) }}</span>
                             @endif
                         </td>
+                        <td>{{ $student->email ?? '-' }}</td>
                         <td>
                             <a href="{{ route('registrar.students.show', $student->id) }}" class="btn btn-primary">
                                 View
@@ -91,7 +104,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" style="text-align:center; color:#64748b;">No students found.</td>
+                        <td colspan="9" style="text-align:center; color:#64748b;">No students found.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -99,8 +112,43 @@
     </div>
 
     <div style="margin-top:18px;">
-        {{ $students->links() }}
+        {{ $students->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const gradeSelect = document.getElementById('grade_level_filter');
+        const sectionSelect = document.getElementById('section_filter');
+
+        function filterSections() {
+            const selectedGrade = gradeSelect.value;
+            const currentSection = "{{ request('section') }}";
+
+            Array.from(sectionSelect.options).forEach((option, index) => {
+                if (index === 0) {
+                    option.hidden = false;
+                    return;
+                }
+
+                const optionGrade = option.getAttribute('data-grade');
+
+                if (!selectedGrade || optionGrade === selectedGrade) {
+                    option.hidden = false;
+                } else {
+                    option.hidden = true;
+                }
+            });
+
+            const selectedOption = Array.from(sectionSelect.options).find(opt => opt.value === currentSection && !opt.hidden);
+            if (!selectedOption && selectedGrade) {
+                sectionSelect.value = '';
+            }
+        }
+
+        gradeSelect.addEventListener('change', filterSections);
+        filterSections();
+    });
+</script>
 
 @endsection

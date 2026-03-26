@@ -33,6 +33,7 @@ class SectionSeeder extends Seeder
                         'section_name' => $sectionName,
                     ],
                     [
+                        'capacity' => 40,
                         'is_active' => true,
                     ]
                 );

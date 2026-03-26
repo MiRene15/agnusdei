@@ -69,7 +69,7 @@ Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:regist
     Route::get('/students/{id}', [RegistrarController::class, 'showStudent'])->name('students.show');
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
     Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
-});
+Route::post('/sectioning/auto-assign/{id}', [RegistrarController::class, 'autoAssignSection'])->name('section.autoAssign');});
 
 /*
 |--------------------------------------------------------------------------
