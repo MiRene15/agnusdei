@@ -76,13 +76,18 @@ class StudentPortalController extends Controller
 
     public function storeAdmission(Request $request)
     {
+        $request->merge([
+            'phone' => $this->normalizePhoneNumber($request->input('phone')),
+            'lrn' => $this->normalizeDigits($request->input('lrn')),
+        ]);
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'birth_date' => 'required|date|before:today',
             'sex' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
-            'phone' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'phone' => ['nullable', 'regex:/^(09\d{9}|639\d{9})$/'],
             'address' => 'nullable|string',
             'applying_for_grade' => 'required|string|max:50',
             'shs_track' => 'nullable|in:' . implode(',', TuitionPlanner::shsTracks()),
@@ -96,7 +101,7 @@ class StudentPortalController extends Controller
             'sex.required' => 'Gender is required.',
             'lrn.required' => 'LRN is required.',
             'lrn.regex' => 'LRN must be exactly 12 digits, numbers only, and start with 4.',
-            'phone.regex' => 'Phone number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
+            'phone.regex' => 'Phone number must be in 09XXXXXXXXX or 639XXXXXXXXX format using numbers only.',
         ]);
 
         if (TuitionPlanner::requiresShsTrack($request->applying_for_grade) && !TuitionPlanner::normalizeTrack($request->shs_track)) {
@@ -447,5 +452,17 @@ class StudentPortalController extends Controller
         return TuitionFee::where('student_id', $student->id)
             ->where('school_year', $schoolYear)
             ->first();
+    }
+
+    private function normalizePhoneNumber(?string $value): ?string
+    {
+        $digits = $this->normalizeDigits($value);
+
+        return $digits !== '' ? $digits : null;
+    }
+
+    private function normalizeDigits(?string $value): string
+    {
+        return preg_replace('/\D+/', '', (string) $value);
     }
 }

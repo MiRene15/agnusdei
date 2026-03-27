@@ -37,7 +37,7 @@
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Age</label><input type="text" id="age" readonly placeholder="Auto computed age" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc;"></div>
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Gender</label><select name="sex" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;"><option value="">Select Gender</option><option value="Male" {{ old('sex') == 'Male' ? 'selected' : '' }}>Male</option><option value="Female" {{ old('sex') == 'Female' ? 'selected' : '' }}>Female</option></select></div>
                         <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Email</label><input type="email" name="email" value="{{ old('email') }}" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
-                        <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Phone</label><input type="text" name="phone" value="{{ old('phone') }}" placeholder="09XXXXXXXXX or +639XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$" inputmode="numeric" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
+                        <div><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Phone</label><input type="text" name="phone" value="{{ old('phone') }}" placeholder="09XXXXXXXXX or 639XXXXXXXXX" pattern="^(09\d{9}|639\d{9})$" inputmode="numeric" maxlength="12" data-phone-only="true" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px;"></div>
                     </div>
                     <div style="margin-top:18px;"><label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Address</label><textarea name="address" rows="3" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; resize:vertical;">{{ old('address') }}</textarea></div>
                 </div>
@@ -179,6 +179,11 @@ lrnInput.addEventListener('input', function () {
         digits = '4' + digits.replace(/^4*/, '');
     }
     this.value = digits.slice(0, 12);
+});
+document.querySelectorAll('input[data-phone-only="true"]').forEach(function (input) {
+    input.addEventListener('input', function () {
+        input.value = input.value.replace(/\D/g, '').slice(0, 12);
+    });
 });
 window.addEventListener('load', function () { computeAge(); updateAcademicFields(); });
 </script>

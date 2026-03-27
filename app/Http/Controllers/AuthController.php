@@ -34,18 +34,19 @@ class AuthController extends Controller
         $request->merge([
             'role' => 'student',
             'email' => $this->normalizeInstitutionalEmail($request->input('email_local')),
+            'contact_number' => $this->normalizePhoneNumber($request->input('contact_number')),
         ]);
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._-]+$/',
-            'contact_number' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'contact_number' => ['nullable', 'regex:/^(09\d{9}|639\d{9})$/'],
             'role' => 'required|in:student',
             'reference_code' => 'nullable|string|max:255',
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/'],
         ], [
-            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
+            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or 639XXXXXXXXX format using numbers only.',
             'password.regex' => 'Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 2 numbers, and 1 special character.',
             'email_local.regex' => 'Institutional email may only use letters, numbers, periods, underscores, and hyphens.',
         ]);
@@ -91,18 +92,19 @@ class AuthController extends Controller
     {
         $request->merge([
             'email' => $this->normalizeInstitutionalEmail($request->input('email_local')),
+            'contact_number' => $this->normalizePhoneNumber($request->input('contact_number')),
         ]);
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'email_local' => 'required|string|max:255|regex:/^[A-Za-z0-9._-]+$/',
-            'contact_number' => ['nullable', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'contact_number' => ['nullable', 'regex:/^(09\d{9}|639\d{9})$/'],
             'role' => 'required|in:teacher,registrar,cashier',
             'reference_code' => 'required|string|max:255',
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=(?:.*\d){2,})(?=.*[^A-Za-z0-9]).{8,}$/'],
         ], [
-            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or +639XXXXXXXXX format.',
+            'contact_number.regex' => 'Contact number must be in 09XXXXXXXXX or 639XXXXXXXXX format using numbers only.',
             'password.regex' => 'Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 2 numbers, and 1 special character.',
             'email_local.regex' => 'Institutional email may only use letters, numbers, periods, underscores, and hyphens.',
         ]);
@@ -317,6 +319,13 @@ class AuthController extends Controller
         }
 
         return $value . '@agnusdei.local';
+    }
+
+    private function normalizePhoneNumber(?string $value): ?string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $value);
+
+        return $digits !== '' ? $digits : null;
     }
 
     private function redirectByRole(string $role)

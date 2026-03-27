@@ -67,7 +67,7 @@
 
                 <div class="auth-field">
                     <label>Contact Number</label>
-                    <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="09XXXXXXXXX or +639XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$">
+                    <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="09XXXXXXXXX or 639XXXXXXXXX" pattern="^(09\d{9}|639\d{9})$" inputmode="numeric" maxlength="12" data-phone-only="true">
                 </div>
 
                 <div class="auth-field">
@@ -122,5 +122,13 @@
 .auth-links a { color:#1d4ed8; font-weight:700; text-decoration:none; }
 @media (max-width: 640px) { .auth-shell { margin:40px auto; } .auth-body, .auth-hero { padding:24px 20px; } .email-fixed-wrap { grid-template-columns:1fr; } .email-fixed-wrap span { border-left:none; border-top:1px solid #cbd5e1; justify-content:flex-start; padding:10px 14px; } }
 </style>
+
+<script>
+document.querySelectorAll('input[data-phone-only="true"]').forEach(function (input) {
+    input.addEventListener('input', function () {
+        input.value = input.value.replace(/\D/g, '').slice(0, 12);
+    });
+});
+</script>
 
 @endsection
