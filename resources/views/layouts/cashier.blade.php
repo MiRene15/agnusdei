@@ -82,7 +82,7 @@
     <div class="logout-wrap"><form method="POST" action="{{ route('logout') }}">@csrf <button type="submit" class="logout-btn">Logout</button></form></div>
 </div>
 <div class="main">
-    <div class="topbar"><h3>@yield('title', 'Cashier Dashboard')</h3><div class="welcome">Welcome, Cashier</div></div>
+    <div class="topbar"><h3>@yield('title', 'Cashier Dashboard')</h3><div class="welcome">Welcome, {{ Auth::user()->name ?? 'Cashier' }}</div></div>
     <div class="content">@yield('content')</div>
 </div>
 <script>

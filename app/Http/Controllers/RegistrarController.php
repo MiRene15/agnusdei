@@ -332,57 +332,96 @@ class RegistrarController extends Controller
             return back()->with('error', 'Student must settle the required down payment before enrollment.');
         }
 
-        $sections = $this->eligibleSectionsForStudent($student);
-        if ($sections->isEmpty()) {
-            return back()->with('error', 'No active sections are available for this student.');
-        }
+        $assignment = $this->findBestSectionAssignment($student, $schoolYear);
 
-        $bestSection = null;
-        $bestClasses = collect();
-        $lowestCount = PHP_INT_MAX;
-
-        foreach ($sections as $section) {
-            $count = Student::where('grade_level', $student->grade_level)
-                ->where('section', $section->section_name)
-                ->where('school_year', $schoolYear)
-                ->count();
-
-            if ($count >= $section->capacity) {
-                continue;
-            }
-
-            $classes = $this->getAlignedClasses($student, $section->section_name, $schoolYear);
-            if ($classes->isEmpty()) {
-                continue;
-            }
-
-            if ($count < $lowestCount) {
-                $lowestCount = $count;
-                $bestSection = $section;
-                $bestClasses = $classes;
-            }
-        }
-
-        if (!$bestSection) {
+        if (!$assignment) {
             return back()->with('error', 'No active section with complete subject-teacher alignment is available for this student.');
         }
 
         $previousSection = $student->section;
         $previousSchoolYear = $student->school_year;
 
-        DB::transaction(function () use ($student, $bestSection, $schoolYear, $previousSection, $previousSchoolYear, $bestClasses) {
+        DB::transaction(function () use ($student, $assignment, $schoolYear, $previousSection, $previousSchoolYear) {
             $student->update([
-                'section' => $bestSection->section_name,
+                'section' => $assignment['section']->section_name,
                 'school_year' => $schoolYear,
                 'status' => 'enrolled',
             ]);
 
-            $this->syncStudentClassEnrollments($student, $bestClasses->pluck('id')->all(), $schoolYear, $previousSection, $previousSchoolYear);
+            $this->syncStudentClassEnrollments($student, $assignment['classes']->pluck('id')->all(), $schoolYear, $previousSection, $previousSchoolYear);
         });
 
-        ActivityLog::record(Auth::id(), 'enrollment', 'auto_assign_section', 'Student', $student->id, 'Auto-assigned section ' . $bestSection->section_name . ' for ' . $schoolYear, request()->ip());
+        ActivityLog::record(Auth::id(), 'enrollment', 'auto_assign_section', 'Student', $student->id, 'Auto-assigned section ' . $assignment['section']->section_name . ' for ' . $schoolYear, request()->ip());
 
-        return back()->with('success', 'Student auto-assigned to section ' . $bestSection->section_name . '.');
+        return back()->with('success', 'Student auto-assigned to section ' . $assignment['section']->section_name . '.');
+    }
+
+    public function batchAutoAssignSections(Request $request)
+    {
+        if (!AcademicEvent::enabled('enrollment_open')) {
+            return back()->with('error', 'Enrollment is currently closed by admin.');
+        }
+
+        $schoolYear = (string) ($request->input('school_year') ?: TuitionPlanner::currentSchoolYear());
+        $students = Student::whereIn('status', ['verified', 'payment_cleared', 'approved', 'enrolled'])
+            ->where('is_transferred', false)
+            ->orderBy('grade_level')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        $assigned = 0;
+        $skipped = 0;
+
+        foreach ($students as $student) {
+            if (!$this->studentCanBeEnrolled($student, $schoolYear)) {
+                $skipped++;
+                continue;
+            }
+
+            if ($student->school_year === $schoolYear && !empty($student->section)) {
+                $skipped++;
+                continue;
+            }
+
+            $assignment = $this->findBestSectionAssignment($student, $schoolYear);
+
+            if (!$assignment) {
+                $skipped++;
+                continue;
+            }
+
+            $previousSection = $student->section;
+            $previousSchoolYear = $student->school_year;
+
+            DB::transaction(function () use ($student, $assignment, $schoolYear, $previousSection, $previousSchoolYear) {
+                $student->update([
+                    'section' => $assignment['section']->section_name,
+                    'school_year' => $schoolYear,
+                    'status' => 'enrolled',
+                ]);
+
+                $this->syncStudentClassEnrollments($student, $assignment['classes']->pluck('id')->all(), $schoolYear, $previousSection, $previousSchoolYear);
+            });
+
+            $assigned++;
+        }
+
+        ActivityLog::record(
+            Auth::id(),
+            'enrollment',
+            'batch_auto_assign_section',
+            'Student',
+            null,
+            "Batch auto-assigned {$assigned} student(s) for {$schoolYear}. Skipped {$skipped}.",
+            $request->ip()
+        );
+
+        if ($assigned === 0) {
+            return back()->with('error', 'No eligible students were auto-assigned. Students may already be assigned, not yet payment-cleared, or missing aligned classes.');
+        }
+
+        return back()->with('success', "{$assigned} student(s) auto-assigned successfully. {$skipped} skipped.");
     }
 
     public function showStudent($id)
@@ -620,6 +659,49 @@ class RegistrarController extends Controller
         }
 
         return $query->get();
+    }
+
+    private function findBestSectionAssignment(Student $student, string $schoolYear): ?array
+    {
+        $sections = $this->eligibleSectionsForStudent($student);
+        if ($sections->isEmpty()) {
+            return null;
+        }
+
+        $bestSection = null;
+        $bestClasses = collect();
+        $lowestCount = PHP_INT_MAX;
+
+        foreach ($sections as $section) {
+            $count = Student::where('grade_level', $student->grade_level)
+                ->where('section', $section->section_name)
+                ->where('school_year', $schoolYear)
+                ->count();
+
+            if ($count >= $section->capacity) {
+                continue;
+            }
+
+            $classes = $this->getAlignedClasses($student, $section->section_name, $schoolYear);
+            if ($classes->isEmpty()) {
+                continue;
+            }
+
+            if ($count < $lowestCount) {
+                $lowestCount = $count;
+                $bestSection = $section;
+                $bestClasses = $classes;
+            }
+        }
+
+        if (!$bestSection) {
+            return null;
+        }
+
+        return [
+            'section' => $bestSection,
+            'classes' => $bestClasses,
+        ];
     }
 
     private function sectionMatchesStudentTrack(Student $student, string $section): bool

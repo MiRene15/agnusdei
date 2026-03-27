@@ -164,7 +164,17 @@ class DefaultStudentsSeeder extends Seeder
                     $student->save();
                 }
 
-                $studentUser->update(['name' => $student->first_name . ' ' . $student->last_name]);
+                $studentUser->update([
+                    'name' => $student->first_name . ' ' . $student->last_name,
+                    'email' => $student->email,
+                    'contact_number' => $student->phone,
+                ]);
+
+                $parentUser->update([
+                    'name' => $parent->first_name . ' ' . $parent->last_name,
+                    'email' => $parent->email,
+                    'contact_number' => $parent->phone,
+                ]);
 
                 foreach ($classMap->get($section->grade_level . '|' . $section->section_name, collect()) as $class) {
                     Enrollment::updateOrCreate(

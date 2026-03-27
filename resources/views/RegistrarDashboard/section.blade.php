@@ -50,6 +50,11 @@
             <h4 style="margin:0;">Student Placement Board</h4>
             <p style="margin:6px 0 0; color:#64748b;">Minimal view of billing readiness, section capacity, and alignment coverage.</p>
         </div>
+        <form method="POST" action="{{ route('registrar.section.autoAssignBatch') }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            @csrf
+            <input type="hidden" name="school_year" value="{{ $schoolYear }}">
+            <button type="submit" class="btn btn-primary">Batch Auto Assign Sections</button>
+        </form>
     </div>
 
     <div class="table-wrap" style="margin:0;">

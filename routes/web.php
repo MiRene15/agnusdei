@@ -66,6 +66,7 @@ Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:regist
     Route::get('/sectioning', [RegistrarController::class, 'sectioning'])->name('section');
     Route::post('/sectioning/update/{id}', [RegistrarController::class, 'updateSection'])->name('section.update');
     Route::post('/sectioning/auto-assign/{id}', [RegistrarController::class, 'autoAssignSection'])->name('section.autoAssign');
+    Route::post('/sectioning/auto-assign-batch', [RegistrarController::class, 'batchAutoAssignSections'])->name('section.autoAssignBatch');
     Route::get('/settings', [AccountSettingsController::class, 'show'])->name('settings');
     Route::post('/settings', [AccountSettingsController::class, 'update'])->name('settings.update');
 });

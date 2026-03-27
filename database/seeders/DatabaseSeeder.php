@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             DefaultStudentsSeeder::class,
             TuitionFeeSeeder::class,
             DefaultPaymentsSeeder::class,
+            DefaultGradesSeeder::class,
             AnnouncementSeeder::class,
         ]);
     }
