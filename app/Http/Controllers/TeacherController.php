@@ -114,6 +114,8 @@ class TeacherController extends Controller
     {
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
+        $gradeEncodingOpen = AcademicEvent::enabled('grade_encoding_open');
+        $ptcRequired = AcademicEvent::enabled('ptc_required');
 
         $classes = collect();
         $selectedClass = null;
@@ -167,7 +169,7 @@ class TeacherController extends Controller
             }
         }
 
-        return view('TeacherDashboard.grades', compact('teacher', 'classes', 'selectedClass', 'enrollments', 'studentSearch'));
+        return view('TeacherDashboard.grades', compact('teacher', 'classes', 'selectedClass', 'enrollments', 'studentSearch', 'gradeEncodingOpen', 'ptcRequired'));
     }
 
     public function saveGrades(Request $request)

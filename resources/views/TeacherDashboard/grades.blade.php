@@ -38,6 +38,21 @@
     <div class="stat-card"><div class="stat-label">Visible Students</div><div class="stat-value">{{ $enrollments->count() }}</div><div class="stat-sub">Filtered list for grade entry</div></div>
 </div>
 
+<div class="card" style="background:linear-gradient(135deg, #f8fbff, #ffffff); border:1px solid #dbeafe;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; align-items:start;">
+        <div>
+            <div style="font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#1d4ed8;">Grade Encoding Event</div>
+            <div style="font-size:22px; font-weight:700; color:{{ $gradeEncodingOpen ? '#166534' : '#991b1b' }}; margin-top:6px;">{{ $gradeEncodingOpen ? 'Open' : 'Closed' }}</div>
+            <div style="color:#64748b; margin-top:6px;">Teachers can upload grades only while the admin enables the academic event `Grade Encoding Open`.</div>
+        </div>
+        <div>
+            <div style="font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#1d4ed8;">PTC Requirement</div>
+            <div style="font-size:22px; font-weight:700; color:{{ $ptcRequired ? '#92400e' : '#166534' }}; margin-top:6px;">{{ $ptcRequired ? 'Required Before Upload' : 'Not Required' }}</div>
+            <div style="color:#64748b; margin-top:6px;">If `PTC Required` is enabled, only students marked as PTC-complete can be encoded.</div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:flex-start; margin-bottom:18px;">
         <div>
@@ -95,7 +110,7 @@
                         <div style="font-size:19px; font-weight:700; color:#0f172a;">{{ $enrollment->student->last_name ?? '-' }}, {{ $enrollment->student->first_name ?? '' }}</div>
                         <div style="margin-top:6px; color:#64748b;">{{ $enrollment->student->student_number ?? '-' }} | LRN: {{ $enrollment->student->lrn ?? '-' }}</div>
                     </div>
-                    @if(\App\Models\AcademicEvent::enabled('ptc_required') && !($enrollment->student->ptc_completed ?? false))
+                    @if($ptcRequired && !($enrollment->student->ptc_completed ?? false))
                         <div style="padding:10px 12px; border-radius:999px; background:#fef3c7; color:#92400e; font-weight:700; font-size:13px;">PTC Pending</div>
                     @else
                         <div style="padding:10px 12px; border-radius:999px; background:#dcfce7; color:#166534; font-weight:700; font-size:13px;">Ready For Encoding</div>

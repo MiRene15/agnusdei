@@ -10,21 +10,41 @@
 
 <div class="page-intro">
     <h4>My Class Schedule</h4>
-    <p>Your weekly classes are grouped by day for a cleaner and easier-to-read schedule.</p>
+    <p>Your weekly classes are grouped by day for a cleaner and easier-to-follow view.</p>
 </div>
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">LRN</div><div class="stat-value" style="font-size:20px;">{{ $student->lrn ?? 'N/A' }}</div><div class="stat-sub">Learner Reference Number</div></div>
+    <div class="stat-card"><div class="stat-label">LRN</div><div class="stat-value" style="font-size:20px;">{{ $student->lrn ?? 'N/A' }}</div><div class="stat-sub">Learner reference number</div></div>
     <div class="stat-card"><div class="stat-label">Grade Level</div><div class="stat-value" style="font-size:20px;">{{ $student->grade_level ?? 'N/A' }}</div><div class="stat-sub">Current assigned grade</div></div>
     <div class="stat-card"><div class="stat-label">Section</div><div class="stat-value" style="font-size:20px;">{{ $student->section ?? 'N/A' }}</div><div class="stat-sub">Current assigned section</div></div>
     <div class="stat-card"><div class="stat-label">School Year</div><div class="stat-value" style="font-size:20px;">{{ $student->school_year ?? 'N/A' }}</div><div class="stat-sub">Current academic year</div></div>
 </div>
 
+<div class="quick-actions" style="margin-bottom:24px;">
+    <div class="action-box" style="pointer-events:none;">
+        <h5>Read By Day</h5>
+        <p>Each day groups all scheduled subjects together for easier scanning.</p>
+    </div>
+    <div class="action-box" style="pointer-events:none;">
+        <h5>Check Room And Time</h5>
+        <p>Every schedule card highlights room, start time, and end time clearly.</p>
+    </div>
+    <div class="action-box" style="pointer-events:none;">
+        <h5>Updates Automatically</h5>
+        <p>Your schedule refreshes from the currently assigned classes in your section.</p>
+    </div>
+</div>
+
 @foreach($dayOrder as $day)
     @php $items = $grouped->get($day, collect())->sortBy('start_time'); @endphp
     <div class="card">
-        <h4 style="margin-bottom:6px;">{{ $day }}</h4>
-        <p style="color:#64748b; margin-bottom:14px;">{{ $items->count() ? $items->count() . ' subject(s) scheduled.' : 'No classes scheduled.' }}</p>
+        <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+            <div>
+                <h4 style="margin-bottom:6px;">{{ $day }}</h4>
+                <p style="color:#64748b; margin:0;">{{ $items->count() ? $items->count() . ' subject(s) scheduled.' : 'No classes scheduled for this day.' }}</p>
+            </div>
+            <div style="padding:10px 12px; border-radius:999px; background:#eef2ff; color:#3730a3; font-weight:700; font-size:12px;">{{ $items->count() }} item(s)</div>
+        </div>
 
         @if($items->isEmpty())
             <div style="padding:18px; border:1px dashed #cbd5e1; border-radius:16px; color:#64748b; background:#f8fafc;">No class schedule for this day yet.</div>
@@ -54,8 +74,8 @@
     <h4>Schedule Notes</h4>
     <ul class="mini-list">
         <li>Please follow your assigned class times strictly.</li>
-        <li>Contact the registrar if your section or class schedule is incorrect.</li>
-        <li>Your schedule automatically updates once class assignments are finalized.</li>
+        <li>Contact the registrar if your section or class schedule looks incorrect.</li>
+        <li>Your schedule updates automatically once class assignments are finalized.</li>
     </ul>
 </div>
 @endsection

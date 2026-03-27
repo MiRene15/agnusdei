@@ -330,7 +330,7 @@ class StudentPortalController extends Controller
         return view('StudentDashboard.subjects', compact('student', 'enrollments'));
     }
 
-    public function grades()
+    public function grades(Request $request)
     {
         $student = $this->requireUnlockedStudent();
         if ($student instanceof \Illuminate\Http\RedirectResponse) {
@@ -338,9 +338,25 @@ class StudentPortalController extends Controller
         }
 
         $enrollmentIds = Enrollment::where('student_id', $student->id)->pluck('id');
-        $grades = Grade::with('enrollment.class.subject')->whereIn('enrollment_id', $enrollmentIds)->get();
+        $periodOptions = ['1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter'];
+        $selectedPeriod = trim((string) $request->query('period'));
 
-        return view('StudentDashboard.grades', compact('student', 'grades'));
+        $gradesQuery = Grade::with('enrollment.class.subject')
+            ->whereIn('enrollment_id', $enrollmentIds);
+
+        if ($selectedPeriod !== '' && in_array($selectedPeriod, $periodOptions, true)) {
+            $gradesQuery->where('grading_period', $selectedPeriod);
+        } else {
+            $selectedPeriod = '';
+        }
+
+        $grades = $gradesQuery
+            ->orderBy('grading_period')
+            ->get()
+            ->sortBy(fn ($grade) => strtolower((string) ($grade->enrollment->class->subject->subject_name ?? '')))
+            ->values();
+
+        return view('StudentDashboard.grades', compact('student', 'grades', 'periodOptions', 'selectedPeriod'));
     }
 
     public function scheduleView()
@@ -395,6 +411,10 @@ class StudentPortalController extends Controller
 
         if ($student->is_transferred) {
             return redirect()->route('login')->withErrors(['email' => 'This student account has been marked as transferred and is no longer active.']);
+        }
+
+        if ($student->status === 'withdrawn') {
+            return redirect()->route('login')->withErrors(['email' => 'This student account has been marked as withdrawn and is no longer active for the current school year.']);
         }
 
         return $student;

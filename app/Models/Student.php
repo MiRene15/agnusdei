@@ -34,6 +34,21 @@ class Student extends Model
         'transfer_notes',
         'ptc_completed',
         'ptc_completed_at',
+        'withdrawal_requested_at',
+        'withdrawal_effective_at',
+        'withdrawal_reason',
+        'withdrawal_policy_acknowledged',
+    ];
+
+    protected $casts = [
+        'portal_unlocked_at' => 'datetime',
+        'transferred_at' => 'datetime',
+        'ptc_completed' => 'boolean',
+        'ptc_completed_at' => 'datetime',
+        'is_transferred' => 'boolean',
+        'withdrawal_requested_at' => 'datetime',
+        'withdrawal_effective_at' => 'datetime',
+        'withdrawal_policy_acknowledged' => 'boolean',
     ];
 
     public function parent()

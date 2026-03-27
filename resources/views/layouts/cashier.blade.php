@@ -15,7 +15,7 @@
         .brand-box h2 { font-size:20px; font-weight:700; margin-bottom:6px; }
         .brand-box p { font-size:12px; opacity:0.85; line-height:1.5; }
         .menu-label { color:rgba(255,255,255,0.75); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin:16px 10px 10px; }
-        .sidebar a, .sidebar button { color:#ffffff; text-decoration:none; padding:13px 14px; border-radius:12px; margin-bottom:8px; font-size:14px; transition:0.25s ease; border:none; background:transparent; text-align:left; width:100%; font-family:inherit; cursor:pointer; }
+        .sidebar a, .sidebar button { color:#ffffff; text-decoration:none; padding:13px 14px; border-radius:12px; margin-bottom:8px; font-size:14px; transition:0.25s ease; border:none; background:transparent; text-align:left; width:100%; font-family:inherit; cursor:pointer; display:block; }
         .sidebar a:hover, .sidebar button:hover { background:rgba(255,255,255,0.12); }
         .sidebar a.active { background:#ffffff; color:#001e82; font-weight:600; box-shadow:0 10px 20px rgba(0,0,0,0.10); }
         .logout-wrap { padding-top:12px; }
@@ -119,7 +119,9 @@
     function bindLoadingScreen() {
         var loadingScreen = document.getElementById('loading-screen');
         if (!loadingScreen) { return; }
+        document.addEventListener('DOMContentLoaded', function () { loadingScreen.classList.remove('active'); });
         window.addEventListener('load', function () { loadingScreen.classList.remove('active'); });
+        window.addEventListener('pageshow', function () { loadingScreen.classList.remove('active'); });
         document.querySelectorAll('a[href]').forEach(function (link) {
             link.addEventListener('click', function (event) {
                 var href = link.getAttribute('href') || '';

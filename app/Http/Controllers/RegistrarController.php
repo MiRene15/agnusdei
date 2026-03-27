@@ -194,6 +194,7 @@ class RegistrarController extends Controller
     public function students(Request $request)
     {
         $query = Student::query();
+        $baseQuery = Student::query();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -216,8 +217,14 @@ class RegistrarController extends Controller
 
         $students = $query->latest()->paginate(10)->withQueryString();
         $sections = Section::where('is_active', true)->orderBy('grade_level')->orderBy('section_name')->get()->groupBy('grade_level');
+        $studentSummary = [
+            'total' => (clone $baseQuery)->count(),
+            'enrolled' => (clone $baseQuery)->where('status', 'enrolled')->count(),
+            'with_section' => (clone $baseQuery)->whereNotNull('section')->count(),
+            'filtered' => $students->total(),
+        ];
 
-        return view('RegistrarDashboard.students', compact('students', 'sections'));
+        return view('RegistrarDashboard.students', compact('students', 'sections', 'studentSummary'));
     }
 
     public function sectioning(Request $request)
@@ -226,6 +233,7 @@ class RegistrarController extends Controller
 
         $students = Student::whereIn('status', ['verified', 'payment_cleared', 'approved', 'enrolled'])
             ->where('is_transferred', false)
+            ->where('status', '!=', 'withdrawn')
             ->with(['tuitionFees' => fn ($query) => $query->where('school_year', $schoolYear)])
             ->orderBy('grade_level')
             ->orderBy('last_name')
@@ -262,6 +270,14 @@ class RegistrarController extends Controller
 
         if ($student->is_transferred) {
             return back()->with('error', 'Transferred students cannot be enrolled.');
+        }
+
+        if ($student->status === 'withdrawn') {
+            return back()->with('error', 'Withdrawn students cannot be sectioned until they re-enroll in a new academic cycle.');
+        }
+
+        if (!$this->canUpdateSectionAssignment($student, $request->school_year)) {
+            return back()->with('error', 'This section assignment is locked for the current school year. Section changes reopen only on the next promotion or enrollment cycle.');
         }
 
         if (!$this->sectionMatchesStudentTrack($student, $request->section)) {
@@ -328,6 +344,14 @@ class RegistrarController extends Controller
             return back()->with('error', 'Transferred students cannot be enrolled.');
         }
 
+        if ($student->status === 'withdrawn') {
+            return back()->with('error', 'Withdrawn students cannot be sectioned until they re-enroll in a new academic cycle.');
+        }
+
+        if (!$this->canUpdateSectionAssignment($student, $schoolYear)) {
+            return back()->with('error', 'This section assignment is locked for the current school year. Section changes reopen only on the next promotion or enrollment cycle.');
+        }
+
         if (!$this->studentCanBeEnrolled($student, $schoolYear)) {
             return back()->with('error', 'Student must settle the required down payment before enrollment.');
         }
@@ -365,6 +389,7 @@ class RegistrarController extends Controller
         $schoolYear = (string) ($request->input('school_year') ?: TuitionPlanner::currentSchoolYear());
         $students = Student::whereIn('status', ['verified', 'payment_cleared', 'approved', 'enrolled'])
             ->where('is_transferred', false)
+            ->where('status', '!=', 'withdrawn')
             ->orderBy('grade_level')
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -379,7 +404,7 @@ class RegistrarController extends Controller
                 continue;
             }
 
-            if ($student->school_year === $schoolYear && !empty($student->section)) {
+            if (!$this->canUpdateSectionAssignment($student, $schoolYear)) {
                 $skipped++;
                 continue;
             }
@@ -501,6 +526,31 @@ class RegistrarController extends Controller
         ActivityLog::record(Auth::id(), 'student', 'mark_transferred', 'Student', $student->id, 'Marked student as transferred.', $request->ip());
 
         return back()->with('success', 'Student has been marked as transferred and portal access was locked.');
+    }
+
+    public function markWithdrawn(Request $request, $id)
+    {
+        $request->validate([
+            'withdrawal_reason' => 'required|string|max:1000',
+            'withdrawal_policy_acknowledged' => 'accepted',
+        ], [
+            'withdrawal_policy_acknowledged.accepted' => 'Please acknowledge the withdrawal policy before proceeding.',
+        ]);
+
+        $student = Student::findOrFail($id);
+
+        $student->update([
+            'status' => 'withdrawn',
+            'portal_access_status' => 'locked',
+            'withdrawal_requested_at' => now(),
+            'withdrawal_effective_at' => now(),
+            'withdrawal_reason' => $request->withdrawal_reason,
+            'withdrawal_policy_acknowledged' => true,
+        ]);
+
+        ActivityLog::record(Auth::id(), 'student', 'mark_withdrawn', 'Student', $student->id, 'Marked student as withdrawn.', $request->ip());
+
+        return back()->with('success', 'Student has been marked as withdrawn and access has been locked. Re-enrollment will require a new academic cycle review.');
     }
 
     public function markPtcCompleted(Request $request, $id)
@@ -702,6 +752,15 @@ class RegistrarController extends Controller
             'section' => $bestSection,
             'classes' => $bestClasses,
         ];
+    }
+
+    private function canUpdateSectionAssignment(Student $student, string $schoolYear): bool
+    {
+        if ($student->section && $student->school_year === $schoolYear && in_array($student->status, ['enrolled', 'withdrawn'], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     private function sectionMatchesStudentTrack(Student $student, string $section): bool

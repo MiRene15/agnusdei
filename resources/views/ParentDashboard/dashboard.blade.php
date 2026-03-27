@@ -3,32 +3,42 @@
 @section('title', 'Parent Dashboard')
 
 @section('content')
-
 <div class="page-intro">
     <h4>Parent Dashboard</h4>
-    <p>Monitor your children, academic progress, and billing summary in one place.</p>
+    <p>Monitor linked students, academic progress, and billing status from one cleaner dashboard.</p>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-label">Parent Account</div>
-        <div class="stat-value" style="font-size:20px;">
-            {{ $parent ? $parent->first_name . ' ' . $parent->last_name : 'Not Linked' }}
-        </div>
+        <div class="stat-value" style="font-size:20px;">{{ $parent ? $parent->first_name . ' ' . $parent->last_name : 'Not Linked' }}</div>
         <div class="stat-sub">Registered parent profile</div>
     </div>
-
     <div class="stat-card">
         <div class="stat-label">Total Children</div>
         <div class="stat-value">{{ $totalChildren }}</div>
-        <div class="stat-sub">Students linked to this parent</div>
+        <div class="stat-sub">Students linked to this account</div>
     </div>
-
     <div class="stat-card">
         <div class="stat-label">Outstanding Balance</div>
-        <div class="stat-value">₱{{ number_format($totalBalance, 2) }}</div>
+        <div class="stat-value">PHP {{ number_format($totalBalance, 2) }}</div>
         <div class="stat-sub">Combined remaining balance</div>
     </div>
+</div>
+
+<div class="quick-actions" style="margin-bottom:24px;">
+    <a href="{{ route('parent.children') }}" class="action-box">
+        <h5>Open Children List</h5>
+        <p>Review every linked student profile and current school placement.</p>
+    </a>
+    <a href="{{ route('parent.grades') }}" class="action-box">
+        <h5>Check Grades</h5>
+        <p>See subject grades and monitor academic progress quickly.</p>
+    </a>
+    <a href="{{ route('parent.billing') }}" class="action-box">
+        <h5>Review Billing</h5>
+        <p>Track balances, payments, and current tuition standing.</p>
+    </a>
 </div>
 
 <div class="grid-2">
@@ -67,11 +77,10 @@
     <div class="card">
         <h4>Quick Notes</h4>
         <ul class="mini-list">
-            <li>Use the Children page to see all linked student profiles.</li>
-            <li>Use the Grades page to monitor subject performance.</li>
-            <li>Use the Billing page to view tuition and payment records.</li>
+            <li>Use `My Children` to inspect linked student profiles.</li>
+            <li>Use `Grades` to monitor quarter-based academic performance.</li>
+            <li>Use `Billing` to review tuition status and recent payment history.</li>
         </ul>
     </div>
 </div>
-
 @endsection

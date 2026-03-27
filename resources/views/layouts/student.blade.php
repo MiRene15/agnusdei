@@ -41,6 +41,11 @@
         .stat-label { color:#64748b; font-size:13px; margin-bottom:10px; }
         .stat-value { font-size:30px; font-weight:700; color:#001e82; }
         .stat-sub { margin-top:8px; color:#94a3b8; font-size:12px; }
+        .quick-actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; }
+        .action-box { display:block; background:linear-gradient(180deg, #ffffff, #f8fbff); border:1px solid #dbeafe; border-radius:18px; padding:18px 18px 16px; text-decoration:none; color:#0f172a; transition:0.22s ease; box-shadow:0 10px 25px rgba(15, 23, 42, 0.06); }
+        .action-box:hover { transform:translateY(-3px); box-shadow:0 18px 34px rgba(0,30,130,0.10); border-color:#60a5fa; }
+        .action-box h5 { color:#001e82; margin-bottom:8px; font-size:16px; }
+        .action-box p { color:#64748b; font-size:13px; line-height:1.55; }
         .table-wrap { overflow-x:auto; }
         table { width:100%; border-collapse:collapse; margin-top:8px; min-width:760px; }
         th { text-align:left; padding:14px; background:#001e82; color:#ffffff; font-size:13px; font-weight:600; }

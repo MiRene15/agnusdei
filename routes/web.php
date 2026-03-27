@@ -60,6 +60,7 @@ Route::prefix('registrar')->name('registrar.')->middleware(['auth', 'role:regist
     Route::get('/students', [RegistrarController::class, 'students'])->name('students');
     Route::get('/students/{id}', [RegistrarController::class, 'showStudent'])->name('students.show');
     Route::post('/students/{id}/transfer', [RegistrarController::class, 'markTransferred'])->name('students.transfer');
+    Route::post('/students/{id}/withdraw', [RegistrarController::class, 'markWithdrawn'])->name('students.withdraw');
     Route::post('/students/{id}/ptc-complete', [RegistrarController::class, 'markPtcCompleted'])->name('students.ptc');
     Route::post('/students/{id}/tuition/{tuitionId}/carryover-approve', [RegistrarController::class, 'approveCarryover'])->name('students.carryover');
     Route::post('/students/{id}/tuition/{tuitionId}/voucher-confirm', [RegistrarController::class, 'confirmShsVoucher'])->name('students.voucher');

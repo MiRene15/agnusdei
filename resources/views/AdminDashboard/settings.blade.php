@@ -60,6 +60,17 @@
     <h4>Academic Event Controls</h4>
     <p style="color:#64748b; margin-bottom:16px;">Enable or disable live rules that affect enrollment and grade workflows.</p>
 
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:18px;">
+        <div style="padding:16px; border:1px solid #dbeafe; border-radius:14px; background:#eff6ff;">
+            <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#1d4ed8;">Grade Upload Rule</div>
+            <div style="color:#1e3a8a; margin-top:6px; line-height:1.7; font-size:14px;">Teachers can upload grades only when <strong>Grade Encoding Open</strong> is enabled.</div>
+        </div>
+        <div style="padding:16px; border:1px solid #fef3c7; border-radius:14px; background:#fffbeb;">
+            <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#92400e;">PTC Rule</div>
+            <div style="color:#92400e; margin-top:6px; line-height:1.7; font-size:14px;">When <strong>PTC Required</strong> is enabled, teachers can upload grades only for students whose PTC is marked completed.</div>
+        </div>
+    </div>
+
     <div class="table-wrap">
         <table>
             <thead>
