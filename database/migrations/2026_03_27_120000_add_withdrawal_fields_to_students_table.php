@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('students', function (Blueprint $table) {
             if (!Schema::hasColumn('students', 'withdrawal_requested_at')) {
-                $table->timestamp('withdrawal_requested_at')->nullable()->after('ptc_completed_at');
+                $table->timestamp('withdrawal_requested_at')->nullable();
             }
 
             if (!Schema::hasColumn('students', 'withdrawal_effective_at')) {

@@ -92,6 +92,13 @@
 .receipt-totals span { color:#4b5563; }
 .receipt-totals strong { color:#0f172a; text-align:right; }
 .receipt-footer { margin-top:16px; display:grid; gap:6px; text-align:center; font-size:10px; color:#374151; }
+.receipt-shell { justify-content:center; margin-top:20px; }
+@media screen {
+    .sidebar, .topbar { display:none !important; }
+    .main { width:100%; }
+    .content { padding:20px 24px 30px; }
+    .receipt-shell { display:flex; justify-content:center; margin-top:0; }
+}
 @media print {
     @page { size: 58mm auto; margin: 3mm; }
     body { background:#fff; }

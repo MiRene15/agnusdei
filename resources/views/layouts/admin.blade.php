@@ -49,6 +49,13 @@
         .btn-primary:hover { transform:translateY(-1px); box-shadow:0 16px 28px rgba(0, 30, 130, 0.18); }
         .btn-outline { border-color:#bfdbfe; color:#0f3ca8; background:linear-gradient(180deg, #ffffff, #f8fbff); }
         .btn-outline:hover { border-color:#60a5fa; background:#eff6ff; }
+        .pagination { display:flex; flex-wrap:wrap; gap:8px; list-style:none; margin:0; padding:0; justify-content:flex-end; }
+        .pagination .page-item { margin:0; }
+        .pagination .page-link { display:inline-flex; align-items:center; justify-content:center; min-width:40px; padding:10px 14px; border-radius:12px; border:1px solid #d7e2f0; background:#ffffff; color:#1e293b; text-decoration:none; font-size:14px; transition:0.18s ease; }
+        .pagination .page-link:hover { background:#eff6ff; border-color:#bfdbfe; }
+        .pagination .active .page-link, .pagination .page-link.active { background:#001e82; border-color:#001e82; color:#ffffff; }
+        .pagination .disabled .page-link, .pagination .page-item.disabled .page-link { opacity:0.55; cursor:not-allowed; background:#f8fafc; }
+        .pagination .page-link span { display:inline-flex; align-items:center; justify-content:center; width:100%; }
         .form-control, .search-row input, .search-row select, input[type='text'], input[type='password'], input[type='email'], input[type='date'], input[type='number'], textarea, select {
             width:100%; padding:13px 15px; border:1px solid #d7e2f0; border-radius:14px; font-size:14px; background:linear-gradient(180deg, #ffffff, #f8fbff); outline:none; color:#0f172a; box-shadow:inset 0 1px 2px rgba(15, 23, 42, 0.04);
         }
